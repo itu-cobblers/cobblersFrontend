@@ -7,63 +7,82 @@ This repo is the React frontend. The backend lives in the sibling repo `api.boot
 ## Stack
 
 - **React 19** + **Vite 8** (ESM, `"type": "module"`)
+- **TypeScript** (strict, `verbatimModuleSyntax`) — no `any`, no manual type casts anywhere
+- **Tailwind CSS v4** (`@tailwindcss/vite`) — palette lives as `@theme` tokens in `src/index.css`
 - **@monaco-editor/react** + **monaco-editor** — the code editor (same engine as VS Code)
 - **three** — the 3D scene that reacts to student progress
-- **ESLint 10** (flat config: `js.recommended`, `react-hooks`, `react-refresh`)
-- No TypeScript, no test runner, no CSS framework — plain CSS with CSS variables.
+- **classnames** — every `className` is computed with it (no ternaries/template literals for classes)
+- **Vitest** + **@testing-library/react** (jsdom) — co-located `*.test.ts` per component
+- **ESLint 10** (flat config: `js.recommended`, `typescript-eslint`, `react-hooks`, `react-refresh`)
 
 ## Commands
 
 ```bash
 npm install
-npm run dev      # Vite dev server on http://localhost:5173
-npm run build    # production build to dist/
-npm run preview  # preview the build
-npm run lint     # eslint .
+npm run dev        # Vite dev server on http://localhost:5173
+npm run build      # tsc --noEmit && vite build → dist/
+npm run preview    # preview the build
+npm run lint       # eslint .
+npm run typecheck  # tsc --noEmit
+npm run test       # vitest run
 ```
 
-Run the backend separately: `dotnet run` in `api.bootIT` (listens on `http://localhost:5179`). Vite proxies `/api/*` to that port (see `vite.config.js`), so frontend code always calls `/api/...` relatively — never hardcode the port.
+Run the backend separately: `dotnet run` in `api.bootIT`. Vite proxies `/api/*` to it (see `vite.config.ts`), so frontend code always calls `/api/...` relatively — never hardcode the port.
+
+## Path aliases
+
+Defined in both `tsconfig.json` (`paths`) and `vite.config.ts` (`resolve.alias`); keep them in sync. `@/*`→`src/*`, plus `@components`, `@views`, `@hooks`, `@lib`, `@themes`, `@types` (each works bare or as `/*`). Import across folders via aliases, not deep relative paths.
 
 ## Project structure
 
 ```
 src/
-  main.jsx                  # entry; mounts <App/> in StrictMode
-  App.jsx                   # root component — owns ALL app state, calls /api/run
-  App.css                   # layout + component styles (uses CSS vars)
-  index.css                 # CSS variable palette ("Hygge Café") + resets
-  components/               # theme-agnostic IDE chrome (work with any/no theme)
-    Toolbar.jsx             # top bar: logo, themed subtitle, Submit/Run, sidebar toggle
-    Sidebar.jsx             # foldable task list + progress bar + active task detail
-    OutputPanel.jsx         # terminal-style stdout/stderr panel
+  main.tsx                  # entry; picks TeacherGate (/teacher) or StudentView, mounts in StrictMode
+  index.css                 # Tailwind import + @theme tokens ("Hygge Café") + base layer
+  vite-env.d.ts             # ImportMetaEnv (VITE_TEACHER_CODE) + vite/client types
+  types/                    # cross-cutting domain types (Task, ExecuteResult, Theme, …) + barrel
+  components/               # PURE, reusable presentational components (visual props only)
+    Button/ Spinner/ Icon/ Badge/ ProgressBar/ TextField/ Modal/ IconButton/
+    OutputPanel/ CodeEditor/ Toolbar/ Sidebar/ TaskList/ TaskItem/ TaskDetail/ SubmitModal/
+    index.ts                # barrel re-exporting every component + its types
+  views/                    # page-level views — OWN state/business logic via co-located hooks
+    StudentView/            # the IDE (was App.jsx); useStudentWorkspace orchestrates everything
+    TeacherGate/            # code-entry gate; useTeacherAuth
+    TeacherDashboard/       # session + timer; useTeacherSession
+  hooks/                    # cross-cutting state hooks: useExecutor, useTasks, useSubmission
   themes/                   # pluggable visual skins — the THEME BOUNDARY
-    index.js                # registry + ACTIVE_THEME + nullTheme
-    cafe/
-      index.js              # cafe theme descriptor { id, name, subtitle, Scene }
-      CafeScene.jsx         # Three.js 3D café; renders the shop-name board
-  lib/                      # client-side Java tooling — see src/lib/CLAUDE.md
-    tasks.js                # TASKS array + per-task check()/starter (task source of truth)
-    javaValidator.js        # heuristic Java linter → Monaco markers
-    javaCompletions.js      # Monaco completion providers (members + snippets)
+    index.ts                # registry + ACTIVE_THEME + nullTheme
+    cafe/                   # CafeScene.tsx + useCafeScene (Three.js) + utils/constants/types
+  lib/                      # framework-agnostic client-side tooling — see src/lib/CLAUDE.md
+    tasks.ts                # TASKS array + per-task check()/starter (task source of truth)
+    executeApi.ts / submissionApi.ts / sessionApi.ts / mockApi.ts / identity.ts / teacherAuth.ts
+    javaValidator.ts        # heuristic Java linter → Monaco markers
+    javaCompletions.ts      # Monaco completion providers (members + snippets)
+  test/setup.ts             # jest-dom matchers for Vitest
   assets/                   # images (hero.png, svgs)
 ```
 
+### Component folder layout (the strict convention)
+
+Each shared component is a folder: `ComponentName.tsx` + `index.ts` (barrel), with `.types.ts` / `.constants.ts` / `.utils.ts` / `.hooks.ts` / `.test.ts` **only when needed**. Class strings and variant→class maps (typed as `Record<…>`, no `as`) live in `.constants.ts`; data transforms in `.utils.ts`; effects/state in `.hooks.ts`. Tests are `.test.ts` (no JSX) using `createElement` from React.
+
+## Components vs views
+
+- **`src/components/` = pure presentational.** Props describe **visual** state only (`isDisabled`/`isLoading`, never `isAuthenticated`); no fetching, no app state; all class computation via `classnames`; event handlers passed as named refs (`handle*`), never inline arrows in JSX.
+- **`src/views/` = pages.** They own state and business logic through their co-located hooks and pass display-ready props down to components. Cross-cutting state hooks live in `src/hooks/`.
+
 ## State & data flow
 
-`App.jsx` is the single source of truth — there is **no state library, router, or context**. State lives in `useState` hooks in `App` and flows down via props:
+`StudentView` is the single source of truth for the IDE — **no state library, router, or context**. Its hook `useStudentWorkspace` (`src/views/StudentView/StudentView.hooks.ts`) composes `useExecutor` / `useTasks` / `useSubmission`, holds `code` + sidebar-fold UI state, and shapes the props each component renders.
 
-- `code`, `output`, `isRunning` — editor + run lifecycle
-- `activeTask`, `completedTasks` (a `Set`), `sidebarFolded` — task UI
-- `signals` — a theme-agnostic bag of values tasks broadcast on success (e.g. `{ cafeName }`); merged into shared state and handed to the active theme's `Scene`
-
-Run flow: Submit → `executeCode(code)` (`src/lib/executeApi.js`) → `POST /api/execute { code }` → `{ status, stdout, stderr }` → render `stdout` (falls back to `stderr`, then `"(no output)"`). Then `App` grades the run **generically** via `TASKS[activeTask].check({ code, output, stderr, exitCode })` — the contract response is mapped onto that shape (`stdout`→`output`, `status`→`exitCode`) so `tasks.js` is untouched. On a passing verdict the task is marked complete and any `verdict.signals` are merged into `signals`. `App` contains **no task-specific or theme-specific logic** — see the two boundaries below.
+Run flow: Run → `executor.run(code)` → `executeCode(code)` (`@lib/executeApi`) → `POST /api/execute` → `{ status, stdout, stderr }` → terminal shows `stdout` (falls back to `stderr`, then `"(no output)"`). Then it grades **generically** via `TASKS[activeTask].check({ code, output, stderr, exitCode })` (contract mapped: `stdout`→`output`, `status`→`exitCode`). On a passing verdict the task completes and `verdict.signals` merge into `signals`, which is handed to the active theme's `Scene`. No task- or theme-specific logic lives in the view — see the two boundaries below.
 
 ## Boundaries (task ⟂ theme)
 
-The IDE core (editor, task list, output) is decoupled from both *what the tasks are* and *which visual theme is shown*, so either can be added, changed, or removed without touching `App.jsx`.
+The IDE core (editor, task list, output) is decoupled from both *what the tasks are* and *which visual theme is shown*, so either can be added, changed, or removed without touching the views. Domain shapes (`Task`, `Verdict`, `ExecuteResult`, `Theme`, …) live in `src/types/`.
 
-- **Task boundary — `src/lib/tasks.js`.** Each task is self-contained: `{ id, title, difficulty, description, hint?, starter?, check? }`. Passing criteria live in `check(result)` where `result = { code, output, stderr, exitCode }`, returning a verdict `{ passed, signals?, message? }`. To add a task or change grading, edit only this file. A task without `check` never auto-completes. `signals` is a free-form, theme-agnostic payload (the core never interprets it). Also exports `defaultStarter`. See `src/lib/CLAUDE.md`.
-- **Theme boundary — `src/themes/`.** A theme is a pluggable skin implementing `{ id, name, subtitle, Scene }`, where `Scene` is a React component (the right-hand panel) receiving `{ signals, completedTasks, activeTask }` — or `null` for no scene. It decides which `signals` keys it cares about (the café theme uses `signals.cafeName` for the shop board). Swap themes by changing `ACTIVE_THEME` in `src/themes/index.js`; set it to `nullTheme` to run the **plain IDE with no 3D scene at all** (the editor, tasks, and output still work; the toolbar subtitle is theme-driven and disappears too). Add a theme by dropping a folder under `src/themes/`, exporting the shape, and registering it in `THEMES`.
+- **Task boundary — `src/lib/tasks.ts`.** Each task is self-contained: `{ id, title, difficulty, description, hint?, starter?, check? }`. Passing criteria live in `check(result)` where `result = { code, output, stderr, exitCode }`, returning a verdict `{ passed, signals?, message? }`. To add a task or change grading, edit only this file. A task without `check` never auto-completes. `signals` is a free-form, theme-agnostic payload (the core never interprets it). Also exports `defaultStarter`. See `src/lib/CLAUDE.md`.
+- **Theme boundary — `src/themes/`.** A theme implements the `Theme` type (`@types`): `{ id, name, subtitle, Scene }`, where `Scene` is a React component (the right-hand panel) receiving `SceneProps` `{ signals, completedTasks, activeTask }` — or `null` for no scene. It decides which `signals` keys it cares about (the café theme uses `signals.cafeName` for the shop board). Swap themes by changing `ACTIVE_THEME` in `src/themes/index.ts`; set it to `nullTheme` to run the **plain IDE with no 3D scene at all**. Add a theme by dropping a folder under `src/themes/`, exporting the `Theme` shape, and registering it in `THEMES`.
 
 ## Backend API contract
 
@@ -71,29 +90,31 @@ The frontend depends on this endpoint (proxied via `/api`), per `CONTRACT.md` in
 
 - `POST /api/execute` body `{ "code": "..." }` → `{ "status": "success" | "compile_error" | "runtime_error", "stdout": string, "stderr": string }`
 
-All backend calls go through **`src/lib/executeApi.js`** — the single seam to the API.
+All backend calls go through the seams in `src/lib`: **`executeApi.ts`** (run), **`submissionApi.ts`** (submit), **`sessionApi.ts`** (teacher session + timer).
 
-**The backend may not be ready yet.** `executeApi.js` calls the real endpoint and, on any failure, falls back to a **mock** (`src/lib/mockExecute.js`) that regex-extracts `System.out.println("...")` literals and echoes them — it does **not** compile or run Java. The mock is designed to be deleted in one step once the backend is live: remove `mockExecute.js`, its import, and the clearly-fenced fallback branch in `executeApi.js`. Planned backend: a real dockerized Java executor (Piston), a SignalR hub for teacher→room broadcasts (e.g. a timer), and per-student progress persistence — see the api repo's `CONTRACT.md` / `STORIES.md`.
+**The backend may not be ready yet.** `executeApi.ts` / `submissionApi.ts` call the real endpoints and, on any failure, fall back to a **mock** (`src/lib/mockApi.ts`) that round-robins through canned success/error scenarios so every result-UI state can be previewed — it does **not** compile or run Java. The mock is designed to be deleted in one step once the backend is live: remove `mockApi.ts`, its imports, and the clearly-fenced fallback branches. Planned backend: a real dockerized Java executor (Piston), a SignalR hub for teacher→room broadcasts (e.g. a timer), and per-student progress persistence — see the api repo's `CONTRACT.md` / `STORIES.md`.
 
 ## Theme — "Hygge Café"
 
-The product is dressed as a cozy café. UI copy uses café language ("Submit" → "Brewing…", "brew your code"). The palette is defined as CSS variables in `src/index.css` (`--bg` dark roast, `--accent` caramel, etc.) — **always use these variables, never hardcode colors.** It's a dark theme; Monaco runs `theme="vs-dark"`. Tasks are themed around building a café (start by naming the shop).
+The product is dressed as a cozy café. The palette is defined as **Tailwind `@theme` tokens** in `src/index.css` — semantic names like `roast` (bg), `espresso`, `mahogany`, `night`, `oak` (border), `milk`/`foam`/`cream` (text), `caramel`/`toffee` (accent), `mint`/`honey`/`berry`. **Always use the tokens via utilities** (`bg-roast`, `text-caramel`, `border-oak`, `bg-caramel/15` for the old `--accent-soft`) — never hardcode hex except the rare arbitrary value already in a constants file. It's a dark theme; Monaco runs `theme="vs-dark"`. Base font is 14px (set on `body` as an absolute size, kept off the root so Tailwind's rem spacing scale still equals the original pixels). Tasks are themed around building a café (start by naming the shop).
 
-The café is now **one pluggable theme** under `src/themes/cafe/` (see the theme boundary above), not hardcoded into `App`. Its 3D scene and panel chrome are self-contained in `CafeScene.jsx`; for now its CSS (`.cafe-panel`, `.cafe-header`, etc.) still lives in `App.css` rather than alongside the theme (POC — move it if you want a fully self-contained skin). Disabling the theme (`ACTIVE_THEME = nullTheme`) leaves a working, unbranded IDE.
+The café is **one pluggable theme** under `src/themes/cafe/` (see the theme boundary above). Its Three.js scene is built in `CafeScene.utils.ts`, driven by the `useCafeScene` hook, and rendered by `CafeScene.tsx`; chrome is Tailwind utilities. `App.css` no longer exists — all component styling is utilities on the components. Disabling the theme (`ACTIVE_THEME = nullTheme`, the current default) leaves a working, unbranded IDE.
 
 > **Note on `DESIGN.md`:** that file documents a *Mintlify* (light, mint-green) design system and does **not** match the app's current Hygge Café dark palette. Treat it as external reference material, not the spec for this app, unless the user says otherwise. Confirm intent before restyling to it.
 
 ## Conventions
 
-- Functional components only, one per file, **default export**. Props destructured in the signature.
-- **No semicolons** in JS/JSX; 2-space indentation. (Monaco editor content uses `tabSize: 4` for the Java the *students* write — separate concern.)
-- Keep new state in `App.jsx` and pass via props unless there's a strong reason to introduce context.
-- Style with classes + CSS variables in `App.css`/`index.css`; nested `&:hover` syntax is used (native CSS nesting). No inline styles except dynamic values (e.g. progress-bar width).
-- `lib/` modules are framework-agnostic vanilla JS with JSDoc headers — keep them React-free.
+- Functional components only, one per folder, **default export** (re-exported named from `index.ts`). Props destructured in the signature.
+- **No semicolons**; 2-space indentation. (Monaco editor content uses `tabSize: 4` for the Java the *students* write — separate concern.)
+- **No `any`, no manual casts** (`as`). Narrow with `instanceof`/`typeof`/null-checks; type constant maps as `Record<K, V>`.
+- **State in hooks.** Components hold no `useState`/effects — those live in `*.hooks.ts` (component-local) or `src/hooks/` (cross-cutting). Views own logic via their hooks.
+- **`classnames` for every `className`** — variant maps in `.constants.ts`, object syntax for conditionals; no ternaries/template literals for classes. No inline styles except dynamic values (e.g. progress-bar width).
+- **Event handlers** are named `handle*` and passed as refs — never inline arrows in JSX.
+- Style with Tailwind utilities + the `@theme` tokens. `lib/` modules are framework-agnostic (no React/JSX) with JSDoc headers.
 
-## Roles (planned, not yet built)
+## Roles
 
-The product is intended to have **student** and **teacher** views selected by role. The current code is single-view (student-style) only — there is no auth, role switching, or routing yet. Build these out when asked; don't assume they exist.
+Two views selected by URL path in `src/main.tsx`: `/teacher` → `TeacherGate` (code-entry, `VITE_TEACHER_CODE`) → `TeacherDashboard`; anything else → `StudentView`. **No router** — just a `pathname.startsWith('/teacher')` check. Teacher auth is a sessionStorage flag (`src/lib/teacherAuth.ts`); set `VITE_TEACHER_CODE` in `.env.local` (see `.env.example`).
 
 ## Git / current state
 

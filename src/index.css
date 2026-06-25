@@ -1,68 +1,51 @@
-*, *::before, *::after {
-  box-sizing: border-box;
+@import "tailwindcss";
+
+/* ── "Hygge Café" design tokens ──────────────────────────────────────────
+   The palette lives here as Tailwind theme tokens, so every color is used via
+   a utility (e.g. bg-roast, text-caramel, border-oak) — never hardcoded.
+   Token name → former CSS variable:
+     roast=--bg  espresso=--bg-surface  mahogany=--bg-sidebar  night=--bg-toolbar
+     oak=--border  milk=--text  foam=--text-muted  cream=--text-heading
+     caramel=--accent  toffee=--accent-hover  mint=--green  honey=--yellow  berry=--red
+   accent-soft → caramel/15 · glow → honey/25                                */
+@theme {
+  --color-roast: #261c15;
+  --color-espresso: #2f231a;
+  --color-mahogany: #221912;
+  --color-night: #1c140e;
+  --color-oak: #4a382a;
+  --color-milk: #ece0cf;
+  --color-foam: #a68d72;
+  --color-cream: #fbf3e4;
+  --color-caramel: #d4915d;
+  --color-toffee: #c07d47;
+  --color-mint: #a9c484;
+  --color-honey: #e8c170;
+  --color-berry: #d98873;
+
+  --font-sans: system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-mono: ui-monospace, "Cascadia Code", Consolas, "Courier New", monospace;
 }
 
-:root {
-  /* ── Hygge Café palette ── */
-  --bg: #261c15;            /* dark roast */
-  --bg-surface: #2f231a;    /* espresso */
-  --bg-sidebar: #221912;    /* mahogany shadow */
-  --bg-toolbar: #1c140e;    /* night café */
-  --border: #4a382a;        /* worn oak */
-  --text: #ece0cf;          /* steamed milk */
-  --text-muted: #a68d72;    /* latte foam */
-  --text-heading: #fbf3e4;  /* cream */
-  --accent: #d4915d;        /* caramel */
-  --accent-hover: #c07d47;  /* toffee */
-  --accent-soft: rgba(212, 145, 93, 0.16);
-  --green: #a9c484;         /* mint sprig */
-  --yellow: #e8c170;        /* honey */
-  --red: #d98873;           /* berry jam */
-  --glow: rgba(232, 193, 112, 0.25);
-  --mono: ui-monospace, 'Cascadia Code', Consolas, 'Courier New', monospace;
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --serif: Georgia, 'Times New Roman', serif;
-  font-family: var(--sans), sans-serif;
-  color: var(--text);
-  background: var(--bg);
-  font-size: 14px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
+@layer base {
+  /* Base font is 14px as an absolute size — kept off the root so the rem-based
+     Tailwind spacing scale still matches the original pixel values. */
+  body {
+    margin: 0;
+    overflow: hidden;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    color: var(--color-milk);
+    background: var(--color-roast);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
 
-body {
-  margin: 0;
-  overflow: hidden;
-}
-
-#root {
-  width: 100vw;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-h1, h2, h3 {
-  margin: 0;
-  color: var(--text-heading);
-  font-weight: 600;
-}
-
-p {
-  margin: 0;
-}
-
-button {
-  cursor: pointer;
-  font-family: var(--sans), sans-serif;
-}
-
-select {
-  font-family: var(--sans), sans-serif;
-}
-
-ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+  #root {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
 }

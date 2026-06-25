@@ -1,0 +1,45 @@
+import { IconButton } from '@components/IconButton'
+import { Icon } from '@components/Icon'
+import { Badge } from '@components/Badge'
+import { Button } from '@components/Button'
+import type { ToolbarProps } from './Toolbar.types'
+import {
+  TOOLBAR_CLASS,
+  TOOLBAR_SIDE_CLASS,
+  TOOLBAR_RIGHT_CLASS,
+  TOOLBAR_LOGO_CLASS,
+  TOOLBAR_SUBTITLE_CLASS,
+} from './Toolbar.constants'
+
+export default function Toolbar({
+  subtitle,
+  isRunning,
+  isSubmitting,
+  onToggleSidebar,
+  onRun,
+  onSubmit,
+}: ToolbarProps) {
+  const isBusy = isRunning || isSubmitting
+  const submitLabel = isSubmitting ? 'Submitting…' : 'Submit'
+
+  return (
+    <header className={TOOLBAR_CLASS}>
+      <div className={TOOLBAR_SIDE_CLASS}>
+        <IconButton label="Toggle task panel" onClick={onToggleSidebar}>
+          <Icon name="menu" />
+        </IconButton>
+        <span className={TOOLBAR_LOGO_CLASS}>bootIT</span>
+        {subtitle && <span className={TOOLBAR_SUBTITLE_CLASS}>{subtitle}</span>}
+        <Badge tone="lang">Java</Badge>
+      </div>
+      <div className={TOOLBAR_RIGHT_CLASS}>
+        <IconButton label="Run code" onClick={onRun} isLoading={isRunning} isDisabled={isBusy}>
+          <Icon name="play" />
+        </IconButton>
+        <Button onClick={onSubmit} isLoading={isSubmitting} isDisabled={isBusy}>
+          {submitLabel}
+        </Button>
+      </div>
+    </header>
+  )
+}

@@ -1,12 +1,13 @@
-# CLAUDE.md — src/lib (client-side Java tooling)
+# CLAUDE.md — src/lib (client-side tooling)
 
-Framework-agnostic vanilla JS that powers the in-browser Java experience. **No React, no JSX here** — these modules take a `monaco` instance (or plain strings) and return data. Each file has a JSDoc header; keep it updated.
+Framework-agnostic **TypeScript** that powers the in-browser Java experience and the API seams. **No React, no JSX here** — these modules take a `monaco` instance (typed `typeof import('monaco-editor')`) or plain data and return data. No `any`, no manual casts. Each file has a JSDoc header; keep it updated. Domain types come from `@types` (`src/types/`).
 
 ## Files
 
-- **`tasks.js`** — `export const TASKS`, the single source of truth for the sidebar, plus `export const defaultStarter`. Each task: `{ id, title, difficulty: 'Easy'|'Medium'|'Hard', description, hint?, starter?, check? }`. `id` is the array index and is used directly as `activeTask`/`completedTasks` keys in `App.jsx` — keep them sequential from 0. **Passing criteria are self-contained per task** via `check(result)` (the "task boundary"): `result = { code, output, stderr, exitCode }`, return a verdict `{ passed, signals?, message? }`. `App.jsx` calls `TASKS[activeTask].check(...)` generically and never hardcodes task logic — to add a task or change grading, edit only this file. `signals` is a free-form, **theme-agnostic** bag broadcast on success (e.g. `{ cafeName }`); the core merges it into shared state and passes it to the active theme, which decides how to interpret each key. A task with no `check` simply never auto-completes.
-- **`javaValidator.js`** — heuristic linter. `validateJava(code, monaco)` returns Monaco markers; `attachValidator(editor, monaco)` wires it to run on mount + debounced (300 ms) on every edit. Call `attachValidator` from the editor's `onMount`.
-- **`javaCompletions.js`** — `registerJavaCompletions(monaco)` registers two completion providers. Call it from the editor's `beforeMount`.
+- **`tasks.ts`** — `export const TASKS: Task[]`, the single source of truth for the sidebar, plus `export const defaultStarter`. Each `Task`: `{ id, title, difficulty: 'Easy'|'Medium'|'Hard', description, hint?, starter?, check? }`. `id` is the array index — keep them sequential from 0. **Passing criteria are self-contained per task** via `check(result)` (the "task boundary"): `result = { code, output, stderr, exitCode }`, return a `Verdict` `{ passed, signals?, message? }`. `useTasks` calls `TASKS[activeTask].check(...)` generically and never hardcodes task logic — to add a task or change grading, edit only this file. `signals` is a free-form, **theme-agnostic** bag broadcast on success (e.g. `{ cafeName }`). A task with no `check` simply never auto-completes.
+- **`javaValidator.ts`** — heuristic linter. `validateJava(code, monaco)` returns `editor.IMarkerData[]`; `attachValidator(editor, monaco)` wires it to run on mount + debounced on every edit. Called from `useCodeEditorSetup` (the editor's `onMount`).
+- **`javaCompletions.ts`** — `registerJavaCompletions(monaco)` registers two completion providers. Called from `useCodeEditorSetup` (the editor's `beforeMount`).
+- **API seams** — `executeApi.ts` (run), `submissionApi.ts` (submit), `sessionApi.ts` (teacher session/timer), with `mockApi.ts` as the deletable fallback. Plus `identity.ts` (anon student id) and `teacherAuth.ts` (sessionStorage flag).
 
 ## The validator is intentionally heuristic
 
