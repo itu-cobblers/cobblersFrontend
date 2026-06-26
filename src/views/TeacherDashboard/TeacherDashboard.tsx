@@ -18,6 +18,8 @@ import {
   TEACHER_ERROR_CLASS,
   TEACHER_HINT_CLASS,
   TEACHER_STUDENTS_CLASS,
+  TEACHER_ROSTER_CLASS,
+  TEACHER_ROSTER_ITEM_CLASS,
 } from './TeacherDashboard.constants'
 
 export default function TeacherDashboard() {
@@ -25,6 +27,7 @@ export default function TeacherDashboard() {
     sessionCode,
     isCreatingSession,
     sessionError,
+    roster,
     minutes,
     isStartingTimer,
     timerEndsAt,
@@ -98,13 +101,23 @@ export default function TeacherDashboard() {
         </aside>
 
         <main className={TEACHER_STUDENTS_CLASS}>
-          <h2 className={TEACHER_SECTION_TITLE_CLASS}>Students</h2>
-          <p className={TEACHER_HINT_CLASS}>
-            No students connected yet.{' '}
-            {sessionCode
-              ? `Share the room code "${sessionCode}" with your class.`
-              : 'Create a session to get a room code.'}
-          </p>
+          <h2 className={TEACHER_SECTION_TITLE_CLASS}>Students ({roster.length})</h2>
+          {roster.length === 0 ? (
+            <p className={TEACHER_HINT_CLASS}>
+              No students connected yet.{' '}
+              {sessionCode
+                ? `Share the room code "${sessionCode}" with your class.`
+                : 'Create a session to get a room code.'}
+            </p>
+          ) : (
+            <div className={TEACHER_ROSTER_CLASS}>
+              {roster.map((student) => (
+                <span key={student.studentId} className={TEACHER_ROSTER_ITEM_CLASS}>
+                  {student.displayName}
+                </span>
+              ))}
+            </div>
+          )}
         </main>
       </div>
     </div>

@@ -10,9 +10,11 @@ import {
   SIDEBAR_HEADER_CLASS,
   SIDEBAR_HEADING_CLASS,
   SIDEBAR_PROGRESS_LABEL_CLASS,
+  SIDEBAR_SCROLL_CLASS,
+  SIDEBAR_DAY_HEADER_CLASS,
 } from './Sidebar.constants'
 
-export default function Sidebar({ items, detail, progress, isFolded, onSelect }: SidebarProps) {
+export default function Sidebar({ groups, detail, progress, isFolded, onSelect }: SidebarProps) {
   return (
     <aside
       className={classNames(SIDEBAR_BASE_CLASS, {
@@ -27,7 +29,14 @@ export default function Sidebar({ items, detail, progress, isFolded, onSelect }:
           {progress.completed}/{progress.total} completed
         </span>
       </div>
-      <TaskList items={items} onSelect={onSelect} />
+      <div className={SIDEBAR_SCROLL_CLASS}>
+        {groups.map((group) => (
+          <section key={group.day}>
+            <h3 className={SIDEBAR_DAY_HEADER_CLASS}>{group.label}</h3>
+            <TaskList items={group.items} onSelect={onSelect} />
+          </section>
+        ))}
+      </div>
       <TaskDetail {...detail} />
     </aside>
   )

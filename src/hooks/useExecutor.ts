@@ -1,15 +1,17 @@
 import { useState } from 'react'
-import type { ExecuteResult, ExecuteStatus } from '@types'
+import type { ExecuteRequest, ExecuteResult, ExecuteStatus } from '@types'
 import { executeCode } from '@lib/executeApi'
 
 export interface UseExecutor {
   output: string
   status: ExecuteStatus | null
   isRunning: boolean
-  /** Execute code, update the terminal, and return the raw response (or null on error). */
-  run: (code: string) => Promise<ExecuteResult | null>
+  /** Execute a request, update the terminal, and return the raw response (or null on error). */
+  run: (request: ExecuteRequest) => Promise<ExecuteResult | null>
   /** Mirror an external result (e.g. a submission) in the terminal without re-running. */
   showResult: (result: ExecuteResult) => void
+  /** Clear the terminal (e.g. when switching tasks). */
+  reset: () => void
 }
 
 /**
@@ -26,12 +28,17 @@ export function useExecutor(): UseExecutor {
     setOutput((result.stdout?.trim() ? result.stdout : result.stderr) || '(no output)')
   }
 
-  async function run(code: string): Promise<ExecuteResult | null> {
+  function reset() {
+    setOutput('')
+    setStatus(null)
+  }
+
+  async function run(request: ExecuteRequest): Promise<ExecuteResult | null> {
     setIsRunning(true)
     setOutput('Running…')
     setStatus(null)
     try {
-      const data = await executeCode(code)
+      const data = await executeCode(request)
       render(data)
       return data
     } catch (err) {
@@ -44,5 +51,5 @@ export function useExecutor(): UseExecutor {
     }
   }
 
-  return { output, status, isRunning, run, showResult: render }
+  return { output, status, isRunning, run, showResult: render, reset }
 }

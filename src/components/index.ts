@@ -25,6 +25,15 @@ export type { ModalProps } from './Modal'
 export { OutputPanel } from './OutputPanel'
 export type { OutputPanelProps } from './OutputPanel'
 
+export { PredictPanel } from './PredictPanel'
+export type { PredictPanelProps, PredictStatus } from './PredictPanel'
+
+export { FileUpload, readSourceFiles } from './FileUpload'
+export type { FileUploadProps } from './FileUpload'
+
+export { ProjectPanel } from './ProjectPanel'
+export type { ProjectPanelProps } from './ProjectPanel'
+
 export { CodeEditor, useCodeEditorSetup } from './CodeEditor'
 export type { CodeEditorProps } from './CodeEditor'
 
@@ -38,10 +47,13 @@ export { TaskDetail } from './TaskDetail'
 export type { TaskDetailProps } from './TaskDetail'
 
 export { Sidebar } from './Sidebar'
-export type { SidebarProps, SidebarProgress } from './Sidebar'
+export type { SidebarProps, SidebarProgress, SidebarGroup } from './Sidebar'
 
 export { Toolbar } from './Toolbar'
 export type { ToolbarProps } from './Toolbar'
+
+export { JoinRoomBar } from './JoinRoomBar'
+export type { JoinRoomBarProps } from './JoinRoomBar'
 
 export { SubmitModal, getSubmitResultView } from './SubmitModal'
 export type { SubmitModalProps } from './SubmitModal'

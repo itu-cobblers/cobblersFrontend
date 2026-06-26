@@ -27,6 +27,12 @@ export default defineConfig({
         target: 'http://localhost:5046',
         changeOrigin: true,
       },
+      // SignalR hub (teacher↔student room). ws:true upgrades the WebSocket.
+      '/hub': {
+        target: 'http://localhost:5046',
+        changeOrigin: true,
+        ws: true,
+      },
     },
   },
   test: {

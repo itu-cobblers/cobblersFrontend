@@ -6,8 +6,15 @@ export interface SidebarProgress {
   total: number
 }
 
-export interface SidebarProps {
+/** One day's section in the task list. */
+export interface SidebarGroup {
+  day: number
+  label: string
   items: TaskListEntry[]
+}
+
+export interface SidebarProps {
+  groups: SidebarGroup[]
   detail: TaskDetailProps
   progress: SidebarProgress
   isFolded: boolean
