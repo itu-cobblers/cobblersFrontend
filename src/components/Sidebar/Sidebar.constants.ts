@@ -10,3 +10,8 @@ export const SIDEBAR_HEADER_CLASS = 'shrink-0 border-b border-oak px-4 pb-2.5 pt
 export const SIDEBAR_HEADING_CLASS = 'mb-2.5 text-[13px] uppercase tracking-[0.8px] text-foam'
 
 export const SIDEBAR_PROGRESS_LABEL_CLASS = 'mt-1.5 block text-[11px] text-foam'
+
+export const SIDEBAR_SCROLL_CLASS = 'flex-1 overflow-y-auto'
+
+export const SIDEBAR_DAY_HEADER_CLASS =
+  'px-4 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-[0.6px] text-caramel'

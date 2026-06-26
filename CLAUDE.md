@@ -44,6 +44,7 @@ src/
   components/               # PURE, reusable presentational components (visual props only)
     Button/ Spinner/ Icon/ Badge/ ProgressBar/ TextField/ Modal/ IconButton/
     OutputPanel/ CodeEditor/ Toolbar/ Sidebar/ TaskList/ TaskItem/ TaskDetail/ SubmitModal/
+    PredictPanel/ FileUpload/ ProjectPanel/ JoinRoomBar/   # quiz, mini-project upload, room-join bar
     index.ts                # barrel re-exporting every component + its types
   views/                    # page-level views — OWN state/business logic via co-located hooks
     StudentView/            # the IDE (was App.jsx); useStudentWorkspace orchestrates everything
@@ -54,8 +55,11 @@ src/
     index.ts                # registry + ACTIVE_THEME + nullTheme
     cafe/                   # CafeScene.tsx + useCafeScene (Three.js) + utils/constants/types
   lib/                      # framework-agnostic client-side tooling — see src/lib/CLAUDE.md
-    tasks.ts                # TASKS array + per-task check()/starter (task source of truth)
-    executeApi.ts / submissionApi.ts / sessionApi.ts / mockApi.ts / identity.ts / teacherAuth.ts
+    tasks.ts                # TASKS union (code|predict|project) grouped by day — task source of truth
+    grade.ts / predict.ts   # stdout grading helpers + predict-quiz grading
+    executeApi.ts / submissionApi.ts / sessionApi.ts / quizApi.ts / mockApi.ts   # REST seams (try real → mock)
+    sessionHub.ts           # SignalR seam: joinSession (student) / observeSession (teacher) / TimerStarted
+    identity.ts / teacherAuth.ts   # anon studentId + displayName; teacher sessionStorage flag
     javaValidator.ts        # heuristic Java linter → Monaco markers
     javaCompletions.ts      # Monaco completion providers (members + snippets)
   test/setup.ts             # jest-dom matchers for Vitest
@@ -81,7 +85,11 @@ Run flow: Run → `executor.run(code)` → `executeCode(code)` (`@lib/executeApi
 
 The IDE core (editor, task list, output) is decoupled from both *what the tasks are* and *which visual theme is shown*, so either can be added, changed, or removed without touching the views. Domain shapes (`Task`, `Verdict`, `ExecuteResult`, `Theme`, …) live in `src/types/`.
 
-- **Task boundary — `src/lib/tasks.ts`.** Each task is self-contained: `{ id, title, difficulty, description, hint?, starter?, check? }`. Passing criteria live in `check(result)` where `result = { code, output, stderr, exitCode }`, returning a verdict `{ passed, signals?, message? }`. To add a task or change grading, edit only this file. A task without `check` never auto-completes. `signals` is a free-form, theme-agnostic payload (the core never interprets it). Also exports `defaultStarter`. See `src/lib/CLAUDE.md`.
+- **Task boundary — `src/lib/tasks.ts`.** `Task` is a **discriminated union on `kind`** plus a `day` (1–3); the sidebar/progress/boundary use only the shared base fields, and only render+grade branch on `kind`:
+  - `kind:'code'` — write & run Java; graded by `check(result)` (`result = { code, output, stderr, exitCode }` → `{ passed, signals?, message? }`). Optional `stdin` (interactive, e.g. guess-the-number) and `harness` (`{ files, entryClass }` — grader code compiled with the student's `solutionFile`, used by the Day-3 `Container`/`FlightTicket` class tasks).
+  - `kind:'predict'` — read-only `snippet`; the student types the output. Graded by `predict.ts` against `expectedOutput` (+ `accept` for infinite-loop phrasings) through the `quizApi` seam.
+  - `kind:'project'` — Day-3 mini-projects: a `brief` + multi-file upload (scaffolded grading).
+  Grading helpers live in `grade.ts`; to add a task or change grading, edit only `tasks.ts`. A code task without `check` never auto-completes. `signals` is a free-form, theme-agnostic payload. Also exports `defaultStarter`. See `src/lib/CLAUDE.md`.
 - **Theme boundary — `src/themes/`.** A theme implements the `Theme` type (`@types`): `{ id, name, subtitle, Scene }`, where `Scene` is a React component (the right-hand panel) receiving `SceneProps` `{ signals, completedTasks, activeTask }` — or `null` for no scene. It decides which `signals` keys it cares about (the café theme uses `signals.cafeName` for the shop board). Swap themes by changing `ACTIVE_THEME` in `src/themes/index.ts`; set it to `nullTheme` to run the **plain IDE with no 3D scene at all**. Add a theme by dropping a folder under `src/themes/`, exporting the `Theme` shape, and registering it in `THEMES`.
 
 ## Backend API contract

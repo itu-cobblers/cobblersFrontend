@@ -15,6 +15,8 @@ export default function Toolbar({
   subtitle,
   isRunning,
   isSubmitting,
+  isRunDisabled = false,
+  isSubmitDisabled = false,
   onToggleSidebar,
   onRun,
   onSubmit,
@@ -33,10 +35,15 @@ export default function Toolbar({
         <Badge tone="lang">Java</Badge>
       </div>
       <div className={TOOLBAR_RIGHT_CLASS}>
-        <IconButton label="Run code" onClick={onRun} isLoading={isRunning} isDisabled={isBusy}>
+        <IconButton
+          label="Run code"
+          onClick={onRun}
+          isLoading={isRunning}
+          isDisabled={isBusy || isRunDisabled}
+        >
           <Icon name="play" />
         </IconButton>
-        <Button onClick={onSubmit} isLoading={isSubmitting} isDisabled={isBusy}>
+        <Button onClick={onSubmit} isLoading={isSubmitting} isDisabled={isBusy || isSubmitDisabled}>
           {submitLabel}
         </Button>
       </div>

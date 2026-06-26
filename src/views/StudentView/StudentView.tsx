@@ -1,5 +1,15 @@
-import { Toolbar, Sidebar, CodeEditor, OutputPanel, SubmitModal } from '@components'
+import {
+  Toolbar,
+  JoinRoomBar,
+  Sidebar,
+  CodeEditor,
+  OutputPanel,
+  PredictPanel,
+  ProjectPanel,
+  SubmitModal,
+} from '@components'
 import { useStudentWorkspace } from './StudentView.hooks'
+import { useStudentSession } from './useStudentSession'
 import {
   STUDENT_LAYOUT_CLASS,
   STUDENT_MAIN_CLASS,
@@ -7,18 +17,28 @@ import {
 } from './StudentView.constants'
 
 export default function StudentView() {
-  const { editor, output, toolbar, sidebar, submitModal, scene } = useStudentWorkspace()
+  const { activePanel, toolbar, sidebar, submitModal, scene } = useStudentWorkspace()
+  const session = useStudentSession()
   const { Scene } = scene
 
   return (
     <div className={STUDENT_LAYOUT_CLASS}>
       <Toolbar {...toolbar} />
+      <JoinRoomBar {...session} />
       <div className={STUDENT_MAIN_CLASS}>
         <Sidebar {...sidebar} />
-        <div className={STUDENT_EDITOR_COLUMN_CLASS}>
-          <CodeEditor {...editor} />
-          <OutputPanel {...output} />
-        </div>
+        {activePanel.kind === 'project' ? (
+          <ProjectPanel {...activePanel.project} />
+        ) : (
+          <div className={STUDENT_EDITOR_COLUMN_CLASS}>
+            <CodeEditor {...activePanel.editor} />
+            {activePanel.kind === 'code' ? (
+              <OutputPanel {...activePanel.output} />
+            ) : (
+              <PredictPanel {...activePanel.predict} />
+            )}
+          </div>
+        )}
         {Scene && (
           <Scene
             signals={scene.signals}

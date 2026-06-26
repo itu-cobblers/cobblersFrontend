@@ -33,3 +33,8 @@ export const TEACHER_ERROR_CLASS = 'text-[12px] text-berry'
 export const TEACHER_HINT_CLASS = 'text-[12px] leading-relaxed text-foam'
 
 export const TEACHER_STUDENTS_CLASS = 'flex flex-1 flex-col gap-3 overflow-y-auto p-5'
+
+export const TEACHER_ROSTER_CLASS = 'flex flex-wrap gap-2'
+
+export const TEACHER_ROSTER_ITEM_CLASS =
+  'rounded-md border border-oak bg-caramel/10 px-3 py-1.5 text-[13px] text-milk'
