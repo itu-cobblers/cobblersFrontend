@@ -1,6 +1,5 @@
 export type { ExecuteStatus, ExecuteRequest, ExecuteResult, SubmissionResult } from './execution'
 export type {
-  Difficulty,
   Day,
   TaskKind,
   SourceFile,
@@ -14,3 +13,4 @@ export type {
   ProjectTask,
 } from './task'
 export type { SceneProps, Theme } from './theme'
+export type { Taskset } from './taskset'

@@ -69,7 +69,6 @@ export const TASKS: Task[] = [
     day: 1,
     kind: 'code',
     title: 'Name your Café shop',
-    difficulty: 'Easy',
     description:
       "Welcome to your very own hygge café! Every café needs a name. Print your café's name to the console — whatever you print appears on the shop board.",
     hint: 'Use System.out.println("My Cozy Café"); inside main, then press Submit.',
@@ -85,7 +84,6 @@ export const TASKS: Task[] = [
     day: 1,
     kind: 'code',
     title: 'Hello, World!',
-    difficulty: 'Easy',
     description: 'Make the program print exactly: Hello World!',
     hint: 'System.out.println("Hello World!");',
     starter: mainStarter('        // Print Hello World!'),
@@ -97,7 +95,6 @@ export const TASKS: Task[] = [
     day: 1,
     kind: 'code',
     title: 'Print three values',
-    difficulty: 'Easy',
     description:
       'Print these three things, each on its own line: 2024, a greeting like "Hello, my name is …!", and -273.15.',
     hint: 'Three System.out.println(...) statements — an int, a String, and a double.',
@@ -110,7 +107,6 @@ export const TASKS: Task[] = [
     day: 1,
     kind: 'code',
     title: 'Use variables',
-    difficulty: 'Easy',
     description:
       'Print the same three values, but this time store them in variables first: year (int), name (String), abs_nul (double). Remember: different values need different types.',
     hint: 'int year = 2024; double abs_nul = -273.15; then println each.',
@@ -123,7 +119,6 @@ export const TASKS: Task[] = [
     day: 1,
     kind: 'code',
     title: 'Your age',
-    difficulty: 'Easy',
     description:
       'Using a variable called age (= 26), print "I am 26 years old". Then print "Next year I will be 27!" still using age.',
     hint: 'Print age, then age + 1. Numbers join to text with +.',
@@ -136,7 +131,6 @@ export const TASKS: Task[] = [
     day: 1,
     kind: 'code',
     title: 'Concatenate strings',
-    difficulty: 'Easy',
     description:
       'Given the words "Hello", "my", "friend", print them as a single line: Hello my friend!',
     hint: 'Join with +: first + " " + second + " " + third + "!"',
@@ -151,7 +145,6 @@ export const TASKS: Task[] = [
     day: 1,
     kind: 'code',
     title: 'Currency converter',
-    difficulty: 'Medium',
     description:
       'Convert 100 DKK to euro (1 euro = 7.45 kr) and print e.g. "100 kr corresponds to 13.42 euro".',
     hint: 'double eur = dkk / 7.45;',
@@ -164,7 +157,6 @@ export const TASKS: Task[] = [
     day: 1,
     kind: 'code',
     title: 'Celsius → Fahrenheit',
-    difficulty: 'Medium',
     description:
       'Fahrenheit is Celsius × 1.8, then + 32. For c = 37.5, print "37.5C is the same as 99.5F".',
     hint: 'double f = (c * 1.8) + 32;',
@@ -177,7 +169,6 @@ export const TASKS: Task[] = [
     day: 1,
     kind: 'code',
     title: 'Two functions',
-    difficulty: 'Medium',
     description:
       'Refactor the temperature conversion into two parameterised functions: c2f(double c) and f2c(double f), each printing the result.',
     hint: 'static void c2f(double c) { ... }  — call it from main.',
@@ -204,7 +195,6 @@ export const TASKS: Task[] = [
     day: 1,
     kind: 'code',
     title: 'BMI calculator',
-    difficulty: 'Medium',
     description:
       'BMI is weight (kg) divided by height (m) squared. For height 195 cm and weight 84.5 kg, compute and print the BMI.',
     hint: 'Convert cm to m (÷100), then bmi = weight / (heightM * heightM).',
@@ -220,7 +210,6 @@ export const TASKS: Task[] = [
     day: 2,
     kind: 'code',
     title: 'Is it daytime?',
-    difficulty: 'Easy',
     description:
       'Given an hour (0–23), print "Yes, it is daytime!" from 08:00 onward, otherwise "No, it is nighttime."',
     hint: 'Use if (time >= 8) { ... } else { ... }',
@@ -232,7 +221,6 @@ export const TASKS: Task[] = [
     day: 2,
     kind: 'code',
     title: 'Big or small',
-    difficulty: 'Easy',
     description:
       'Write a parameterised function bigsmall(int n) that prints "<n> is a big number" when n > 99, otherwise "<n> is a small number".',
     hint: 'static void bigsmall(int number) { if (number > 99) ... }',
@@ -254,7 +242,6 @@ export const TASKS: Task[] = [
     day: 2,
     kind: 'code',
     title: 'Even or odd',
-    difficulty: 'Easy',
     description:
       'Write a function even(int n) that RETURNS a boolean (true if n is even). Use it to print "<n> is even" or "<n> is not even".',
     hint: 'Even numbers are divisible by 2: number % 2 == 0',
@@ -278,7 +265,6 @@ export const TASKS: Task[] = [
     day: 2,
     kind: 'code',
     title: 'Time of day',
-    difficulty: 'Medium',
     description:
       'Write daypart(int time) that RETURNS a String: 0 midnight, 1–5 night, 6–11 morning, 12 noon, 13–17 afternoon, 18+ evening. Print "It is <daypart>".',
     hint: 'Use an if / else-if chain that returns a String.',
@@ -301,7 +287,6 @@ export const TASKS: Task[] = [
     day: 2,
     kind: 'code',
     title: 'Multiplication series',
-    difficulty: 'Easy',
     description:
       'Using a loop, print the multiplication series for 5: 5, 10, 15, 20, 25, 30, 35, 40, 45, 50 (one per line is fine).',
     hint: 'for (int i = 1; i <= 10; i++) { System.out.println(series * i); }',
@@ -314,7 +299,6 @@ export const TASKS: Task[] = [
     day: 2,
     kind: 'code',
     title: 'Guess the number',
-    difficulty: 'Medium',
     description:
       'A number-guessing game: pick a secret with Random, read guesses with a Scanner in a while loop, and print "Too low" / "Too high" until correct.',
     hint: 'Scanner scanner = new Scanner(System.in); while (guess != secret) { guess = scanner.nextInt(); ... }',
@@ -340,7 +324,6 @@ public class Guess {
     day: 2,
     kind: 'code',
     title: 'NIM (bonus)',
-    difficulty: 'Hard',
     description:
       'Bonus: build NIM for 2 players. Matches on the table; each turn a player takes 1–3 (never more than what is left). Whoever takes the last match wins. Read moves with a Scanner.',
     hint: 'Track remaining matches in a loop; validate the move is 1–3 and not more than remaining.',
@@ -362,7 +345,6 @@ public class Nim {
     day: 2,
     kind: 'predict',
     title: 'While Loop Quiz 1',
-    difficulty: 'Easy',
     description: 'Read the loop and predict exactly what it prints.',
     snippet: `int i = 10;
 while (i > 0) {
@@ -376,7 +358,6 @@ while (i > 0) {
     day: 2,
     kind: 'predict',
     title: 'While Loop Quiz 2',
-    difficulty: 'Easy',
     description: 'Read the loop and predict exactly what it prints.',
     snippet: `int i = 1;
 while (i <= 10) {
@@ -390,7 +371,6 @@ while (i <= 10) {
     day: 2,
     kind: 'predict',
     title: 'While Loop Quiz 3',
-    difficulty: 'Medium',
     description: 'Read the loop and predict exactly what it prints.',
     snippet: `int i = 1;
 while (i < 100) {
@@ -404,7 +384,6 @@ while (i < 100) {
     day: 2,
     kind: 'predict',
     title: 'While Loop Quiz 4',
-    difficulty: 'Hard',
     description: 'Careful with this one! Predict what it prints — some loops never stop.',
     hint: 'What is 1 × 1? Does i ever change?',
     snippet: `int i = 1;
@@ -420,7 +399,6 @@ while (i < 42) {
     day: 2,
     kind: 'predict',
     title: 'While Loop Quiz 5',
-    difficulty: 'Easy',
     description: 'Read the loop and predict exactly what it prints.',
     snippet: `int i = 0;
 while (i <= 15) {
@@ -434,7 +412,6 @@ while (i <= 15) {
     day: 2,
     kind: 'predict',
     title: 'While Loop Quiz 6',
-    difficulty: 'Medium',
     description: 'Read the loop and predict exactly what it prints.',
     snippet: `int i = 64;
 while (i >= 2) {
@@ -448,7 +425,6 @@ while (i >= 2) {
     day: 2,
     kind: 'predict',
     title: 'For Loop Quiz 1',
-    difficulty: 'Easy',
     description: 'Read the loop and predict exactly what it prints.',
     snippet: `for (int i = 10; i > 0; i = i - 2) {
     System.out.println(i);
@@ -460,7 +436,6 @@ while (i >= 2) {
     day: 2,
     kind: 'predict',
     title: 'For Loop Quiz 2',
-    difficulty: 'Easy',
     description: 'Read the loop and predict exactly what it prints.',
     snippet: `for (int i = 1; i < 10; i = i + 3) {
     System.out.println(i);
@@ -472,7 +447,6 @@ while (i >= 2) {
     day: 2,
     kind: 'predict',
     title: 'For Loop Quiz 3',
-    difficulty: 'Hard',
     description: 'Careful with this one! Predict what it prints — some loops never stop.',
     hint: 'What is 1 × 1? Does i ever grow?',
     snippet: `for (int i = 1; i < 10; i = i * i) {
@@ -486,7 +460,6 @@ while (i >= 2) {
     day: 2,
     kind: 'predict',
     title: 'For Loop Quiz 4',
-    difficulty: 'Easy',
     description: 'Read the loop and predict exactly what it prints.',
     snippet: `for (int i = 0; i <= 15; i = i + 3) {
     System.out.println(i);
@@ -498,7 +471,6 @@ while (i >= 2) {
     day: 2,
     kind: 'predict',
     title: 'For Loop Quiz 5',
-    difficulty: 'Medium',
     description: 'Read the loop and predict exactly what it prints.',
     snippet: `for (int i = 1; i <= 10000; i = i * 10) {
     System.out.println(i);
@@ -510,7 +482,6 @@ while (i >= 2) {
     day: 2,
     kind: 'predict',
     title: 'For Loop Quiz 6',
-    difficulty: 'Medium',
     description: 'Read the loop and predict exactly what it prints.',
     snippet: `for (int i = 64; i >= 2; i = i / 2) {
     System.out.println(i);
@@ -524,7 +495,6 @@ while (i >= 2) {
     day: 3,
     kind: 'code',
     title: 'Person class',
-    difficulty: 'Easy',
     description:
       'Warm-up: make a Person class with fields name and age, a constructor Person(String n, int a), display() that prints "Niek (25 years old)", and birthday() that adds a year.',
     hint: 'display(): System.out.println(name + " (" + age + " years old)");',
@@ -548,7 +518,6 @@ while (i >= 2) {
     day: 3,
     kind: 'code',
     title: 'FlightTicket class',
-    difficulty: 'Medium',
     description:
       'Make a FlightTicket class: fields from, to, price; constructor (f, t, p); show() prints "CPH --> JFK (7500 DKK)"; discount() takes 500 DKK off. Make sure discount() can\'t be abused (price must never go negative).',
     hint: 'In discount(), only subtract if the price stays >= 0.',
@@ -578,7 +547,6 @@ while (i >= 2) {
     day: 3,
     kind: 'code',
     title: 'Container class',
-    difficulty: 'Medium',
     description:
       'Make a Container class: fields id, amount, max; constructor Container(String i, int max) (amount starts at 0); show() prints "Container: AX35 (23/30)"; addCargo(int a) adds boxes. Make sure the container can\'t be over-filled.',
     hint: 'In addCargo, only add if amount + a <= max (mirror the Account guard pattern).',
@@ -609,7 +577,6 @@ while (i >= 2) {
     day: 3,
     kind: 'project',
     title: 'Build a Tree',
-    difficulty: 'Hard',
     description: 'Mini-project: model a growing (and eventually dying, occasionally blooming) tree.',
     entryClass: 'Main',
     requiredClasses: ['Tree'],
@@ -640,7 +607,6 @@ Develop it in VS Code, then upload your .java files here to run them.`,
     day: 3,
     kind: 'project',
     title: "Grandpa's Time Machine",
-    difficulty: 'Hard',
     description: 'Mini-project: a text-based time machine that travels between years.',
     entryClass: 'Main',
     requiredClasses: ['TimeMachine'],
@@ -668,7 +634,6 @@ Hint: model the machine as an object — store the current year as a field; one 
     day: 3,
     kind: 'project',
     title: "Grandma's Blackmarket Kitchen",
-    difficulty: 'Hard',
     description: 'Mini-project: a catering planner that assigns menus and dodges the police.',
     entryClass: 'Main',
     requiredClasses: ['Kitchen'],

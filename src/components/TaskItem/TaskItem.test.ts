@@ -6,7 +6,6 @@ import TaskItem from './TaskItem'
 const baseProps = {
   id: 2,
   title: 'Reverse a String',
-  difficulty: 'Easy' as const,
   isActive: false,
   isDone: false,
 }

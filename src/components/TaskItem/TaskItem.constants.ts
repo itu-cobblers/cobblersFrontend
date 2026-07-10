@@ -1,12 +1,3 @@
-import type { Difficulty } from '@types'
-import type { BadgeTone } from '@components/Badge'
-
-export const DIFFICULTY_TONE: Record<Difficulty, BadgeTone> = {
-  Easy: 'easy',
-  Medium: 'medium',
-  Hard: 'hard',
-}
-
 export const TASK_ITEM_BASE_CLASS =
   'flex cursor-pointer items-center gap-2.5 border-l-[3px] border-transparent px-4 py-2 transition-colors hover:bg-milk/5'
 
