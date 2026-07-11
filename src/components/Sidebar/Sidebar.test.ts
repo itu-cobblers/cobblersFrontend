@@ -10,13 +10,13 @@ const props: SidebarProps = {
       day: 1,
       label: 'Day 1 · Basics',
       items: [
-        { id: 0, title: 'Name your Café shop', difficulty: 'Easy', isActive: true, isDone: true },
+        { id: 0, title: 'Name your Café shop', isActive: true, isDone: true },
       ],
     },
     {
       day: 2,
       label: 'Day 2 · Loops',
-      items: [{ id: 1, title: 'FizzBuzz', difficulty: 'Easy', isActive: false, isDone: false }],
+      items: [{ id: 1, title: 'FizzBuzz', isActive: false, isDone: false }],
     },
   ],
   detail: { title: 'Name your Café shop', description: 'Print a name.', hint: 'println' },

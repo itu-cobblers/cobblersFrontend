@@ -52,8 +52,21 @@ export type { SidebarProps, SidebarProgress, SidebarGroup } from './Sidebar'
 export { Toolbar } from './Toolbar'
 export type { ToolbarProps } from './Toolbar'
 
-export { JoinRoomBar } from './JoinRoomBar'
-export type { JoinRoomBarProps } from './JoinRoomBar'
+export { StudentEntry } from './StudentEntry'
+export type { StudentEntryProps, JoinMode } from './StudentEntry'
+
+export { Toast } from './Toast'
+export type { ToastProps, ToastTone } from './Toast'
+
+export { TasksetPreview } from './TasksetPreview'
+export type {
+  TasksetPreviewProps,
+  TasksetPreviewGroup,
+  TasksetPreviewEntry,
+} from './TasksetPreview'
+
+export { StudentRoster } from './StudentRoster'
+export type { StudentRosterProps, RosterEntry, RosterStatus } from './StudentRoster'
 
 export { SubmitModal, getSubmitResultView } from './SubmitModal'
 export type { SubmitModalProps } from './SubmitModal'

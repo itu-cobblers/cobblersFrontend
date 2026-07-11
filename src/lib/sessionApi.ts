@@ -12,9 +12,13 @@ export interface Timer {
   endsAt: string
 }
 
-/** POST /api/sessions → create a new room and return its join code. */
-export async function createSession(): Promise<Session> {
-  const res = await fetch('/api/sessions', { method: 'POST' })
+/** POST /api/sessions → create a new room bound to a taskset, return its join code. */
+export async function createSession(tasksetId: string): Promise<Session> {
+  const res = await fetch('/api/sessions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tasksetId }),
+  })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.json()
 }

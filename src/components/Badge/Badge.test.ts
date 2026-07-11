@@ -10,7 +10,7 @@ describe('Badge', () => {
   })
 
   it('applies tone-specific classes', () => {
-    render(createElement(Badge, { tone: 'hard', children: 'Hard' }))
-    expect(screen.getByText('Hard')).toHaveClass('text-berry')
+    render(createElement(Badge, { tone: 'lang', children: 'Java' }))
+    expect(screen.getByText('Java')).toHaveClass('text-caramel')
   })
 })

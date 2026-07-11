@@ -5,8 +5,8 @@ import TaskList from './TaskList'
 import type { TaskListEntry } from './TaskList.types'
 
 const items: TaskListEntry[] = [
-  { id: 0, title: 'Name your Café shop', difficulty: 'Easy', isActive: true, isDone: true },
-  { id: 1, title: 'FizzBuzz', difficulty: 'Easy', isActive: false, isDone: false },
+  { id: 0, title: 'Name your Café shop', isActive: true, isDone: true },
+  { id: 1, title: 'FizzBuzz', isActive: false, isDone: false },
 ]
 
 describe('TaskList', () => {

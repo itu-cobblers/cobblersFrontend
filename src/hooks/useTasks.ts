@@ -1,6 +1,5 @@
 import { useState } from 'react'
-import type { ExecuteResult, Signals } from '@types'
-import { TASKS } from '@lib/tasks'
+import type { ExecuteResult, Signals, Task } from '@types'
 
 interface GradeOptions {
   /** Mark complete regardless of check() — e.g. the backend accepted a submission. */
@@ -22,10 +21,11 @@ export interface UseTasks {
 
 /**
  * Owns task selection, completion progress, and the theme-agnostic `signals`
- * bag. Grading for code tasks runs the task's own check() (tasks.ts); predict
- * and project tasks complete via `complete()`.
+ * bag. Grades against the `tasks` it's given (the active taskset). Grading for
+ * code tasks runs the task's own check() (tasks.ts); predict and project tasks
+ * complete via `complete()`.
  */
-export function useTasks(): UseTasks {
+export function useTasks(tasks: Task[]): UseTasks {
   const [activeTask, setActiveTask] = useState(0)
   const [completedTasks, setCompletedTasks] = useState<Set<number>>(new Set())
   const [signals, setSignals] = useState<Signals>({})
@@ -36,7 +36,7 @@ export function useTasks(): UseTasks {
   }
 
   function grade(code: string, result: ExecuteResult, { forceComplete = false }: GradeOptions = {}) {
-    const task = TASKS[activeTask]
+    const task = tasks[activeTask]
     if (!task) return
     if (task.kind !== 'code') {
       if (forceComplete) complete(task.id)
@@ -58,7 +58,7 @@ export function useTasks(): UseTasks {
     setActiveTask,
     completedTasks,
     signals,
-    activeTaskId: TASKS[activeTask]?.id,
+    activeTaskId: tasks[activeTask]?.id,
     grade,
     complete,
   }

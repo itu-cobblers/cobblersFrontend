@@ -10,8 +10,6 @@
  * base fields; only rendering + grading branch on `kind`.
  */
 
-export type Difficulty = 'Easy' | 'Medium' | 'Hard'
-
 /** Which day of the 3-day camp a task belongs to. */
 export type Day = 1 | 2 | 3
 
@@ -49,7 +47,6 @@ interface TaskBase {
   id: number
   day: Day
   title: string
-  difficulty: Difficulty
   description: string
   hint?: string
   kind: TaskKind

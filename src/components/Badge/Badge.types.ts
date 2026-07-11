@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
-/** `lang` is a filled pill (e.g. "Java"); the difficulty tones are colored labels. */
-export type BadgeTone = 'lang' | 'easy' | 'medium' | 'hard'
+/** `lang` is a filled pill (e.g. "Java"). */
+export type BadgeTone = 'lang'
 
 export interface BadgeProps {
   tone: BadgeTone

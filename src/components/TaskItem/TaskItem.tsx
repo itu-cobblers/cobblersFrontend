@@ -1,8 +1,6 @@
 import classNames from 'classnames'
-import { Badge } from '@components/Badge'
 import type { TaskItemProps } from './TaskItem.types'
 import {
-  DIFFICULTY_TONE,
   TASK_ITEM_BASE_CLASS,
   TASK_ITEM_ACTIVE_CLASS,
   TASK_CHECK_BASE_CLASS,
@@ -12,7 +10,7 @@ import {
   TASK_TITLE_DONE_CLASS,
 } from './TaskItem.constants'
 
-export default function TaskItem({ id, title, difficulty, isActive, isDone, onSelect }: TaskItemProps) {
+export default function TaskItem({ id, title, isActive, isDone, onSelect }: TaskItemProps) {
   function handleClick() {
     onSelect(id)
   }
@@ -29,7 +27,6 @@ export default function TaskItem({ id, title, difficulty, isActive, isDone, onSe
         <span className={classNames(TASK_TITLE_BASE_CLASS, { [TASK_TITLE_DONE_CLASS]: isDone })}>
           {title}
         </span>
-        <Badge tone={DIFFICULTY_TONE[difficulty]}>{difficulty}</Badge>
       </div>
     </li>
   )

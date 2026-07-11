@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { ExecuteRequest, SourceFile } from '@types'
+import type { ExecuteRequest, SourceFile, Task } from '@types'
 import type {
   CodeEditorProps,
   OutputPanelProps,
@@ -12,15 +12,10 @@ import type {
 import { useExecutor } from '@hooks/useExecutor'
 import { useTasks } from '@hooks/useTasks'
 import { useSubmission } from '@hooks/useSubmission'
-import { TASKS, defaultStarter } from '@lib/tasks'
+import { defaultStarter } from '@lib/tasks'
+import { groupTasksByDay } from '@lib/taskset'
 import { checkPrediction } from '@lib/quizApi'
 import { ACTIVE_THEME } from '@themes'
-
-const DAY_LABELS: Record<number, string> = {
-  1: 'Day 1 · Basics',
-  2: 'Day 2 · Loops & Logic',
-  3: 'Day 3 · Objects & Projects',
-}
 
 const noop = () => {
   /* read-only editor: changes are ignored */
@@ -33,40 +28,41 @@ export type ActivePanel =
   | { kind: 'project'; project: ProjectPanelProps }
 
 /** Seed editor content for every code task from its starter. */
-function initialCode(): Record<number, string> {
+function initialCode(taskList: Task[]): Record<number, string> {
   const map: Record<number, string> = {}
-  for (const task of TASKS) {
+  for (const task of taskList) {
     if (task.kind === 'code') map[task.id] = task.starter ?? defaultStarter
   }
   return map
 }
 
 /**
- * Orchestrates the student workspace. Holds per-task editor/answer/upload state
- * and the run / task / submit hooks, and shapes the props each component
- * renders — branching by the active task's `kind`.
+ * Orchestrates the student workspace for the active taskset's `tasks`. Holds
+ * per-task editor/answer/upload state and the run / task / submit hooks, and
+ * shapes the props each component renders — branching by the active task's
+ * `kind`.
  */
-export function useStudentWorkspace() {
-  const [codeByTask, setCodeByTask] = useState<Record<number, string>>(initialCode)
+export function useStudentWorkspace(tasks: Task[]) {
+  const [codeByTask, setCodeByTask] = useState<Record<number, string>>(() => initialCode(tasks))
   const [answerByTask, setAnswerByTask] = useState<Record<number, string>>({})
   const [statusByTask, setStatusByTask] = useState<Record<number, PredictStatus>>({})
   const [filesByTask, setFilesByTask] = useState<Record<number, SourceFile[]>>({})
   const [isSidebarFolded, setIsSidebarFolded] = useState(false)
 
   const executor = useExecutor()
-  const tasks = useTasks()
-  const active = TASKS[tasks.activeTask]
+  const taskProgress = useTasks(tasks)
+  const active = tasks[taskProgress.activeTask]
 
   const submission = useSubmission({
     onResult: (submittedCode, result) => {
       executor.showResult(result)
-      if (result.accepted) tasks.grade(submittedCode, result, { forceComplete: true })
+      if (result.accepted) taskProgress.grade(submittedCode, result, { forceComplete: true })
     },
   })
 
   // ── handlers ──────────────────────────────────────────────────────────────
   function handleSelectTask(id: number) {
-    tasks.setActiveTask(id)
+    taskProgress.setActiveTask(id)
     executor.reset()
   }
 
@@ -95,7 +91,7 @@ export function useStudentWorkspace() {
     const request = buildCodeRequest(code)
     if (!request) return
     const data = await executor.run(request)
-    if (data) tasks.grade(code, data)
+    if (data) taskProgress.grade(code, data)
   }
 
   function handleOpenSubmit() {
@@ -103,7 +99,7 @@ export function useStudentWorkspace() {
   }
 
   function handleConfirmSubmit() {
-    submission.confirm(codeByTask[active.id] ?? '', tasks.activeTaskId)
+    submission.confirm(codeByTask[active.id] ?? '', taskProgress.activeTaskId)
   }
 
   function handlePredictAnswerChange(value: string) {
@@ -120,12 +116,12 @@ export function useStudentWorkspace() {
       accept: active.accept,
     })
     setStatusByTask((prev) => ({ ...prev, [active.id]: correct ? 'correct' : 'wrong' }))
-    if (correct) tasks.complete(active.id)
+    if (correct) taskProgress.complete(active.id)
   }
 
   function handlePredictUnderstood() {
     setStatusByTask((prev) => ({ ...prev, [active.id]: 'done' }))
-    tasks.complete(active.id)
+    taskProgress.complete(active.id)
   }
 
   function handleProjectFilesChange(files: SourceFile[]) {
@@ -137,24 +133,21 @@ export function useStudentWorkspace() {
     const files = filesByTask[active.id] ?? []
     if (files.length === 0) return
     const data = await executor.run({ files, entryClass: active.entryClass ?? 'Main' })
-    if (data?.status === 'success') tasks.complete(active.id)
+    if (data?.status === 'success') taskProgress.complete(active.id)
   }
 
   // ── display-ready props ─────────────────────────────────────────────────────
-  const toEntry = (id: number, title: string, difficulty: TaskListEntry['difficulty']): TaskListEntry => ({
+  const toEntry = (id: number, title: string): TaskListEntry => ({
     id,
     title,
-    difficulty,
-    isActive: id === tasks.activeTaskId,
-    isDone: tasks.completedTasks.has(id),
+    isActive: id === taskProgress.activeTaskId,
+    isDone: taskProgress.completedTasks.has(id),
   })
 
-  const groups: SidebarGroup[] = [1, 2, 3].map((day) => ({
-    day,
-    label: DAY_LABELS[day],
-    items: TASKS.filter((task) => task.day === day).map((task) =>
-      toEntry(task.id, task.title, task.difficulty),
-    ),
+  const groups: SidebarGroup[] = groupTasksByDay(tasks).map((group) => ({
+    day: group.day,
+    label: group.label,
+    items: group.items.map((task) => toEntry(task.id, task.title)),
   }))
 
   function buildActivePanel(): ActivePanel {
@@ -211,7 +204,7 @@ export function useStudentWorkspace() {
     sidebar: {
       groups,
       detail: { title: active.title, description: active.description, hint: active.hint },
-      progress: { completed: tasks.completedTasks.size, total: TASKS.length },
+      progress: { completed: taskProgress.completedTasks.size, total: tasks.length },
       isFolded: isSidebarFolded,
       onSelect: handleSelectTask,
     },
@@ -225,9 +218,9 @@ export function useStudentWorkspace() {
     },
     scene: {
       Scene: ACTIVE_THEME.Scene,
-      signals: tasks.signals,
-      completedTasks: tasks.completedTasks,
-      activeTask: tasks.activeTask,
+      signals: taskProgress.signals,
+      completedTasks: taskProgress.completedTasks,
+      activeTask: taskProgress.activeTask,
     },
   }
 }
