@@ -24,6 +24,13 @@ const ICONS: Record<IconName, ReactElement> = {
       <polygon points="2,1 13,7 2,13" />
     </svg>
   ),
+  info: (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <circle cx="7" cy="7" r="6" stroke="currentColor" strokeWidth="1.3" />
+      <rect x="6.3" y="6" width="1.4" height="4.5" rx="0.7" fill="currentColor" />
+      <rect x="6.3" y="3.4" width="1.4" height="1.4" rx="0.7" fill="currentColor" />
+    </svg>
+  ),
 }
 
 export default function Icon({ name }: IconProps) {
