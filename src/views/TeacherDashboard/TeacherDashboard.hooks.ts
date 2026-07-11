@@ -1,12 +1,7 @@
 import { useEffect, useState } from 'react'
 import { createSession, startTimer } from '@lib/sessionApi'
-import {
-  fetchTasksets,
-  fetchTaskset,
-  fetchMockRoster,
-  type TaskSetSummary,
-} from '@lib/tasksetApi'
-import { groupTasksByDay } from '@lib/taskset'
+import { fetchTasksets, fetchTaskset, type TaskSetSummary } from '@lib/tasksetApi'
+import { groupTasks } from '@lib/taskset'
 import { observeSession, type Student } from '@lib/sessionHub'
 import { revokeTeacher } from '@lib/teacherAuth'
 import type { RosterEntry, TasksetPreviewGroup } from '@components'
@@ -49,8 +44,7 @@ export function useTeacherSession() {
         if (cancelled) return
         setPreviewTitle(taskset.displayTitle)
         setPreviewGroups(
-          groupTasksByDay(taskset.tasks).map((group) => ({
-            day: group.day,
+          groupTasks(taskset.tasks, 'Tasks').map((group) => ({
             label: group.label,
             items: group.items.map((task) => ({
               id: task.id,
@@ -109,21 +103,9 @@ export function useTeacherSession() {
     setIsCreatingSession(true)
     setSessionError(null)
     try {
-      // MOCK — the sessions API isn't live yet, so fall back to a fixed room code
-      // when the request fails. Delete the catch-fallback when the backend lands.
-      let code: string
-      try {
-        code = (await createSession(selectedTasksetId)).code
-      } catch {
-        code = 'ABCD'
-      }
+      const { code } = await createSession(selectedTasksetId)
       setSessionCode(code)
       observe(code)
-      // MOCK — seed fabricated progress so the roster isn't empty while the hub
-      // is down. Delete this block when live roster + progress land.
-      fetchMockRoster()
-        .then((roster) => setStudents(roster.map((entry) => ({ ...entry, total: previewCount() }))))
-        .catch(() => undefined)
     } catch (err) {
       setSessionError(err instanceof Error ? err.message : String(err))
     } finally {
@@ -136,14 +118,7 @@ export function useTeacherSession() {
     setIsStartingTimer(true)
     setTimerError(null)
     try {
-      // MOCK — fall back to a locally-computed end time when the timer API isn't
-      // live. Delete the catch-fallback when the backend lands.
-      let endsAt: string
-      try {
-        endsAt = (await startTimer(sessionCode, minutes)).endsAt
-      } catch {
-        endsAt = new Date(Date.now() + minutes * 60_000).toISOString()
-      }
+      const { endsAt } = await startTimer(sessionCode, minutes)
       setTimerEndsAt(endsAt)
     } catch (err) {
       setTimerError(err instanceof Error ? err.message : String(err))

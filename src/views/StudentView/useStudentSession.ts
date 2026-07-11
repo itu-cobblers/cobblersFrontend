@@ -3,7 +3,9 @@ import type { Taskset } from '@types'
 import type { JoinMode } from '@components'
 import type { ToastTone } from '@components'
 import { getStudentId, getDisplayName, setDisplayName } from '@lib/identity'
-import { fetchStudentTaskset } from '@lib/tasksetApi'
+import { getSession } from '@lib/sessionApi'
+import { joinSession } from '@lib/sessionHub'
+import { fetchStudentTaskset, fetchTaskset } from '@lib/tasksetApi'
 
 interface Toast {
   message: string
@@ -17,9 +19,9 @@ const TOAST_DURATION_MS = 3500
  * code) or Solo Practice. Both resolve to a `taskset` that the caller uses to
  * reveal the IDE. Until then the student sees the entry screen.
  *
- * ⚠️ The join/solo bodies are MOCK — code `ABCD` succeeds and returns a Day-1
- * taskset; any other code shows an error toast. Real: `joinSession` over
- * SignalR returns the taskset for the room (see @lib/sessionHub).
+ * Join: GET /api/sessions/:code resolves the room's taskset (404 ⇒ toast),
+ * then the SignalR JoinSession is attempted best-effort (roster + timer) —
+ * content still loads if the hub hiccups. Solo: the hardcoded all-tasks set.
  */
 export function useStudentSession() {
   const [name, setName] = useState(getDisplayName)
@@ -42,31 +44,36 @@ export function useStudentSession() {
 
   async function handleJoin() {
     const roomCode = code.trim().toUpperCase()
-    setDisplayName(name.trim())
+    const displayName = name.trim()
+    setDisplayName(displayName)
     setIsJoining(true)
-    // ── MOCK join — delete when SignalR is live ────────────────────────────────
-    // Real: `const state = await joinSession({ code, studentId, displayName })`
-    // and the taskset arrives from the socket. For now only "ABCD" succeeds.
     try {
-      if (roomCode !== 'ABCD') {
-        setToast({ message: 'Room not found — check the code and try again.', tone: 'error' })
-        return
-      }
-      getStudentId() // ensure a persistent id exists before any submission
-      setTaskset(await fetchStudentTaskset())
+      const session = await getSession(roomCode) // 404 ⇒ no such room
+      if (!session.tasksetId) throw new Error('room has no taskset')
+
+      const studentId = getStudentId() // ensure a persistent id exists before any submission
+      // Best-effort room membership (teacher roster + timer broadcasts); the
+      // taskset comes from REST either way.
+      joinSession({ code: roomCode, studentId, displayName }).catch((err: unknown) => {
+        console.warn('[join] hub join failed:', err instanceof Error ? err.message : String(err))
+      })
+
+      setTaskset(await fetchTaskset(session.tasksetId))
+    } catch {
+      setToast({ message: 'Room not found — check the code and try again.', tone: 'error' })
     } finally {
       setIsJoining(false)
     }
-    // ── end MOCK ────────────────────────────────────────────────────────────────
   }
 
   async function handleStartSolo() {
     setDisplayName(name.trim())
     getStudentId() // ensure a persistent id exists before any solo submission
     setIsStartingSolo(true)
-    // MOCK — real: request a solo taskset from the API. For now, Day-1 tasks.
     try {
       setTaskset(await fetchStudentTaskset())
+    } catch {
+      setToast({ message: 'Could not load the tasks — please try again in a moment.', tone: 'error' })
     } finally {
       setIsStartingSolo(false)
     }

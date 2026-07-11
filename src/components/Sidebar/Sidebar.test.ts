@@ -7,16 +7,14 @@ import type { SidebarProps } from './Sidebar.types'
 const props: SidebarProps = {
   groups: [
     {
-      day: 1,
-      label: 'Day 1 · Basics',
+      label: 'BootIT Day 1 — 2026',
       items: [
-        { id: 0, title: 'Name your Café shop', isActive: true, isDone: true },
+        { id: 1, title: 'Name your Café shop', isActive: true, isDone: true },
       ],
     },
     {
-      day: 2,
-      label: 'Day 2 · Loops',
-      items: [{ id: 1, title: 'FizzBuzz', isActive: false, isDone: false }],
+      label: 'Extra practice',
+      items: [{ id: 2, title: 'FizzBuzz', isActive: false, isDone: false }],
     },
   ],
   detail: { title: 'Name your Café shop', description: 'Print a name.', hint: 'println' },
@@ -26,11 +24,11 @@ const props: SidebarProps = {
 }
 
 describe('Sidebar', () => {
-  it('renders day headers, progress label, and task rows', () => {
+  it('renders group headers, progress label, and task rows', () => {
     render(createElement(Sidebar, props))
     expect(screen.getByRole('heading', { name: 'Tasks' })).toBeInTheDocument()
-    expect(screen.getByText('Day 1 · Basics')).toBeInTheDocument()
-    expect(screen.getByText('Day 2 · Loops')).toBeInTheDocument()
+    expect(screen.getByText('BootIT Day 1 — 2026')).toBeInTheDocument()
+    expect(screen.getByText('Extra practice')).toBeInTheDocument()
     expect(screen.getByText('1/5 completed')).toBeInTheDocument()
     expect(screen.getAllByRole('listitem')).toHaveLength(2)
   })

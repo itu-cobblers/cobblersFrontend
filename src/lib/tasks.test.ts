@@ -40,6 +40,8 @@ describe('task grading', () => {
   it('every task has a unique sequential id and a valid day', () => {
     const ids = TASKS.map((t) => t.id)
     expect(ids).toEqual(ids.map((_, i) => i))
-    expect(TASKS.every((t) => [1, 2, 3].includes(t.day))).toBe(true)
+    // `day` is optional on Task now (API tasks drop it), but every entry in
+    // the legacy local bundle must still carry one.
+    expect(TASKS.every((t) => t.day !== undefined && [1, 2, 3].includes(t.day))).toBe(true)
   })
 })

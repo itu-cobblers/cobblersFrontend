@@ -21,7 +21,7 @@ export default function TasksetPreview({ title, groups }: TasksetPreviewProps) {
     <div className={PREVIEW_WRAP_CLASS}>
       {title && <h3 className={PREVIEW_TITLE_CLASS}>{title}</h3>}
       {groups.map((group) => (
-        <section key={group.day} className={PREVIEW_GROUP_CLASS}>
+        <section key={group.label} className={PREVIEW_GROUP_CLASS}>
           <h4 className={PREVIEW_DAY_HEADER_CLASS}>{group.label}</h4>
           <ul className={PREVIEW_LIST_CLASS}>
             {group.items.map((item) => (

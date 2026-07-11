@@ -8,6 +8,27 @@ vi.mock('@monaco-editor/react', () => ({
     createElement('textarea', { 'data-testid': 'editor', defaultValue: value }),
 }))
 
+// The taskset now comes from the backend; stub the seam so the solo flow
+// works without a running API.
+vi.mock('@lib/tasksetApi', () => ({
+  SOLO_TASKSET_ID: 'all-tasks-for-solo-2026',
+  fetchTasksets: vi.fn(),
+  fetchTaskset: vi.fn(),
+  fetchStudentTaskset: vi.fn().mockResolvedValue({
+    tasksetId: 'all-tasks-for-solo-2026',
+    displayTitle: 'BootIT — All Tasks (Solo) 2026',
+    tasks: [
+      {
+        id: 1,
+        kind: 'code',
+        title: 'Hello, World!',
+        description: 'Make the program print exactly: Hello World!',
+        starter: 'public class Main {}',
+      },
+    ],
+  }),
+}))
+
 const { default: StudentView } = await import('./StudentView')
 
 describe('StudentView', () => {

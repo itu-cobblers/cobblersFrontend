@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { ExecuteRequest, SourceFile, Task } from '@types'
+import type { ExecuteRequest, SourceFile, Task, Taskset } from '@types'
 import type {
   CodeEditorProps,
   OutputPanelProps,
@@ -13,7 +13,7 @@ import { useExecutor } from '@hooks/useExecutor'
 import { useTasks } from '@hooks/useTasks'
 import { useSubmission } from '@hooks/useSubmission'
 import { defaultStarter } from '@lib/tasks'
-import { groupTasksByDay } from '@lib/taskset'
+import { groupTasks } from '@lib/taskset'
 import { checkPrediction } from '@lib/quizApi'
 import { ACTIVE_THEME } from '@themes'
 
@@ -37,12 +37,12 @@ function initialCode(taskList: Task[]): Record<number, string> {
 }
 
 /**
- * Orchestrates the student workspace for the active taskset's `tasks`. Holds
- * per-task editor/answer/upload state and the run / task / submit hooks, and
- * shapes the props each component renders — branching by the active task's
- * `kind`.
+ * Orchestrates the student workspace for the active taskset. Holds per-task
+ * editor/answer/upload state and the run / task / submit hooks, and shapes
+ * the props each component renders — branching by the active task's `kind`.
  */
-export function useStudentWorkspace(tasks: Task[]) {
+export function useStudentWorkspace(taskset: Taskset) {
+  const { tasks } = taskset
   const [codeByTask, setCodeByTask] = useState<Record<number, string>>(() => initialCode(tasks))
   const [answerByTask, setAnswerByTask] = useState<Record<number, string>>({})
   const [statusByTask, setStatusByTask] = useState<Record<number, PredictStatus>>({})
@@ -144,8 +144,7 @@ export function useStudentWorkspace(tasks: Task[]) {
     isDone: taskProgress.completedTasks.has(id),
   })
 
-  const groups: SidebarGroup[] = groupTasksByDay(tasks).map((group) => ({
-    day: group.day,
+  const groups: SidebarGroup[] = groupTasks(tasks, taskset.displayTitle).map((group) => ({
     label: group.label,
     items: group.items.map((task) => toEntry(task.id, task.title)),
   }))

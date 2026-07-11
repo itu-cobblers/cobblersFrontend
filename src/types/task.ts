@@ -43,9 +43,14 @@ export interface Verdict {
 }
 
 interface TaskBase {
-  /** Sequential from 0 across all days — used as the active/completed key. */
+  /** Server-assigned task id — used as the active/completed key. */
   id: number
-  day: Day
+  /**
+   * Legacy day tag. Tasks fetched from the API don't carry it (day is
+   * expressed by which taskset a task belongs to — see the api repo's
+   * SCHEMA.md); only the old local bundle in tasks.ts still sets it.
+   */
+  day?: Day
   title: string
   description: string
   hint?: string

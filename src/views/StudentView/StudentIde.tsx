@@ -12,7 +12,7 @@ interface StudentIdeProps {
 }
 
 export default function StudentIde({ taskset }: StudentIdeProps) {
-  const { activePanel, toolbar, sidebar, submitModal, scene } = useStudentWorkspace(taskset.tasks)
+  const { activePanel, toolbar, sidebar, submitModal, scene } = useStudentWorkspace(taskset)
   const { Scene } = scene
 
   return (

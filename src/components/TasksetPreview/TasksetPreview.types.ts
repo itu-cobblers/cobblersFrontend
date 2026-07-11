@@ -9,13 +9,12 @@ export interface TasksetPreviewEntry {
 }
 
 export interface TasksetPreviewGroup {
-  day: number
   label: string
   items: TasksetPreviewEntry[]
 }
 
 export interface TasksetPreviewProps {
-  /** Optional heading shown above the day groups (e.g. the taskset title). */
+  /** Optional heading shown above the groups (e.g. the taskset title). */
   title?: string
   groups: TasksetPreviewGroup[]
 }

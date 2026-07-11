@@ -8,6 +8,12 @@ export interface Session {
   code: string
 }
 
+/** GET /api/sessions/:code — how a joining student resolves the room's taskset. */
+export interface SessionInfo {
+  code: string
+  tasksetId: string | null
+}
+
 export interface Timer {
   endsAt: string
 }
@@ -19,6 +25,13 @@ export async function createSession(tasksetId: string): Promise<Session> {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ tasksetId }),
   })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+  return res.json()
+}
+
+/** GET /api/sessions/:code → resolve a room's taskset (404 ⇒ no such room). */
+export async function getSession(code: string): Promise<SessionInfo> {
+  const res = await fetch(`/api/sessions/${encodeURIComponent(code)}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.json()
 }

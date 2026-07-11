@@ -6,9 +6,8 @@ export interface SidebarProgress {
   total: number
 }
 
-/** One day's section in the task list. */
+/** One labelled section in the task list (a taskset renders as one group). */
 export interface SidebarGroup {
-  day: number
   label: string
   items: TaskListEntry[]
 }

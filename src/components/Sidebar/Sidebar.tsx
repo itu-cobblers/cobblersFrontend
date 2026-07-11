@@ -31,7 +31,7 @@ export default function Sidebar({ groups, detail, progress, isFolded, onSelect }
       </div>
       <div className={SIDEBAR_SCROLL_CLASS}>
         {groups.map((group) => (
-          <section key={group.day}>
+          <section key={group.label}>
             <h3 className={SIDEBAR_DAY_HEADER_CLASS}>{group.label}</h3>
             <TaskList items={group.items} onSelect={onSelect} />
           </section>
