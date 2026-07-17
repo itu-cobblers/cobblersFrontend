@@ -16,8 +16,12 @@
  *     assignments won't auto-complete until the submissions endpoint lands;
  *     predict assignments still grade locally from `expectedOutput` / `accept`.
  *   - No `day` — a set IS one day's content; solo uses the all-assignments set.
+ *
+ * While the backend routes aren't live, both fetchers fall back to the legacy
+ * local bundle via mockApi.ts (clearly-fenced branches, deletable in one step).
  */
 import type { Harness, Assignment, AssignmentKind, AssignmentSet } from '@types'
+import { mockAssignmentSets, mockAssignmentSet } from './mockApi' // MOCK: remove with the fallback branches below
 
 /** The assignment set the solo cohort hardcodes (CONTRACT.md, "Assignments"). */
 export const SOLO_ASSIGNMENT_SET_ID = 'all-assignments-for-solo-2026'
@@ -74,7 +78,16 @@ function toAssignment(dto: ApiAssignment): Assignment {
 
 /** `GET /api/assignmentsets` — the teacher's session-creation picker. */
 export async function fetchAssignmentSets(): Promise<AssignmentSetSummary[]> {
-  return getJson<AssignmentSetSummary[]>('/api/assignmentsets')
+  try {
+    return await getJson<AssignmentSetSummary[]>('/api/assignmentsets')
+  } catch (err) {
+    // ─────────────── MOCK FALLBACK — remove when the backend is ready ───────────────
+    // Delete this catch block, the mock imports above, and mockApi.ts.
+    const reason = err instanceof Error ? err.message : String(err)
+    console.warn('[assignmentsets] backend unavailable, using local bundle:', reason)
+    return mockAssignmentSets()
+    // ──────────────────────────── END MOCK FALLBACK ─────────────────────────────────
+  }
 }
 
 /**
@@ -83,14 +96,23 @@ export async function fetchAssignmentSets(): Promise<AssignmentSetSummary[]> {
  * in parallel.
  */
 export async function fetchAssignmentSet(assignmentSetId: string): Promise<AssignmentSet> {
-  const [summaries, apiAssignments] = await Promise.all([
-    fetchAssignmentSets(),
-    getJson<ApiAssignment[]>(`/api/assignmentsets/${encodeURIComponent(assignmentSetId)}/assignments`),
-  ])
-  return {
-    assignmentSetId,
-    displayTitle: summaries.find((set) => set.assignmentSetId === assignmentSetId)?.displayTitle ?? assignmentSetId,
-    assignments: apiAssignments.map(toAssignment),
+  try {
+    const [summaries, apiAssignments] = await Promise.all([
+      getJson<AssignmentSetSummary[]>('/api/assignmentsets'),
+      getJson<ApiAssignment[]>(`/api/assignmentsets/${encodeURIComponent(assignmentSetId)}/assignments`),
+    ])
+    return {
+      assignmentSetId,
+      displayTitle: summaries.find((set) => set.assignmentSetId === assignmentSetId)?.displayTitle ?? assignmentSetId,
+      assignments: apiAssignments.map(toAssignment),
+    }
+  } catch (err) {
+    // ─────────────── MOCK FALLBACK — remove when the backend is ready ───────────────
+    // Delete this catch block, the mock imports above, and mockApi.ts.
+    const reason = err instanceof Error ? err.message : String(err)
+    console.warn('[assignmentsets] backend unavailable, using local bundle:', reason)
+    return mockAssignmentSet(assignmentSetId)
+    // ──────────────────────────── END MOCK FALLBACK ─────────────────────────────────
   }
 }
 

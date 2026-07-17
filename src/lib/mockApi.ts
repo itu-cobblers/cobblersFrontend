@@ -1,8 +1,8 @@
 /**
  * ⚠️ TEMPORARY MOCKS — delete this whole file once the backend implements
- *    POST /api/execute and POST /api/submission. Then remove the fenced
- *    fallback branches in executeApi.ts and submissionApi.ts. Nothing else
- *    imports this file.
+ *    POST /api/execute, POST /api/submission, and the /api/assignmentsets
+ *    routes. Then remove the fenced fallback branches in executeApi.ts,
+ *    submissionApi.ts, and assignmentSetApi.ts. Nothing else imports this file.
  *
  * Each list below is a set of **200-OK** responses covering the different
  * success/failure shapes a student's code can produce. The mock walks the list
@@ -11,8 +11,14 @@
  *
  * To pin one scenario while you style it, set PIN_EXECUTE / PIN_SUBMIT to its
  * 0-based index instead of null.
+ *
+ * The assignment-set mock serves the legacy local bundle (assignments.ts), so
+ * the whole student UI — entry screen, sidebar, all three assignment kinds,
+ * and local check() grading — works with no backend at all.
  */
-import type { ExecuteResult, SubmissionResult } from '@types'
+import type { AssignmentSet, ExecuteResult, SubmissionResult } from '@types'
+import type { AssignmentSetSummary } from './assignmentSetApi'
+import { ASSIGNMENTS } from './assignments'
 
 interface Scenario<T> {
   label: string
@@ -112,4 +118,18 @@ export function mockSubmit(): SubmissionResult {
   const s = SUBMIT_SCENARIOS[i]
   console.info(`[mock] /api/submission → "${s.label}"`)
   return s.payload
+}
+
+const MOCK_SET_TITLE = 'bootIT assignments (local mock)'
+
+/** GET /api/assignmentsets — a single summary pointing at the local bundle. */
+export function mockAssignmentSets(): AssignmentSetSummary[] {
+  console.info('[mock] /api/assignmentsets → local bundle')
+  return [{ assignmentSetId: 'local-mock', displayTitle: MOCK_SET_TITLE }]
+}
+
+/** GET /api/assignmentsets/:id/assignments — the legacy local bundle, whatever the id. */
+export function mockAssignmentSet(assignmentSetId: string): AssignmentSet {
+  console.info(`[mock] /api/assignmentsets/${assignmentSetId} → local bundle (${ASSIGNMENTS.length} assignments)`)
+  return { assignmentSetId, displayTitle: MOCK_SET_TITLE, assignments: ASSIGNMENTS }
 }
