@@ -3,7 +3,7 @@ import type { SubmissionResult } from '@types'
 import { submitCode } from '@lib/submissionApi'
 
 interface UseSubmissionOptions {
-  /** Cross-cutting effects on a result (mirror in terminal, grade the task). */
+  /** Cross-cutting effects on a result (mirror in terminal, grade the assignment). */
   onResult?: (code: string, result: SubmissionResult) => void
 }
 
@@ -13,13 +13,13 @@ export interface UseSubmission {
   result: SubmissionResult | null
   open: () => void
   close: () => void
-  confirm: (code: string, taskId: number | undefined) => Promise<SubmissionResult | null>
+  confirm: (code: string, assignmentId: number | undefined) => Promise<SubmissionResult | null>
 }
 
 /**
  * Owns the submit-to-teacher flow: the confirm/result modal state and the
  * submit lifecycle. Cross-cutting effects are injected via `onResult` so this
- * hook stays decoupled from the executor/tasks.
+ * hook stays decoupled from the executor/assignments.
  */
 export function useSubmission({ onResult }: UseSubmissionOptions = {}): UseSubmission {
   const [showSubmit, setShowSubmit] = useState(false)
@@ -37,11 +37,11 @@ export function useSubmission({ onResult }: UseSubmissionOptions = {}): UseSubmi
     setResult(null)
   }
 
-  async function confirm(code: string, taskId: number | undefined): Promise<SubmissionResult | null> {
-    if (taskId === undefined) return null
+  async function confirm(code: string, assignmentId: number | undefined): Promise<SubmissionResult | null> {
+    if (assignmentId === undefined) return null
     setIsSubmitting(true)
     try {
-      const r = await submitCode({ taskId, code })
+      const r = await submitCode({ assignmentId, code })
       setResult(r)
       onResult?.(code, r)
       return r

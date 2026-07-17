@@ -1,16 +1,16 @@
 /**
- * tasks.ts — the single source of truth for the task list (the "task boundary").
+ * assignments.ts — the single source of truth for the assignment list (the "assignment boundary").
  *
- * Tasks come from the 3-day bootIT slide decks, grouped by `day` and split by
+ * Assignments come from the 3-day bootIT slide decks, grouped by `day` and split by
  * `kind`:
  *   - 'code'    — write & run Java; graded by check() on the run result.
  *   - 'predict' — read a read-only snippet and predict its printed output.
  *   - 'project' — a multi-file mini-project uploaded from VS Code.
  *
- * To add/change a task or its grading, edit only this file. Grading helpers live
- * in grade.ts; predict grading in predict.ts. See src/types/task.ts for shapes.
+ * To add/change an assignment or its grading, edit only this file. Grading helpers live
+ * in grade.ts; predict grading in predict.ts. See src/types/assignment.ts for shapes.
  */
-import type { Task } from '@types'
+import type { Assignment } from '@types'
 import { includesAll, includesLine, matches } from './grade'
 
 export const defaultStarter = `public class Main {
@@ -62,7 +62,7 @@ const containerHarness = `public class Main {
 }
 `
 
-export const TASKS: Task[] = [
+export const ASSIGNMENTS: Assignment[] = [
   // ─────────────────────────── DAY 1 — basics ───────────────────────────
   {
     id: 0,

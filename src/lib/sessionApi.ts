@@ -8,9 +8,10 @@ export interface Session {
   code: string
 }
 
-/** GET /api/sessions/:code — how a joining student resolves the room's taskset. */
+/** GET /api/sessions/:code — how a joining student resolves the room's assignment set. */
 export interface SessionInfo {
   code: string
+  /** Contract naming — the wire still calls a set a "taskset". */
   tasksetId: string | null
 }
 
@@ -18,7 +19,7 @@ export interface Timer {
   endsAt: string
 }
 
-/** POST /api/sessions → create a new room bound to a taskset, return its join code. */
+/** POST /api/sessions → create a new room bound to an assignment set, return its join code. */
 export async function createSession(tasksetId: string): Promise<Session> {
   const res = await fetch('/api/sessions', {
     method: 'POST',
@@ -29,7 +30,7 @@ export async function createSession(tasksetId: string): Promise<Session> {
   return res.json()
 }
 
-/** GET /api/sessions/:code → resolve a room's taskset (404 ⇒ no such room). */
+/** GET /api/sessions/:code → resolve a room's assignment set (404 ⇒ no such room). */
 export async function getSession(code: string): Promise<SessionInfo> {
   const res = await fetch(`/api/sessions/${encodeURIComponent(code)}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)

@@ -1,4 +1,4 @@
-export interface TaskItemProps {
+export interface AssignmentItemProps {
   id: number
   title: string
   isActive: boolean

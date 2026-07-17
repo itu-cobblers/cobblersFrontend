@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import { ProgressBar } from '@components/ProgressBar'
-import { TaskList } from '@components/TaskList'
-import { TaskDetail } from '@components/TaskDetail'
+import { AssignmentList } from '@components/AssignmentList'
+import { AssignmentDetail } from '@components/AssignmentDetail'
 import type { SidebarProps } from './Sidebar.types'
 import {
   SIDEBAR_BASE_CLASS,
@@ -23,7 +23,7 @@ export default function Sidebar({ groups, detail, progress, isFolded, onSelect }
       })}
     >
       <div className={SIDEBAR_HEADER_CLASS}>
-        <h2 className={SIDEBAR_HEADING_CLASS}>Tasks</h2>
+        <h2 className={SIDEBAR_HEADING_CLASS}>Assignments</h2>
         <ProgressBar value={progress.completed} max={progress.total} />
         <span className={SIDEBAR_PROGRESS_LABEL_CLASS}>
           {progress.completed}/{progress.total} completed
@@ -33,11 +33,11 @@ export default function Sidebar({ groups, detail, progress, isFolded, onSelect }
         {groups.map((group) => (
           <section key={group.label}>
             <h3 className={SIDEBAR_DAY_HEADER_CLASS}>{group.label}</h3>
-            <TaskList items={group.items} onSelect={onSelect} />
+            <AssignmentList items={group.items} onSelect={onSelect} />
           </section>
         ))}
       </div>
-      <TaskDetail {...detail} />
+      <AssignmentDetail {...detail} />
     </aside>
   )
 }

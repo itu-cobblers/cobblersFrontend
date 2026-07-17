@@ -17,11 +17,11 @@ export const TEACHER_SECTION_TITLE_CLASS =
 export const TEACHER_CODE_DISPLAY_CLASS =
   'font-mono text-[36px] font-extrabold tracking-[0.15em] text-caramel'
 
-export const TEACHER_TASKSET_ROW_CLASS = 'flex flex-col gap-1.5'
+export const TEACHER_ASSIGNMENT_SET_ROW_CLASS = 'flex flex-col gap-1.5'
 
-export const TEACHER_TASKSET_LABEL_CLASS = 'text-[11px] text-foam'
+export const TEACHER_ASSIGNMENT_SET_LABEL_CLASS = 'text-[11px] text-foam'
 
-export const TEACHER_TASKSET_SELECT_CLASS =
+export const TEACHER_ASSIGNMENT_SET_SELECT_CLASS =
   'rounded-md border border-oak bg-night px-3 py-[9px] text-[13px] text-milk outline-none transition-colors focus:border-caramel'
 
 export const TEACHER_TIMER_ROW_CLASS = 'flex items-center gap-2'

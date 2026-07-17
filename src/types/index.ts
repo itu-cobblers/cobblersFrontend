@@ -1,16 +1,16 @@
 export type { ExecuteStatus, ExecuteRequest, ExecuteResult, SubmissionResult } from './execution'
 export type {
   Day,
-  TaskKind,
+  AssignmentKind,
   SourceFile,
   Signals,
   CheckResult,
   Verdict,
   Harness,
-  Task,
-  CodeTask,
-  PredictTask,
-  ProjectTask,
-} from './task'
+  Assignment,
+  CodeAssignment,
+  PredictAssignment,
+  ProjectAssignment,
+} from './assignment'
 export type { SceneProps, Theme } from './theme'
-export type { Taskset } from './taskset'
+export type { AssignmentSet } from './assignmentSet'

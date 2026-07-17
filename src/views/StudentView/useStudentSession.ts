@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import type { Taskset } from '@types'
+import type { AssignmentSet } from '@types'
 import type { JoinMode } from '@components'
 import type { ToastTone } from '@components'
 import { getStudentId, getDisplayName, setDisplayName } from '@lib/identity'
 import { getSession } from '@lib/sessionApi'
 import { joinSession } from '@lib/sessionHub'
-import { fetchStudentTaskset, fetchTaskset } from '@lib/tasksetApi'
+import { fetchStudentAssignmentSet, fetchAssignmentSet } from '@lib/assignmentSetApi'
 
 interface Toast {
   message: string
@@ -16,18 +16,18 @@ const TOAST_DURATION_MS = 3500
 
 /**
  * Student entry: pick a display name, then either Join a class (needs a class
- * code) or Solo Practice. Both resolve to a `taskset` that the caller uses to
+ * code) or Solo Practice. Both resolve to an `assignmentSet` that the caller uses to
  * reveal the IDE. Until then the student sees the entry screen.
  *
- * Join: GET /api/sessions/:code resolves the room's taskset (404 ⇒ toast),
+ * Join: GET /api/sessions/:code resolves the room's assignment set (404 ⇒ toast),
  * then the SignalR JoinSession is attempted best-effort (roster + timer) —
- * content still loads if the hub hiccups. Solo: the hardcoded all-tasks set.
+ * content still loads if the hub hiccups. Solo: the hardcoded all-assignments set.
  */
 export function useStudentSession() {
   const [name, setName] = useState(getDisplayName)
   const [code, setCode] = useState('')
   const [mode, setMode] = useState<JoinMode>('join')
-  const [taskset, setTaskset] = useState<Taskset | null>(null)
+  const [assignmentSet, setAssignmentSet] = useState<AssignmentSet | null>(null)
   const [isJoining, setIsJoining] = useState(false)
   const [isStartingSolo, setIsStartingSolo] = useState(false)
   const [toast, setToast] = useState<Toast | null>(null)
@@ -49,16 +49,16 @@ export function useStudentSession() {
     setIsJoining(true)
     try {
       const session = await getSession(roomCode) // 404 ⇒ no such room
-      if (!session.tasksetId) throw new Error('room has no taskset')
+      if (!session.tasksetId) throw new Error('room has no assignment set')
 
       const studentId = getStudentId() // ensure a persistent id exists before any submission
       // Best-effort room membership (teacher roster + timer broadcasts); the
-      // taskset comes from REST either way.
+      // assignment set comes from REST either way.
       joinSession({ code: roomCode, studentId, displayName }).catch((err: unknown) => {
         console.warn('[join] hub join failed:', err instanceof Error ? err.message : String(err))
       })
 
-      setTaskset(await fetchTaskset(session.tasksetId))
+      setAssignmentSet(await fetchAssignmentSet(session.tasksetId))
     } catch {
       setToast({ message: 'Room not found — check the code and try again.', tone: 'error' })
     } finally {
@@ -71,9 +71,9 @@ export function useStudentSession() {
     getStudentId() // ensure a persistent id exists before any solo submission
     setIsStartingSolo(true)
     try {
-      setTaskset(await fetchStudentTaskset())
+      setAssignmentSet(await fetchStudentAssignmentSet())
     } catch {
-      setToast({ message: 'Could not load the tasks — please try again in a moment.', tone: 'error' })
+      setToast({ message: 'Could not load the assignments — please try again in a moment.', tone: 'error' })
     } finally {
       setIsStartingSolo(false)
     }
@@ -85,7 +85,7 @@ export function useStudentSession() {
   }
 
   return {
-    taskset,
+    assignmentSet,
     toast,
     dismissToast,
     entry: {

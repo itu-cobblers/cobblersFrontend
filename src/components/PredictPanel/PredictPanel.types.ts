@@ -14,6 +14,6 @@ export interface PredictPanelProps {
   hint?: string
   onAnswerChange: (value: string) => void
   onSubmit: () => void
-  /** "I understand now" — completes the task after a wrong answer. */
+  /** "I understand now" — completes the assignment after a wrong answer. */
   onUnderstood: () => void
 }

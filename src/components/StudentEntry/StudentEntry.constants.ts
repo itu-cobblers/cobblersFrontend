@@ -31,4 +31,4 @@ export const ENTRY_TOGGLE_LABELS: Record<JoinMode, string> = {
 }
 
 export const SOLO_MODE_HINT =
-  "Solo practice is for when you can't join a class on site — work through the tasks at your own pace."
+  "Solo practice is for when you can't join a class on site — work through the assignments at your own pace."

@@ -1,4 +1,4 @@
-import type { TasksetPreviewProps } from './TasksetPreview.types'
+import type { AssignmentSetPreviewProps } from './AssignmentSetPreview.types'
 import {
   PREVIEW_WRAP_CLASS,
   PREVIEW_TITLE_CLASS,
@@ -14,9 +14,9 @@ import {
   PREVIEW_DESC_CLASS,
   PREVIEW_HINT_CLASS,
   KIND_LABEL,
-} from './TasksetPreview.constants'
+} from './AssignmentSetPreview.constants'
 
-export default function TasksetPreview({ title, groups }: TasksetPreviewProps) {
+export default function AssignmentSetPreview({ title, groups }: AssignmentSetPreviewProps) {
   return (
     <div className={PREVIEW_WRAP_CLASS}>
       {title && <h3 className={PREVIEW_TITLE_CLASS}>{title}</h3>}

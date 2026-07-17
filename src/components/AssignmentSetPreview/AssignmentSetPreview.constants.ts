@@ -1,4 +1,4 @@
-import type { TaskKind } from '@types'
+import type { AssignmentKind } from '@types'
 
 export const PREVIEW_WRAP_CLASS = 'flex flex-col gap-4'
 
@@ -31,7 +31,7 @@ export const PREVIEW_DESC_CLASS = 'text-[12px] leading-relaxed text-foam'
 
 export const PREVIEW_HINT_CLASS = 'text-[12px] leading-relaxed text-caramel'
 
-export const KIND_LABEL: Record<TaskKind, string> = {
+export const KIND_LABEL: Record<AssignmentKind, string> = {
   code: 'Code',
   predict: 'Predict',
   project: 'Project',

@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react'
 import { createSession, startTimer } from '@lib/sessionApi'
-import { fetchTasksets, fetchTaskset, type TaskSetSummary } from '@lib/tasksetApi'
-import { groupTasks } from '@lib/taskset'
+import { fetchAssignmentSets, fetchAssignmentSet, type AssignmentSetSummary } from '@lib/assignmentSetApi'
+import { groupAssignments } from '@lib/assignmentSet'
 import { observeSession, type Student } from '@lib/sessionHub'
 import { revokeTeacher } from '@lib/teacherAuth'
-import type { RosterEntry, TasksetPreviewGroup } from '@components'
+import type { RosterEntry, AssignmentSetPreviewGroup } from '@components'
 
 /** Owns the teacher session + timer lifecycle, the request state, and the live roster. */
 export function useTeacherSession() {
-  const [tasksets, setTasksets] = useState<TaskSetSummary[]>([])
-  const [selectedTasksetId, setSelectedTasksetId] = useState('')
-  const [previewGroups, setPreviewGroups] = useState<TasksetPreviewGroup[]>([])
+  const [assignmentSets, setAssignmentSets] = useState<AssignmentSetSummary[]>([])
+  const [selectedAssignmentSetId, setSelectedAssignmentSetId] = useState('')
+  const [previewGroups, setPreviewGroups] = useState<AssignmentSetPreviewGroup[]>([])
   const [previewTitle, setPreviewTitle] = useState('')
 
   const [sessionCode, setSessionCode] = useState<string | null>(null)
@@ -25,44 +25,44 @@ export function useTeacherSession() {
   const [timerError, setTimerError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchTasksets()
+    fetchAssignmentSets()
       .then((sets) => {
-        setTasksets(sets)
-        setSelectedTasksetId((current) => current || (sets[0]?.tasksetId ?? ''))
+        setAssignmentSets(sets)
+        setSelectedAssignmentSetId((current) => current || (sets[0]?.tasksetId ?? ''))
       })
       .catch((err: unknown) => {
-        console.warn('[teacher] fetchTasksets failed:', err instanceof Error ? err.message : String(err))
+        console.warn('[teacher] fetchAssignmentSets failed:', err instanceof Error ? err.message : String(err))
       })
   }, [])
 
-  // Load the selected taskset's tasks so the teacher can browse them read-only.
+  // Load the selected assignment set's assignments so the teacher can browse them read-only.
   useEffect(() => {
-    if (!selectedTasksetId) return
+    if (!selectedAssignmentSetId) return
     let cancelled = false
-    fetchTaskset(selectedTasksetId)
-      .then((taskset) => {
+    fetchAssignmentSet(selectedAssignmentSetId)
+      .then((assignmentSet) => {
         if (cancelled) return
-        setPreviewTitle(taskset.displayTitle)
+        setPreviewTitle(assignmentSet.displayTitle)
         setPreviewGroups(
-          groupTasks(taskset.tasks, 'Tasks').map((group) => ({
+          groupAssignments(assignmentSet.assignments, 'Assignments').map((group) => ({
             label: group.label,
-            items: group.items.map((task) => ({
-              id: task.id,
-              title: task.title,
-              kind: task.kind,
-              description: task.description,
-              hint: task.hint,
+            items: group.items.map((assignment) => ({
+              id: assignment.id,
+              title: assignment.title,
+              kind: assignment.kind,
+              description: assignment.description,
+              hint: assignment.hint,
             })),
           })),
         )
       })
       .catch((err: unknown) => {
-        console.warn('[teacher] fetchTaskset failed:', err instanceof Error ? err.message : String(err))
+        console.warn('[teacher] fetchAssignmentSet failed:', err instanceof Error ? err.message : String(err))
       })
     return () => {
       cancelled = true
     }
-  }, [selectedTasksetId])
+  }, [selectedAssignmentSetId])
 
   function observe(code: string) {
     // Best-effort: if the hub is unreachable the dashboard still works (mock roster below).
@@ -99,11 +99,11 @@ export function useTeacherSession() {
   }
 
   async function handleCreateSession() {
-    if (!selectedTasksetId) return
+    if (!selectedAssignmentSetId) return
     setIsCreatingSession(true)
     setSessionError(null)
     try {
-      const { code } = await createSession(selectedTasksetId)
+      const { code } = await createSession(selectedAssignmentSetId)
       setSessionCode(code)
       observe(code)
     } catch (err) {
@@ -137,9 +137,9 @@ export function useTeacherSession() {
   }
 
   return {
-    tasksets,
-    selectedTasksetId,
-    onTasksetChange: setSelectedTasksetId,
+    assignmentSets,
+    selectedAssignmentSetId,
+    onAssignmentSetChange: setSelectedAssignmentSetId,
     previewGroups,
     previewTitle,
     sessionCode,

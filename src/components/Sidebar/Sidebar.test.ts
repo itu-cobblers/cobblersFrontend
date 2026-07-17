@@ -24,9 +24,9 @@ const props: SidebarProps = {
 }
 
 describe('Sidebar', () => {
-  it('renders group headers, progress label, and task rows', () => {
+  it('renders group headers, progress label, and assignment rows', () => {
     render(createElement(Sidebar, props))
-    expect(screen.getByRole('heading', { name: 'Tasks' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Assignments' })).toBeInTheDocument()
     expect(screen.getByText('BootIT Day 1 — 2026')).toBeInTheDocument()
     expect(screen.getByText('Extra practice')).toBeInTheDocument()
     expect(screen.getByText('1/5 completed')).toBeInTheDocument()
