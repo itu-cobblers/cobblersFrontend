@@ -8,8 +8,7 @@ import { getStudentId } from './identity'
  *
  * ⚠️ The submission contract is still an OPEN DECISION in the api repo's
  * CONTRACT.md. This is the frontend's working assumption — reconcile the exact
- * shape with the backend member before launch. Note the wire field keeps the
- * contract's "task" naming (`taskId`) even though the frontend says assignment:
+ * shape with the backend member before launch:
  *
  *   request:  { studentId, assignmentId, code }
  *   response: { status, stdout, stderr, accepted, message }
