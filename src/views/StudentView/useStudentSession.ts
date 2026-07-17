@@ -49,7 +49,7 @@ export function useStudentSession() {
     setIsJoining(true)
     try {
       const session = await getSession(roomCode) // 404 ⇒ no such room
-      if (!session.tasksetId) throw new Error('room has no assignment set')
+      if (!session.assignmentSetId) throw new Error('room has no assignment set')
 
       const studentId = getStudentId() // ensure a persistent id exists before any submission
       // Best-effort room membership (teacher roster + timer broadcasts); the
@@ -58,7 +58,7 @@ export function useStudentSession() {
         console.warn('[join] hub join failed:', err instanceof Error ? err.message : String(err))
       })
 
-      setAssignmentSet(await fetchAssignmentSet(session.tasksetId))
+      setAssignmentSet(await fetchAssignmentSet(session.assignmentSetId))
     } catch {
       setToast({ message: 'Room not found — check the code and try again.', tone: 'error' })
     } finally {

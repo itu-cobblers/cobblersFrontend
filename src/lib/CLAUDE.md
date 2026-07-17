@@ -8,7 +8,7 @@ Framework-agnostic **TypeScript** that powers the in-browser Java experience and
 - **`assignmentSet.ts`** — `groupAssignments(assignments, label)` shapes an assignment set's list into the one labelled group the sidebar/preview render.
 - **`javaValidator.ts`** — heuristic linter. `validateJava(code, monaco)` returns `editor.IMarkerData[]`; `attachValidator(editor, monaco)` wires it to run on mount + debounced on every edit. Called from `useCodeEditorSetup` (the editor's `onMount`).
 - **`javaCompletions.ts`** — `registerJavaCompletions(monaco)` registers two completion providers. Called from `useCodeEditorSetup` (the editor's `beforeMount`).
-- **API seams** — `executeApi.ts` (run), `submissionApi.ts` (submit), `sessionApi.ts` (session/room/timer), `assignmentSetApi.ts` (assignment sets), `quizApi.ts` (predict answers), with `mockApi.ts` as the deletable fallback. Plus `identity.ts` (anon student id) and `teacherAuth.ts` (sessionStorage flag). ⚠️ The wire contract still says "task"/"taskset" (URLs, `taskId`, `tasksetId`) — translate to Assignment naming only inside these seams.
+- **API seams** — `executeApi.ts` (run), `submissionApi.ts` (submit), `sessionApi.ts` (session/room/timer), `assignmentSetApi.ts` (assignment sets), `quizApi.ts` (predict answers), with `mockApi.ts` as the deletable fallback. Plus `identity.ts` (anon student id) and `teacherAuth.ts` (sessionStorage flag). The wire contract uses Assignment naming end to end (`/api/assignmentsets`, `assignmentId`, `assignmentSetId`) — keep these seams in lockstep with the api repo's `CONTRACT.md`.
 
 ## The validator is intentionally heuristic
 

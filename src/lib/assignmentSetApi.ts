@@ -1,14 +1,11 @@
 /**
  * assignmentSetApi.ts — the assignment-set data seam, backed by the real
- * backend (see the api repo's CONTRACT.md, "Tasks").
+ * backend (see the api repo's CONTRACT.md, "Assignments"). The contract is
+ * unified on Assignment naming end to end — keep these URLs and field names
+ * in lockstep with CONTRACT.md:
  *
- * ⚠️ Naming: the wire contract still says "task"/"taskset" (URLs and the
- * `tasksetId` field) — the backend renamed its internals to Assignment but is
- * keeping the contract naming for now, so this file is the only place that
- * translates. Endpoints:
- *
- *   GET /api/tasksets                → assignment-set picker summaries
- *   GET /api/tasksets/:id/tasks     → the set's assignments, sorted by position
+ *   GET /api/assignmentsets                     → assignment-set picker summaries
+ *   GET /api/assignmentsets/:id/assignments    → the set's assignments, sorted by position
  *
  * The wire shape is { id, kind, title, description, hint?, content } where
  * `content` holds the kind-specific fields — `toAssignment()` flattens it into
@@ -18,20 +15,19 @@
  *   - No `check()` — grading moved server-side (rules live in the DB). Code
  *     assignments won't auto-complete until the submissions endpoint lands;
  *     predict assignments still grade locally from `expectedOutput` / `accept`.
- *   - No `day` — a set IS one day's content; solo uses the all-tasks set.
+ *   - No `day` — a set IS one day's content; solo uses the all-assignments set.
  */
 import type { Harness, Assignment, AssignmentKind, AssignmentSet } from '@types'
 
-/** The assignment set the solo cohort hardcodes (CONTRACT.md, "Tasks"). */
-export const SOLO_ASSIGNMENT_SET_ID = 'all-tasks-for-solo-2026'
+/** The assignment set the solo cohort hardcodes (CONTRACT.md, "Assignments"). */
+export const SOLO_ASSIGNMENT_SET_ID = 'all-assignments-for-solo-2026'
 
 export interface AssignmentSetSummary {
-  /** Contract naming — the wire still calls a set a "taskset". */
-  tasksetId: string
+  assignmentSetId: string
   displayTitle: string
 }
 
-/** Wire shape of one assignment from GET /api/tasksets/:id/tasks. */
+/** Wire shape of one assignment from GET /api/assignmentsets/:id/assignments. */
 interface ApiAssignment {
   id: number
   kind: AssignmentKind
@@ -76,23 +72,24 @@ function toAssignment(dto: ApiAssignment): Assignment {
   }
 }
 
-/** `GET /api/tasksets` — the teacher's session-creation picker. */
+/** `GET /api/assignmentsets` — the teacher's session-creation picker. */
 export async function fetchAssignmentSets(): Promise<AssignmentSetSummary[]> {
-  return getJson<AssignmentSetSummary[]>('/api/tasksets')
+  return getJson<AssignmentSetSummary[]>('/api/assignmentsets')
 }
 
 /**
- * A full assignment set (summary + assignments). The tasks endpoint doesn't
- * return the display title, so it's resolved from the summaries list in parallel.
+ * A full assignment set (summary + assignments). The assignments endpoint
+ * doesn't return the display title, so it's resolved from the summaries list
+ * in parallel.
  */
-export async function fetchAssignmentSet(tasksetId: string): Promise<AssignmentSet> {
+export async function fetchAssignmentSet(assignmentSetId: string): Promise<AssignmentSet> {
   const [summaries, apiAssignments] = await Promise.all([
     fetchAssignmentSets(),
-    getJson<ApiAssignment[]>(`/api/tasksets/${encodeURIComponent(tasksetId)}/tasks`),
+    getJson<ApiAssignment[]>(`/api/assignmentsets/${encodeURIComponent(assignmentSetId)}/assignments`),
   ])
   return {
-    tasksetId,
-    displayTitle: summaries.find((set) => set.tasksetId === tasksetId)?.displayTitle ?? tasksetId,
+    assignmentSetId,
+    displayTitle: summaries.find((set) => set.assignmentSetId === assignmentSetId)?.displayTitle ?? assignmentSetId,
     assignments: apiAssignments.map(toAssignment),
   }
 }

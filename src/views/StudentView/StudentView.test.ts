@@ -11,11 +11,11 @@ vi.mock('@monaco-editor/react', () => ({
 // The assignment set now comes from the backend; stub the seam so the solo flow
 // works without a running API.
 vi.mock('@lib/assignmentSetApi', () => ({
-  SOLO_ASSIGNMENT_SET_ID: 'all-tasks-for-solo-2026',
+  SOLO_ASSIGNMENT_SET_ID: 'all-assignments-for-solo-2026',
   fetchAssignmentSets: vi.fn(),
   fetchAssignmentSet: vi.fn(),
   fetchStudentAssignmentSet: vi.fn().mockResolvedValue({
-    tasksetId: 'all-tasks-for-solo-2026',
+    assignmentSetId: 'all-assignments-for-solo-2026',
     displayTitle: 'BootIT — All Assignments (Solo) 2026',
     assignments: [
       {

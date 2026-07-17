@@ -28,7 +28,7 @@ export function useTeacherSession() {
     fetchAssignmentSets()
       .then((sets) => {
         setAssignmentSets(sets)
-        setSelectedAssignmentSetId((current) => current || (sets[0]?.tasksetId ?? ''))
+        setSelectedAssignmentSetId((current) => current || (sets[0]?.assignmentSetId ?? ''))
       })
       .catch((err: unknown) => {
         console.warn('[teacher] fetchAssignmentSets failed:', err instanceof Error ? err.message : String(err))

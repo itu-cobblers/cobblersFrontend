@@ -28,8 +28,7 @@ export async function checkPrediction({
     const res = await fetch('/api/quiz/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      // The wire keeps the contract's "task" naming for now.
-      body: JSON.stringify({ studentId: getStudentId(), taskId: assignmentId, answer }),
+      body: JSON.stringify({ studentId: getStudentId(), assignmentId, answer }),
     })
     if (!res.ok) throw new Error(`API returned ${res.status}`)
     return await res.json()

@@ -7,7 +7,7 @@ import type { Assignment } from './assignment'
  * `ASSIGNMENTS` array.
  */
 export interface AssignmentSet {
-  tasksetId: string
+  assignmentSetId: string
   displayTitle: string
   assignments: Assignment[]
 }

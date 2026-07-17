@@ -91,7 +91,7 @@ export default function TeacherDashboard() {
               >
                 {assignmentSets.length === 0 && <option value="">Loading assignment sets…</option>}
                 {assignmentSets.map((assignmentSet) => (
-                  <option key={assignmentSet.tasksetId} value={assignmentSet.tasksetId}>
+                  <option key={assignmentSet.assignmentSetId} value={assignmentSet.assignmentSetId}>
                     {assignmentSet.displayTitle}
                   </option>
                 ))}

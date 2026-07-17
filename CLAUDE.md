@@ -86,7 +86,7 @@ Run flow: Run → `executor.run(code)` → `executeCode(code)` (`@lib/executeApi
 
 The IDE core (editor, assignment list, output) is decoupled from both *what the assignments are* and *which visual theme is shown*, so either can be added, changed, or removed without touching the views. Domain shapes (`Assignment`, `Verdict`, `ExecuteResult`, `Theme`, …) live in `src/types/`.
 
-- **Assignment boundary — `src/types/assignment.ts` + `src/lib/assignmentSetApi.ts`.** `Assignment` is a **discriminated union on `kind`**; the sidebar/progress/boundary use only the shared base fields, and only render+grade branch on `kind`. Live assignments come from the backend (`GET /api/tasksets/:id/tasks`); `src/lib/assignments.ts` keeps the legacy local bundle (with its optional `day` tag):
+- **Assignment boundary — `src/types/assignment.ts` + `src/lib/assignmentSetApi.ts`.** `Assignment` is a **discriminated union on `kind`**; the sidebar/progress/boundary use only the shared base fields, and only render+grade branch on `kind`. Live assignments come from the backend (`GET /api/assignmentsets/:id/assignments`); `src/lib/assignments.ts` keeps the legacy local bundle (with its optional `day` tag):
   - `kind:'code'` — write & run Java; graded by `check(result)` (`result = { code, output, stderr, exitCode }` → `{ passed, signals?, message? }`). Optional `stdin` (interactive, e.g. guess-the-number) and `harness` (`{ files, entryClass }` — grader code compiled with the student's `solutionFile`, used by the Day-3 `Container`/`FlightTicket` class assignments). API-served assignments carry no `check()` — grading is moving server-side.
   - `kind:'predict'` — read-only `snippet`; the student types the output. Graded by `predict.ts` against `expectedOutput` (+ `accept` for infinite-loop phrasings) through the `quizApi` seam.
   - `kind:'project'` — Day-3 mini-projects: a `brief` + multi-file upload (scaffolded grading).
@@ -98,10 +98,10 @@ The IDE core (editor, assignment list, output) is decoupled from both *what the 
 The frontend depends on these endpoints (proxied via `/api`), per `CONTRACT.md` in the api repo:
 
 - `POST /api/execute` body `{ "code": "..." }` → `{ "status": "success" | "compile_error" | "runtime_error", "stdout": string, "stderr": string }`
-- `GET /api/tasksets` / `GET /api/tasksets/:id/tasks` — assignment-set summaries + an assignment list (`assignmentSetApi.ts`)
+- `GET /api/assignmentsets` / `GET /api/assignmentsets/:id/assignments` — assignment-set summaries + an assignment list (`assignmentSetApi.ts`)
 - `POST /api/sessions`, `GET /api/sessions/:code`, `POST /api/sessions/:code/timer` — rooms + timer (`sessionApi.ts`)
 
-**Naming:** the wire contract still says "task"/"taskset" (URLs, `taskId`, `tasksetId`) while both codebases call the entity **Assignment** internally — the backend renamed for the same reason (clash with `System.Threading.Tasks.Task`). Translate only at the seams in `src/lib`; never let contract naming leak past them, and don't rename wire fields until the contract itself is updated.
+**Naming:** the entity is **Assignment** everywhere — code, wire contract (URLs, `assignmentId`, `assignmentSetId`), and UI. The old "task"/"taskset" naming is fully retired on both sides (the backend renamed because of the clash with `System.Threading.Tasks.Task`); keep the seam URLs/fields in `src/lib` in lockstep with the api repo's `CONTRACT.md`.
 
 All backend calls go through the seams in `src/lib`: **`executeApi.ts`** (run), **`submissionApi.ts`** (submit), **`sessionApi.ts`** (teacher session + timer).
 
