@@ -37,14 +37,14 @@ export type { ProjectPanelProps } from './ProjectPanel'
 export { CodeEditor, useCodeEditorSetup } from './CodeEditor'
 export type { CodeEditorProps } from './CodeEditor'
 
-export { TaskItem } from './TaskItem'
-export type { TaskItemProps } from './TaskItem'
+export { AssignmentItem } from './AssignmentItem'
+export type { AssignmentItemProps } from './AssignmentItem'
 
-export { TaskList } from './TaskList'
-export type { TaskListProps, TaskListEntry } from './TaskList'
+export { AssignmentList } from './AssignmentList'
+export type { AssignmentListProps, AssignmentListEntry } from './AssignmentList'
 
-export { TaskDetail } from './TaskDetail'
-export type { TaskDetailProps } from './TaskDetail'
+export { AssignmentDetail } from './AssignmentDetail'
+export type { AssignmentDetailProps } from './AssignmentDetail'
 
 export { Sidebar } from './Sidebar'
 export type { SidebarProps, SidebarProgress, SidebarGroup } from './Sidebar'
@@ -58,12 +58,12 @@ export type { StudentEntryProps, JoinMode } from './StudentEntry'
 export { Toast } from './Toast'
 export type { ToastProps, ToastTone } from './Toast'
 
-export { TasksetPreview } from './TasksetPreview'
+export { AssignmentSetPreview } from './AssignmentSetPreview'
 export type {
-  TasksetPreviewProps,
-  TasksetPreviewGroup,
-  TasksetPreviewEntry,
-} from './TasksetPreview'
+  AssignmentSetPreviewProps,
+  AssignmentSetPreviewGroup,
+  AssignmentSetPreviewEntry,
+} from './AssignmentSetPreview'
 
 export { StudentRoster } from './StudentRoster'
 export type { StudentRosterProps, RosterEntry, RosterStatus } from './StudentRoster'

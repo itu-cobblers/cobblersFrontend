@@ -1,7 +1,7 @@
 /**
- * Task domain types — the "task boundary" contract (see src/lib/tasks.ts).
+ * Assignment domain types — the "assignment boundary" contract (see src/lib/assignments.ts).
  *
- * Tasks are a discriminated union on `kind`:
+ * Assignments are a discriminated union on `kind`:
  *   - 'code'    — the student writes/runs Java; graded by check() on the run result.
  *   - 'predict' — the student reads a read-only snippet and predicts its output.
  *   - 'project' — a multi-file mini-project uploaded from VS Code (scaffolded grading).
@@ -10,10 +10,10 @@
  * base fields; only rendering + grading branch on `kind`.
  */
 
-/** Which day of the 3-day camp a task belongs to. */
+/** Which day of the 3-day camp an assignment belongs to. */
 export type Day = 1 | 2 | 3
 
-export type TaskKind = 'code' | 'predict' | 'project'
+export type AssignmentKind = 'code' | 'predict' | 'project'
 
 /** One Java source file (name + contents) for multi-file execution. */
 export interface SourceFile {
@@ -22,12 +22,12 @@ export interface SourceFile {
 }
 
 /**
- * Free-form, theme-agnostic payload a task broadcasts on success (e.g.
+ * Free-form, theme-agnostic payload an assignment broadcasts on success (e.g.
  * `{ cafeName }`). The core never interprets it — values are `unknown`.
  */
 export type Signals = Record<string, unknown>
 
-/** Input handed to a code task's `check()` — `output` is stdout, `code` the editor text. */
+/** Input handed to a code assignment's `check()` — `output` is stdout, `code` the editor text. */
 export interface CheckResult {
   code: string
   output: string
@@ -35,21 +35,26 @@ export interface CheckResult {
   exitCode: number
 }
 
-/** Verdict returned by a code task's `check()`. */
+/** Verdict returned by a code assignment's `check()`. */
 export interface Verdict {
   passed: boolean
   signals?: Signals
   message?: string
 }
 
-interface TaskBase {
-  /** Sequential from 0 across all days — used as the active/completed key. */
+interface AssignmentBase {
+  /** Server-assigned assignment id — used as the active/completed key. */
   id: number
-  day: Day
+  /**
+   * Legacy day tag. Assignments fetched from the API don't carry it (day is
+   * expressed by which assignment set an assignment belongs to — see the api repo's
+   * SCHEMA.md); only the old local bundle in assignments.ts still sets it.
+   */
+  day?: Day
   title: string
   description: string
   hint?: string
-  kind: TaskKind
+  kind: AssignmentKind
 }
 
 /** A grader harness: extra files compiled WITH the student's code, run via `entryClass`. */
@@ -58,10 +63,10 @@ export interface Harness {
   entryClass: string
 }
 
-/** Write-and-run Java task (Day 1–3 coding exercises, incl. class-authoring). */
-export interface CodeTask extends TaskBase {
+/** Write-and-run Java assignment (Day 1–3 coding exercises, incl. class-authoring). */
+export interface CodeAssignment extends AssignmentBase {
   kind: 'code'
-  /** Initial Java shown when the task is opened. */
+  /** Initial Java shown when the assignment is opened. */
   starter?: string
   /** Canned stdin for interactive programs (e.g. the guess game). */
   stdin?: string
@@ -74,7 +79,7 @@ export interface CodeTask extends TaskBase {
 }
 
 /** Predict-the-output quiz: read-only snippet, student types the expected output. */
-export interface PredictTask extends TaskBase {
+export interface PredictAssignment extends AssignmentBase {
   kind: 'predict'
   /** Read-only code shown in the editor. */
   snippet: string
@@ -85,7 +90,7 @@ export interface PredictTask extends TaskBase {
 }
 
 /** Multi-file mini-project uploaded from the student's IDE (scaffolded grading). */
-export interface ProjectTask extends TaskBase {
+export interface ProjectAssignment extends AssignmentBase {
   kind: 'project'
   /** Long-form project brief. */
   brief: string
@@ -95,4 +100,4 @@ export interface ProjectTask extends TaskBase {
   entryClass?: string
 }
 
-export type Task = CodeTask | PredictTask | ProjectTask
+export type Assignment = CodeAssignment | PredictAssignment | ProjectAssignment

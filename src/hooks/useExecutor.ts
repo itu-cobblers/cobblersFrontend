@@ -10,7 +10,7 @@ export interface UseExecutor {
   run: (request: ExecuteRequest) => Promise<ExecuteResult | null>
   /** Mirror an external result (e.g. a submission) in the terminal without re-running. */
   showResult: (result: ExecuteResult) => void
-  /** Clear the terminal (e.g. when switching tasks). */
+  /** Clear the terminal (e.g. when switching assignments). */
   reset: () => void
 }
 

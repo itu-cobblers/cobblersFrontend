@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { ExecuteRequest, SourceFile, Task } from '@types'
+import type { ExecuteRequest, SourceFile, Assignment, AssignmentSet } from '@types'
 import type {
   CodeEditorProps,
   OutputPanelProps,
@@ -7,13 +7,13 @@ import type {
   PredictStatus,
   ProjectPanelProps,
   SidebarGroup,
-  TaskListEntry,
+  AssignmentListEntry,
 } from '@components'
 import { useExecutor } from '@hooks/useExecutor'
-import { useTasks } from '@hooks/useTasks'
+import { useAssignments } from '@hooks/useAssignments'
 import { useSubmission } from '@hooks/useSubmission'
-import { defaultStarter } from '@lib/tasks'
-import { groupTasksByDay } from '@lib/taskset'
+import { defaultStarter } from '@lib/assignments'
+import { groupAssignments } from '@lib/assignmentSet'
 import { checkPrediction } from '@lib/quizApi'
 import { ACTIVE_THEME } from '@themes'
 
@@ -21,48 +21,48 @@ const noop = () => {
   /* read-only editor: changes are ignored */
 }
 
-/** The center/right area to render for the active task — discriminated by kind. */
+/** The center/right area to render for the active assignment — discriminated by kind. */
 export type ActivePanel =
   | { kind: 'code'; editor: CodeEditorProps; output: OutputPanelProps }
   | { kind: 'predict'; editor: CodeEditorProps; predict: PredictPanelProps }
   | { kind: 'project'; project: ProjectPanelProps }
 
-/** Seed editor content for every code task from its starter. */
-function initialCode(taskList: Task[]): Record<number, string> {
+/** Seed editor content for every code assignment from its starter. */
+function initialCode(assignmentList: Assignment[]): Record<number, string> {
   const map: Record<number, string> = {}
-  for (const task of taskList) {
-    if (task.kind === 'code') map[task.id] = task.starter ?? defaultStarter
+  for (const assignment of assignmentList) {
+    if (assignment.kind === 'code') map[assignment.id] = assignment.starter ?? defaultStarter
   }
   return map
 }
 
 /**
- * Orchestrates the student workspace for the active taskset's `tasks`. Holds
- * per-task editor/answer/upload state and the run / task / submit hooks, and
- * shapes the props each component renders — branching by the active task's
- * `kind`.
+ * Orchestrates the student workspace for the active assignment set. Holds per-assignment
+ * editor/answer/upload state and the run / assignment / submit hooks, and shapes
+ * the props each component renders — branching by the active assignment's `kind`.
  */
-export function useStudentWorkspace(tasks: Task[]) {
-  const [codeByTask, setCodeByTask] = useState<Record<number, string>>(() => initialCode(tasks))
-  const [answerByTask, setAnswerByTask] = useState<Record<number, string>>({})
-  const [statusByTask, setStatusByTask] = useState<Record<number, PredictStatus>>({})
-  const [filesByTask, setFilesByTask] = useState<Record<number, SourceFile[]>>({})
+export function useStudentWorkspace(assignmentSet: AssignmentSet) {
+  const { assignments } = assignmentSet
+  const [codeByAssignment, setCodeByAssignment] = useState<Record<number, string>>(() => initialCode(assignments))
+  const [answerByAssignment, setAnswerByAssignment] = useState<Record<number, string>>({})
+  const [statusByAssignment, setStatusByAssignment] = useState<Record<number, PredictStatus>>({})
+  const [filesByAssignment, setFilesByAssignment] = useState<Record<number, SourceFile[]>>({})
   const [isSidebarFolded, setIsSidebarFolded] = useState(false)
 
   const executor = useExecutor()
-  const taskProgress = useTasks(tasks)
-  const active = tasks[taskProgress.activeTask]
+  const assignmentProgress = useAssignments(assignments)
+  const active = assignments[assignmentProgress.activeAssignment]
 
   const submission = useSubmission({
     onResult: (submittedCode, result) => {
       executor.showResult(result)
-      if (result.accepted) taskProgress.grade(submittedCode, result, { forceComplete: true })
+      if (result.accepted) assignmentProgress.grade(submittedCode, result, { forceComplete: true })
     },
   })
 
   // ── handlers ──────────────────────────────────────────────────────────────
-  function handleSelectTask(id: number) {
-    taskProgress.setActiveTask(id)
+  function handleSelectAssignment(id: number) {
+    assignmentProgress.setActiveAssignment(id)
     executor.reset()
   }
 
@@ -71,7 +71,7 @@ export function useStudentWorkspace(tasks: Task[]) {
   }
 
   function handleEditorChange(value: string) {
-    setCodeByTask((prev) => ({ ...prev, [active.id]: value }))
+    setCodeByAssignment((prev) => ({ ...prev, [active.id]: value }))
   }
 
   function buildCodeRequest(code: string): ExecuteRequest | null {
@@ -87,11 +87,11 @@ export function useStudentWorkspace(tasks: Task[]) {
   }
 
   async function handleRunCode() {
-    const code = codeByTask[active.id] ?? ''
+    const code = codeByAssignment[active.id] ?? ''
     const request = buildCodeRequest(code)
     if (!request) return
     const data = await executor.run(request)
-    if (data) taskProgress.grade(code, data)
+    if (data) assignmentProgress.grade(code, data)
   }
 
   function handleOpenSubmit() {
@@ -99,55 +99,54 @@ export function useStudentWorkspace(tasks: Task[]) {
   }
 
   function handleConfirmSubmit() {
-    submission.confirm(codeByTask[active.id] ?? '', taskProgress.activeTaskId)
+    submission.confirm(codeByAssignment[active.id] ?? '', assignmentProgress.activeAssignmentId)
   }
 
   function handlePredictAnswerChange(value: string) {
-    setAnswerByTask((prev) => ({ ...prev, [active.id]: value }))
+    setAnswerByAssignment((prev) => ({ ...prev, [active.id]: value }))
   }
 
   async function handlePredictSubmit() {
     if (active.kind !== 'predict') return
-    const answer = answerByTask[active.id] ?? ''
+    const answer = answerByAssignment[active.id] ?? ''
     const { correct } = await checkPrediction({
-      taskId: active.id,
+      assignmentId: active.id,
       answer,
       expectedOutput: active.expectedOutput,
       accept: active.accept,
     })
-    setStatusByTask((prev) => ({ ...prev, [active.id]: correct ? 'correct' : 'wrong' }))
-    if (correct) taskProgress.complete(active.id)
+    setStatusByAssignment((prev) => ({ ...prev, [active.id]: correct ? 'correct' : 'wrong' }))
+    if (correct) assignmentProgress.complete(active.id)
   }
 
   function handlePredictUnderstood() {
-    setStatusByTask((prev) => ({ ...prev, [active.id]: 'done' }))
-    taskProgress.complete(active.id)
+    setStatusByAssignment((prev) => ({ ...prev, [active.id]: 'done' }))
+    assignmentProgress.complete(active.id)
   }
 
   function handleProjectFilesChange(files: SourceFile[]) {
-    setFilesByTask((prev) => ({ ...prev, [active.id]: files }))
+    setFilesByAssignment((prev) => ({ ...prev, [active.id]: files }))
   }
 
   async function handleProjectRun() {
     if (active.kind !== 'project') return
-    const files = filesByTask[active.id] ?? []
+    const files = filesByAssignment[active.id] ?? []
     if (files.length === 0) return
     const data = await executor.run({ files, entryClass: active.entryClass ?? 'Main' })
-    if (data?.status === 'success') taskProgress.complete(active.id)
+    if (data?.status === 'success') assignmentProgress.complete(active.id)
   }
 
   // ── display-ready props ─────────────────────────────────────────────────────
-  const toEntry = (id: number, title: string): TaskListEntry => ({
+  const toEntry = (id: number, title: string): AssignmentListEntry => ({
     id,
     title,
-    isActive: id === taskProgress.activeTaskId,
-    isDone: taskProgress.completedTasks.has(id),
+    isActive: id === assignmentProgress.activeAssignmentId,
+    isDone: assignmentProgress.completedAssignments.has(id),
   })
 
-  const groups: SidebarGroup[] = groupTasksByDay(tasks).map((group) => ({
-    day: group.day,
+  const groups: SidebarGroup[] = groupAssignments(assignments, assignmentSet.displayTitle).map((group) => ({
     label: group.label,
-    items: group.items.map((task) => toEntry(task.id, task.title)),
+    items: group.items.map((assignment) => toEntry(assignment.id, assignment.title)),
   }))
 
   function buildActivePanel(): ActivePanel {
@@ -156,8 +155,8 @@ export function useStudentWorkspace(tasks: Task[]) {
         kind: 'predict',
         editor: { value: active.snippet, onChange: noop, isReadOnly: true },
         predict: {
-          answer: answerByTask[active.id] ?? '',
-          status: statusByTask[active.id] ?? 'idle',
+          answer: answerByAssignment[active.id] ?? '',
+          status: statusByAssignment[active.id] ?? 'idle',
           expectedOutput: active.expectedOutput,
           hint: active.hint,
           onAnswerChange: handlePredictAnswerChange,
@@ -171,7 +170,7 @@ export function useStudentWorkspace(tasks: Task[]) {
         kind: 'project',
         project: {
           brief: active.brief,
-          files: filesByTask[active.id] ?? [],
+          files: filesByAssignment[active.id] ?? [],
           output: executor.output,
           status: executor.status,
           isRunning: executor.isRunning,
@@ -182,12 +181,12 @@ export function useStudentWorkspace(tasks: Task[]) {
     }
     return {
       kind: 'code',
-      editor: { value: codeByTask[active.id] ?? defaultStarter, onChange: handleEditorChange },
+      editor: { value: codeByAssignment[active.id] ?? defaultStarter, onChange: handleEditorChange },
       output: { output: executor.output, status: executor.status },
     }
   }
 
-  const isCodeTask = active.kind === 'code'
+  const isCodeAssignment = active.kind === 'code'
 
   return {
     activePanel: buildActivePanel(),
@@ -195,8 +194,8 @@ export function useStudentWorkspace(tasks: Task[]) {
       subtitle: ACTIVE_THEME.subtitle,
       isRunning: executor.isRunning,
       isSubmitting: submission.isSubmitting,
-      isRunDisabled: !isCodeTask,
-      isSubmitDisabled: !isCodeTask,
+      isRunDisabled: !isCodeAssignment,
+      isSubmitDisabled: !isCodeAssignment,
       onToggleSidebar: handleToggleSidebar,
       onRun: handleRunCode,
       onSubmit: handleOpenSubmit,
@@ -204,9 +203,9 @@ export function useStudentWorkspace(tasks: Task[]) {
     sidebar: {
       groups,
       detail: { title: active.title, description: active.description, hint: active.hint },
-      progress: { completed: taskProgress.completedTasks.size, total: tasks.length },
+      progress: { completed: assignmentProgress.completedAssignments.size, total: assignments.length },
       isFolded: isSidebarFolded,
-      onSelect: handleSelectTask,
+      onSelect: handleSelectAssignment,
     },
     submitModal: {
       isOpen: submission.showSubmit,
@@ -218,9 +217,9 @@ export function useStudentWorkspace(tasks: Task[]) {
     },
     scene: {
       Scene: ACTIVE_THEME.Scene,
-      signals: taskProgress.signals,
-      completedTasks: taskProgress.completedTasks,
-      activeTask: taskProgress.activeTask,
+      signals: assignmentProgress.signals,
+      completedAssignments: assignmentProgress.completedAssignments,
+      activeAssignment: assignmentProgress.activeAssignment,
     },
   }
 }

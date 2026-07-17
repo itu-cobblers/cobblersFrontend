@@ -3,9 +3,9 @@ export interface ToolbarProps {
   subtitle: string
   isRunning: boolean
   isSubmitting: boolean
-  /** Disable Run regardless of busy state (e.g. predict / project tasks). */
+  /** Disable Run regardless of busy state (e.g. predict / project assignments). */
   isRunDisabled?: boolean
-  /** Disable Submit regardless of busy state (e.g. predict / project tasks). */
+  /** Disable Submit regardless of busy state (e.g. predict / project assignments). */
   isSubmitDisabled?: boolean
   onToggleSidebar: () => void
   onRun: () => void

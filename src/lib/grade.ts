@@ -1,7 +1,7 @@
 /**
  * grade.ts — shared, framework-agnostic helpers for grading stdout.
  *
- * Used by task `check()` functions in tasks.ts and by predict-quiz grading
+ * Used by assignment `check()` functions in assignments.ts and by predict-quiz grading
  * (predict.ts). Output comparison is lenient about surrounding whitespace
  * (beginners shouldn't fail on a trailing space) but otherwise faithful.
  */

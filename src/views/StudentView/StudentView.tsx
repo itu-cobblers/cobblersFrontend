@@ -3,10 +3,10 @@ import { useStudentSession } from './useStudentSession'
 import StudentIde from './StudentIde'
 
 export default function StudentView() {
-  const { taskset, toast, dismissToast, entry } = useStudentSession()
+  const { assignmentSet, toast, dismissToast, entry } = useStudentSession()
 
-  // No taskset yet → entry screen (no IDE). Join a class or start solo practice.
-  if (!taskset) {
+  // No assignment set yet → entry screen (no IDE). Join a class or start solo practice.
+  if (!assignmentSet) {
     return (
       <>
         <StudentEntry {...entry} />
@@ -15,5 +15,5 @@ export default function StudentView() {
     )
   }
 
-  return <StudentIde taskset={taskset} />
+  return <StudentIde assignmentSet={assignmentSet} />
 }

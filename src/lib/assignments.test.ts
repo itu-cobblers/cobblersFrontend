@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest'
-import { TASKS } from './tasks'
+import { ASSIGNMENTS } from './assignments'
 
 const codeCheck = (id: number) => {
-  const task = TASKS.find((t) => t.id === id)
-  if (task?.kind !== 'code') throw new Error(`task ${id} is not a code task`)
-  return task.check
+  const assignment = ASSIGNMENTS.find((t) => t.id === id)
+  if (assignment?.kind !== 'code') throw new Error(`assignment ${id} is not a code assignment`)
+  return assignment.check
 }
 
-describe('task grading', () => {
-  it('café task passes on any output and broadcasts cafeName', () => {
+describe('assignment grading', () => {
+  it('café assignment passes on any output and broadcasts cafeName', () => {
     const check = codeCheck(0)
     const verdict = check?.({ code: '', output: 'My Cozy Café\n', stderr: '', exitCode: 0 })
     expect(verdict?.passed).toBe(true)
@@ -37,9 +37,11 @@ describe('task grading', () => {
     expect(verdict?.passed).toBe(false)
   })
 
-  it('every task has a unique sequential id and a valid day', () => {
-    const ids = TASKS.map((t) => t.id)
+  it('every assignment has a unique sequential id and a valid day', () => {
+    const ids = ASSIGNMENTS.map((t) => t.id)
     expect(ids).toEqual(ids.map((_, i) => i))
-    expect(TASKS.every((t) => [1, 2, 3].includes(t.day))).toBe(true)
+    // `day` is optional on Assignment now (API assignments drop it), but every entry in
+    // the legacy local bundle must still carry one.
+    expect(ASSIGNMENTS.every((t) => t.day !== undefined && [1, 2, 3].includes(t.day))).toBe(true)
   })
 })

@@ -58,7 +58,7 @@ export const SUBMIT_SCENARIOS: Scenario<SubmissionResult>[] = [
       stdout: 'Hello, World!\n',
       stderr: '',
       accepted: true,
-      message: 'Submitted! Your teacher can see this task is complete. ✅',
+      message: 'Submitted! Your teacher can see this assignment is complete. ✅',
     },
   },
   {
@@ -68,7 +68,7 @@ export const SUBMIT_SCENARIOS: Scenario<SubmissionResult>[] = [
       stdout: 'helo wrld\n',
       stderr: '',
       accepted: false,
-      message: "Your code runs, but the output doesn't match the task yet. Tweak it and resubmit.",
+      message: "Your code runs, but the output doesn't match the assignment yet. Tweak it and resubmit.",
     },
   },
   {

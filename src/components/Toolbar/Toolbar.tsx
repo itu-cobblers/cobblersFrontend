@@ -27,7 +27,7 @@ export default function Toolbar({
   return (
     <header className={TOOLBAR_CLASS}>
       <div className={TOOLBAR_SIDE_CLASS}>
-        <IconButton label="Toggle task panel" onClick={onToggleSidebar}>
+        <IconButton label="Toggle assignment panel" onClick={onToggleSidebar}>
           <Icon name="menu" />
         </IconButton>
         <span className={TOOLBAR_LOGO_CLASS}>bootIT</span>

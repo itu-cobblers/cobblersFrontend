@@ -1,4 +1,4 @@
-import type { SourceFile } from './task'
+import type { SourceFile } from './assignment'
 
 /**
  * Backend execution & submission contracts (see api repo CONTRACT.md).
@@ -29,7 +29,7 @@ export interface ExecuteResult {
 
 /** POST /api/submission → response (execute result + teacher-facing verdict). */
 export interface SubmissionResult extends ExecuteResult {
-  /** Did the submission satisfy the task? */
+  /** Did the submission satisfy the assignment? */
   accepted: boolean
   /** Beginner-friendly feedback to show in the submit modal. */
   message: string

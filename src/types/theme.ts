@@ -1,11 +1,11 @@
 import type { ComponentType } from 'react'
-import type { Signals } from './task'
+import type { Signals } from './assignment'
 
 /** Props every theme `Scene` receives (the right-hand panel). */
 export interface SceneProps {
   signals: Signals
-  completedTasks: Set<number>
-  activeTask: number
+  completedAssignments: Set<number>
+  activeAssignment: number
 }
 
 /**

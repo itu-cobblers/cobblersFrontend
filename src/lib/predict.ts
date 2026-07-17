@@ -1,7 +1,7 @@
 /**
  * predict.ts — grading for "predict the output" quizzes (Day 2 loops).
  *
- * Compares the student's typed prediction to the task's expectedOutput after
+ * Compares the student's typed prediction to the assignment's expectedOutput after
  * normalizing whitespace. `accept` holds alternative phrasings (e.g. for the
  * infinite-loop quizzes) and is matched case-insensitively as a substring.
  */

@@ -1,21 +1,20 @@
-import type { TaskListEntry } from '@components/TaskList'
-import type { TaskDetailProps } from '@components/TaskDetail'
+import type { AssignmentListEntry } from '@components/AssignmentList'
+import type { AssignmentDetailProps } from '@components/AssignmentDetail'
 
 export interface SidebarProgress {
   completed: number
   total: number
 }
 
-/** One day's section in the task list. */
+/** One labelled section in the assignment list (an assignmentSet renders as one group). */
 export interface SidebarGroup {
-  day: number
   label: string
-  items: TaskListEntry[]
+  items: AssignmentListEntry[]
 }
 
 export interface SidebarProps {
   groups: SidebarGroup[]
-  detail: TaskDetailProps
+  detail: AssignmentDetailProps
   progress: SidebarProgress
   isFolded: boolean
   onSelect: (id: number) => void

@@ -8,7 +8,7 @@ import { isPredictionCorrect } from './predict'
  * frontend change is needed (same pattern as executeApi).
  */
 export interface QuizCheckArgs {
-  taskId: number
+  assignmentId: number
   answer: string
   expectedOutput: string
   accept?: string[]
@@ -19,7 +19,7 @@ export interface QuizCheckResult {
 }
 
 export async function checkPrediction({
-  taskId,
+  assignmentId,
   answer,
   expectedOutput,
   accept = [],
@@ -28,7 +28,7 @@ export async function checkPrediction({
     const res = await fetch('/api/quiz/check', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentId: getStudentId(), taskId, answer }),
+      body: JSON.stringify({ studentId: getStudentId(), assignmentId, answer }),
     })
     if (!res.ok) throw new Error(`API returned ${res.status}`)
     return await res.json()

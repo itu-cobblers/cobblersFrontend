@@ -1,21 +1,16 @@
 import { useEffect, useState } from 'react'
 import { createSession, startTimer } from '@lib/sessionApi'
-import {
-  fetchTasksets,
-  fetchTaskset,
-  fetchMockRoster,
-  type TaskSetSummary,
-} from '@lib/tasksetApi'
-import { groupTasksByDay } from '@lib/taskset'
+import { fetchAssignmentSets, fetchAssignmentSet, type AssignmentSetSummary } from '@lib/assignmentSetApi'
+import { groupAssignments } from '@lib/assignmentSet'
 import { observeSession, type Student } from '@lib/sessionHub'
 import { revokeTeacher } from '@lib/teacherAuth'
-import type { RosterEntry, TasksetPreviewGroup } from '@components'
+import type { RosterEntry, AssignmentSetPreviewGroup } from '@components'
 
 /** Owns the teacher session + timer lifecycle, the request state, and the live roster. */
 export function useTeacherSession() {
-  const [tasksets, setTasksets] = useState<TaskSetSummary[]>([])
-  const [selectedTasksetId, setSelectedTasksetId] = useState('')
-  const [previewGroups, setPreviewGroups] = useState<TasksetPreviewGroup[]>([])
+  const [assignmentSets, setAssignmentSets] = useState<AssignmentSetSummary[]>([])
+  const [selectedAssignmentSetId, setSelectedAssignmentSetId] = useState('')
+  const [previewGroups, setPreviewGroups] = useState<AssignmentSetPreviewGroup[]>([])
   const [previewTitle, setPreviewTitle] = useState('')
 
   const [sessionCode, setSessionCode] = useState<string | null>(null)
@@ -30,45 +25,44 @@ export function useTeacherSession() {
   const [timerError, setTimerError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetchTasksets()
+    fetchAssignmentSets()
       .then((sets) => {
-        setTasksets(sets)
-        setSelectedTasksetId((current) => current || (sets[0]?.tasksetId ?? ''))
+        setAssignmentSets(sets)
+        setSelectedAssignmentSetId((current) => current || (sets[0]?.assignmentSetId ?? ''))
       })
       .catch((err: unknown) => {
-        console.warn('[teacher] fetchTasksets failed:', err instanceof Error ? err.message : String(err))
+        console.warn('[teacher] fetchAssignmentSets failed:', err instanceof Error ? err.message : String(err))
       })
   }, [])
 
-  // Load the selected taskset's tasks so the teacher can browse them read-only.
+  // Load the selected assignment set's assignments so the teacher can browse them read-only.
   useEffect(() => {
-    if (!selectedTasksetId) return
+    if (!selectedAssignmentSetId) return
     let cancelled = false
-    fetchTaskset(selectedTasksetId)
-      .then((taskset) => {
+    fetchAssignmentSet(selectedAssignmentSetId)
+      .then((assignmentSet) => {
         if (cancelled) return
-        setPreviewTitle(taskset.displayTitle)
+        setPreviewTitle(assignmentSet.displayTitle)
         setPreviewGroups(
-          groupTasksByDay(taskset.tasks).map((group) => ({
-            day: group.day,
+          groupAssignments(assignmentSet.assignments, 'Assignments').map((group) => ({
             label: group.label,
-            items: group.items.map((task) => ({
-              id: task.id,
-              title: task.title,
-              kind: task.kind,
-              description: task.description,
-              hint: task.hint,
+            items: group.items.map((assignment) => ({
+              id: assignment.id,
+              title: assignment.title,
+              kind: assignment.kind,
+              description: assignment.description,
+              hint: assignment.hint,
             })),
           })),
         )
       })
       .catch((err: unknown) => {
-        console.warn('[teacher] fetchTaskset failed:', err instanceof Error ? err.message : String(err))
+        console.warn('[teacher] fetchAssignmentSet failed:', err instanceof Error ? err.message : String(err))
       })
     return () => {
       cancelled = true
     }
-  }, [selectedTasksetId])
+  }, [selectedAssignmentSetId])
 
   function observe(code: string) {
     // Best-effort: if the hub is unreachable the dashboard still works (mock roster below).
@@ -105,25 +99,13 @@ export function useTeacherSession() {
   }
 
   async function handleCreateSession() {
-    if (!selectedTasksetId) return
+    if (!selectedAssignmentSetId) return
     setIsCreatingSession(true)
     setSessionError(null)
     try {
-      // MOCK — the sessions API isn't live yet, so fall back to a fixed room code
-      // when the request fails. Delete the catch-fallback when the backend lands.
-      let code: string
-      try {
-        code = (await createSession(selectedTasksetId)).code
-      } catch {
-        code = 'ABCD'
-      }
+      const { code } = await createSession(selectedAssignmentSetId)
       setSessionCode(code)
       observe(code)
-      // MOCK — seed fabricated progress so the roster isn't empty while the hub
-      // is down. Delete this block when live roster + progress land.
-      fetchMockRoster()
-        .then((roster) => setStudents(roster.map((entry) => ({ ...entry, total: previewCount() }))))
-        .catch(() => undefined)
     } catch (err) {
       setSessionError(err instanceof Error ? err.message : String(err))
     } finally {
@@ -136,14 +118,7 @@ export function useTeacherSession() {
     setIsStartingTimer(true)
     setTimerError(null)
     try {
-      // MOCK — fall back to a locally-computed end time when the timer API isn't
-      // live. Delete the catch-fallback when the backend lands.
-      let endsAt: string
-      try {
-        endsAt = (await startTimer(sessionCode, minutes)).endsAt
-      } catch {
-        endsAt = new Date(Date.now() + minutes * 60_000).toISOString()
-      }
+      const { endsAt } = await startTimer(sessionCode, minutes)
       setTimerEndsAt(endsAt)
     } catch (err) {
       setTimerError(err instanceof Error ? err.message : String(err))
@@ -162,9 +137,9 @@ export function useTeacherSession() {
   }
 
   return {
-    tasksets,
-    selectedTasksetId,
-    onTasksetChange: setSelectedTasksetId,
+    assignmentSets,
+    selectedAssignmentSetId,
+    onAssignmentSetChange: setSelectedAssignmentSetId,
     previewGroups,
     previewTitle,
     sessionCode,

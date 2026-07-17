@@ -1,4 +1,4 @@
-import type { Taskset } from '@types'
+import type { AssignmentSet } from '@types'
 import { Toolbar, Sidebar, CodeEditor, OutputPanel, PredictPanel, ProjectPanel, SubmitModal } from '@components'
 import { useStudentWorkspace } from './StudentView.hooks'
 import {
@@ -8,11 +8,11 @@ import {
 } from './StudentView.constants'
 
 interface StudentIdeProps {
-  taskset: Taskset
+  assignmentSet: AssignmentSet
 }
 
-export default function StudentIde({ taskset }: StudentIdeProps) {
-  const { activePanel, toolbar, sidebar, submitModal, scene } = useStudentWorkspace(taskset.tasks)
+export default function StudentIde({ assignmentSet }: StudentIdeProps) {
+  const { activePanel, toolbar, sidebar, submitModal, scene } = useStudentWorkspace(assignmentSet)
   const { Scene } = scene
 
   return (
@@ -35,8 +35,8 @@ export default function StudentIde({ taskset }: StudentIdeProps) {
         {Scene && (
           <Scene
             signals={scene.signals}
-            completedTasks={scene.completedTasks}
-            activeTask={scene.activeTask}
+            completedAssignments={scene.completedAssignments}
+            activeAssignment={scene.activeAssignment}
           />
         )}
       </div>

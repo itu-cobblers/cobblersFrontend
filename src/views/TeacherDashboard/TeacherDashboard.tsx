@@ -1,4 +1,4 @@
-import { Button, TextField, TasksetPreview, StudentRoster } from '@components'
+import { Button, TextField, AssignmentSetPreview, StudentRoster } from '@components'
 import { useTeacherSession } from './TeacherDashboard.hooks'
 import { formatTimerEnds } from './TeacherDashboard.utils'
 import {
@@ -11,9 +11,9 @@ import {
   TEACHER_SECTION_TITLE_CLASS,
   TEACHER_CODE_DISPLAY_CLASS,
   TEACHER_CODE_CAPTION_CLASS,
-  TEACHER_TASKSET_ROW_CLASS,
-  TEACHER_TASKSET_LABEL_CLASS,
-  TEACHER_TASKSET_SELECT_CLASS,
+  TEACHER_ASSIGNMENT_SET_ROW_CLASS,
+  TEACHER_ASSIGNMENT_SET_LABEL_CLASS,
+  TEACHER_ASSIGNMENT_SET_SELECT_CLASS,
   TEACHER_TIMER_ROW_CLASS,
   TEACHER_MINUTES_INPUT_CLASS,
   TEACHER_MINUTES_LABEL_CLASS,
@@ -31,9 +31,9 @@ import {
 
 export default function TeacherDashboard() {
   const {
-    tasksets,
-    selectedTasksetId,
-    onTasksetChange,
+    assignmentSets,
+    selectedAssignmentSetId,
+    onAssignmentSetChange,
     previewGroups,
     previewTitle,
     sessionCode,
@@ -68,31 +68,31 @@ export default function TeacherDashboard() {
       </header>
 
       {!sessionCode ? (
-        // ── Browse: pick a task set and read through its tasks (read-only) ──────
+        // ── Browse: pick an assignment set and read through its assignments (read-only) ──────
         <div className={TEACHER_BROWSE_CLASS}>
           <div className={TEACHER_BROWSE_HEAD_CLASS}>
             <h1 className={TEACHER_BROWSE_TITLE_CLASS}>Start a session</h1>
             <p className={TEACHER_BROWSE_SUBTITLE_CLASS}>
-              Pick a task set and preview its tasks. Create a session when you're ready to open the
+              Pick an assignment set and preview its assignments. Create a session when you're ready to open the
               room to students.
             </p>
           </div>
 
           <div className={TEACHER_BROWSE_ACTIONS_CLASS}>
-            <div className={TEACHER_TASKSET_ROW_CLASS}>
-              <label className={TEACHER_TASKSET_LABEL_CLASS} htmlFor="teacher-taskset-select">
-                Task set
+            <div className={TEACHER_ASSIGNMENT_SET_ROW_CLASS}>
+              <label className={TEACHER_ASSIGNMENT_SET_LABEL_CLASS} htmlFor="teacher-assignmentSet-select">
+                Assignment set
               </label>
               <select
-                id="teacher-taskset-select"
-                className={TEACHER_TASKSET_SELECT_CLASS}
-                value={selectedTasksetId}
-                onChange={(event) => onTasksetChange(event.target.value)}
+                id="teacher-assignmentSet-select"
+                className={TEACHER_ASSIGNMENT_SET_SELECT_CLASS}
+                value={selectedAssignmentSetId}
+                onChange={(event) => onAssignmentSetChange(event.target.value)}
               >
-                {tasksets.length === 0 && <option value="">Loading task sets…</option>}
-                {tasksets.map((taskset) => (
-                  <option key={taskset.tasksetId} value={taskset.tasksetId}>
-                    {taskset.displayTitle}
+                {assignmentSets.length === 0 && <option value="">Loading assignment sets…</option>}
+                {assignmentSets.map((assignmentSet) => (
+                  <option key={assignmentSet.assignmentSetId} value={assignmentSet.assignmentSetId}>
+                    {assignmentSet.displayTitle}
                   </option>
                 ))}
               </select>
@@ -100,17 +100,17 @@ export default function TeacherDashboard() {
             <Button
               onClick={handleCreateSession}
               isLoading={isCreatingSession}
-              isDisabled={!selectedTasksetId}
+              isDisabled={!selectedAssignmentSetId}
             >
               {createLabel}
             </Button>
           </div>
           {sessionError && <p className={TEACHER_ERROR_CLASS}>{sessionError}</p>}
 
-          <TasksetPreview title={previewTitle} groups={previewGroups} />
+          <AssignmentSetPreview title={previewTitle} groups={previewGroups} />
         </div>
       ) : (
-        // ── Active session: code + timer + taskset (left), student status (right) ─
+        // ── Active session: code + timer + assignment set (left), student status (right) ─
         <div className={TEACHER_BODY_CLASS}>
           <aside className={TEACHER_SESSION_ASIDE_CLASS}>
             <section className={TEACHER_SECTION_CLASS}>
@@ -144,8 +144,8 @@ export default function TeacherDashboard() {
             </section>
 
             <section className={TEACHER_SECTION_CLASS}>
-              <h2 className={TEACHER_SECTION_TITLE_CLASS}>Task set</h2>
-              <TasksetPreview groups={previewGroups} />
+              <h2 className={TEACHER_SECTION_TITLE_CLASS}>Assignment set</h2>
+              <AssignmentSetPreview groups={previewGroups} />
             </section>
           </aside>
 
