@@ -1,4 +1,5 @@
 name: Build and Deploy Frontend
+
 permissions:
   contents: read
   packages: write
