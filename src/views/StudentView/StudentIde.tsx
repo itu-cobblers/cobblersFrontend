@@ -9,15 +9,28 @@ import {
 
 interface StudentIdeProps {
   assignmentSet: AssignmentSet
+  sessionLabel: string
+  sessionActionLabel: string
+  onLeaveSession: () => void
 }
 
-export default function StudentIde({ assignmentSet }: StudentIdeProps) {
+export default function StudentIde({
+  assignmentSet,
+  sessionLabel,
+  sessionActionLabel,
+  onLeaveSession,
+}: StudentIdeProps) {
   const { activePanel, toolbar, sidebar, submitModal, scene } = useStudentWorkspace(assignmentSet)
   const { Scene } = scene
 
   return (
     <div className={STUDENT_LAYOUT_CLASS}>
-      <Toolbar {...toolbar} />
+      <Toolbar
+        {...toolbar}
+        sessionLabel={sessionLabel}
+        sessionActionLabel={sessionActionLabel}
+        onLeaveSession={onLeaveSession}
+      />
       <div className={STUDENT_MAIN_CLASS}>
         <Sidebar {...sidebar} />
         {activePanel.kind === 'project' ? (

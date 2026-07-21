@@ -1,5 +1,7 @@
 export const TEACHER_LAYOUT_CLASS = 'flex h-screen flex-col bg-roast text-milk'
 
+export const TEACHER_RESTORING_CLASS = 'flex flex-1 items-center justify-center'
+
 export const TEACHER_HEADER_CLASS =
   'flex h-12 shrink-0 items-center gap-4 border-b border-oak bg-night px-5'
 

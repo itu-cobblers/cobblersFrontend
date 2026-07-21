@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createElement } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 
@@ -13,7 +13,19 @@ vi.mock('@monaco-editor/react', () => ({
 vi.mock('@lib/assignmentSetApi', () => ({
   SOLO_ASSIGNMENT_SET_ID: 'all-assignments-for-solo-2026',
   fetchAssignmentSets: vi.fn(),
-  fetchAssignmentSet: vi.fn(),
+  fetchAssignmentSet: vi.fn().mockResolvedValue({
+    assignmentSetId: 'set-1',
+    displayTitle: 'Room Assignment Set',
+    assignments: [
+      {
+        id: 1,
+        kind: 'code',
+        title: 'Hello, World!',
+        description: 'Make the program print exactly: Hello World!',
+        starter: 'public class Main {}',
+      },
+    ],
+  }),
   fetchStudentAssignmentSet: vi.fn().mockResolvedValue({
     assignmentSetId: 'all-assignments-for-solo-2026',
     displayTitle: 'BootIT — All Assignments (Solo) 2026',
@@ -29,9 +41,21 @@ vi.mock('@lib/assignmentSetApi', () => ({
   }),
 }))
 
+vi.mock('@lib/sessionApi', () => ({
+  getSession: vi.fn().mockResolvedValue({ code: 'ABCD1234', assignmentSetId: 'set-1' }),
+}))
+
+vi.mock('@lib/sessionHub', () => ({
+  joinSession: vi.fn().mockResolvedValue(undefined),
+}))
+
 const { default: StudentView } = await import('./StudentView')
 
 describe('StudentView', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
   it('shows the entry screen first, not the IDE', () => {
     render(createElement(StudentView))
     expect(screen.getByText('Welcome to bootIT')).toBeInTheDocument()
@@ -48,5 +72,36 @@ describe('StudentView', () => {
     expect(await screen.findByRole('heading', { name: 'Assignments' })).toBeInTheDocument()
     expect(screen.getByText('Terminal')).toBeInTheDocument()
     expect(screen.getByTestId('editor')).toBeInTheDocument()
+  })
+
+  it('resumes a joined room from a persisted session after refresh', async () => {
+    localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'join', code: 'ABCD1234' }))
+
+    render(createElement(StudentView))
+
+    expect(await screen.findByRole('heading', { name: 'Assignments' })).toBeInTheDocument()
+    expect(screen.getByText('Room: ABCD1234')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Leave' })).toBeInTheDocument()
+  })
+
+  it('resumes solo practice from a persisted session after refresh', async () => {
+    localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'solo' }))
+
+    render(createElement(StudentView))
+
+    expect(await screen.findByRole('heading', { name: 'Assignments' })).toBeInTheDocument()
+    expect(screen.getByText('Solo practice')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Exit' })).toBeInTheDocument()
+  })
+
+  it('leaving the session clears storage and returns to the entry screen', async () => {
+    localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'solo' }))
+    render(createElement(StudentView))
+    await screen.findByRole('heading', { name: 'Assignments' })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Exit' }))
+
+    expect(screen.getByText('Welcome to bootIT')).toBeInTheDocument()
+    expect(localStorage.getItem('bootit.studentSession')).toBeNull()
   })
 })
