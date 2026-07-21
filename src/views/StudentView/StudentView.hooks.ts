@@ -62,7 +62,9 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
 
   // ── handlers ──────────────────────────────────────────────────────────────
   function handleSelectAssignment(id: number) {
-    assignmentProgress.setActiveAssignment(id)
+    const index = assignments.findIndex((assignment) => assignment.id === id)
+    if (index === -1) return
+    assignmentProgress.setActiveAssignment(index)
     executor.reset()
   }
 
