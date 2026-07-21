@@ -1,8 +1,9 @@
-import { Button, TextField, AssignmentSetPreview, StudentRoster } from '@components'
+import { Button, Spinner, TextField, AssignmentSetPreview, StudentRoster } from '@components'
 import { useTeacherSession } from './TeacherDashboard.hooks'
 import { formatTimerEnds } from './TeacherDashboard.utils'
 import {
   TEACHER_LAYOUT_CLASS,
+  TEACHER_RESTORING_CLASS,
   TEACHER_HEADER_CLASS,
   TEACHER_BRAND_CLASS,
   TEACHER_ROOM_CODE_CLASS,
@@ -44,9 +45,11 @@ export default function TeacherDashboard() {
     isStartingTimer,
     timerEndsAt,
     timerError,
+    isRestoringSession,
     handleCreateSession,
     handleStartTimer,
     handleMinutesChange,
+    handleEndSession,
     handleLogout,
   } = useTeacherSession()
 
@@ -58,16 +61,25 @@ export default function TeacherDashboard() {
       <header className={TEACHER_HEADER_CLASS}>
         <span className={TEACHER_BRAND_CLASS}>BootIT — Teacher</span>
         {sessionCode && (
-          <span className={TEACHER_ROOM_CODE_CLASS}>
-            Room: <strong>{sessionCode}</strong>
-          </span>
+          <>
+            <span className={TEACHER_ROOM_CODE_CLASS}>
+              Room: <strong>{sessionCode}</strong>
+            </span>
+            <Button variant="ghost" onClick={handleEndSession}>
+              End session
+            </Button>
+          </>
         )}
         <Button variant="ghost" onClick={handleLogout}>
           Sign out
         </Button>
       </header>
 
-      {!sessionCode ? (
+      {isRestoringSession ? (
+        <div className={TEACHER_RESTORING_CLASS}>
+          <Spinner />
+        </div>
+      ) : !sessionCode ? (
         // ── Browse: pick an assignment set and read through its assignments (read-only) ──────
         <div className={TEACHER_BROWSE_CLASS}>
           <div className={TEACHER_BROWSE_HEAD_CLASS}>

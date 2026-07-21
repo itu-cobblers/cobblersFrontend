@@ -1,9 +1,14 @@
 import { useEffect, useState } from 'react'
-import { createSession, startTimer } from '@lib/sessionApi'
+import { createSession, getSession, startTimer } from '@lib/sessionApi'
 import { fetchAssignmentSets, fetchAssignmentSet, type AssignmentSetSummary } from '@lib/assignmentSetApi'
 import { groupAssignments } from '@lib/assignmentSet'
 import { observeSession, type Student } from '@lib/sessionHub'
 import { revokeTeacher } from '@lib/teacherAuth'
+import {
+  getPersistedTeacherSession,
+  setPersistedTeacherSession,
+  clearPersistedTeacherSession,
+} from '@lib/teacherSession'
 import type { RosterEntry, AssignmentSetPreviewGroup } from '@components'
 
 /** Owns the teacher session + timer lifecycle, the request state, and the live roster. */
@@ -24,6 +29,10 @@ export function useTeacherSession() {
   const [timerEndsAt, setTimerEndsAt] = useState<string | null>(null)
   const [timerError, setTimerError] = useState<string | null>(null)
 
+  // Read once on mount; drives the lazy initial state below and the rehydrate effect.
+  const [persistedSession] = useState(getPersistedTeacherSession)
+  const [isRestoringSession, setIsRestoringSession] = useState(persistedSession !== null)
+
   useEffect(() => {
     fetchAssignmentSets()
       .then((sets) => {
@@ -34,6 +43,29 @@ export function useTeacherSession() {
         console.warn('[teacher] fetchAssignmentSets failed:', err instanceof Error ? err.message : String(err))
       })
   }, [])
+
+  // Rehydrate a persisted active session on mount so a refresh resumes the
+  // active-session view instead of dropping back to Browse. Roster and
+  // assignment-set content are always re-fetched live.
+  useEffect(() => {
+    if (!persistedSession) return
+
+    getSession(persistedSession.code)
+      .then((info) => {
+        setSessionCode(persistedSession.code)
+        setSelectedAssignmentSetId(info.assignmentSetId ?? '')
+        if (persistedSession.timerEndsAt && new Date(persistedSession.timerEndsAt) > new Date()) {
+          setTimerEndsAt(persistedSession.timerEndsAt)
+        }
+        observe(persistedSession.code)
+      })
+      .catch(() => {
+        clearPersistedTeacherSession()
+        setSessionError('Your previous session is no longer available.')
+      })
+      .finally(() => setIsRestoringSession(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- observe/mergeLiveRoster are recreated every render; this is a mount-only rehydrate keyed on the stable persistedSession value
+  }, [persistedSession])
 
   // Load the selected assignment set's assignments so the teacher can browse them read-only.
   useEffect(() => {
@@ -105,6 +137,7 @@ export function useTeacherSession() {
     try {
       const { code } = await createSession(selectedAssignmentSetId)
       setSessionCode(code)
+      setPersistedTeacherSession({ code, timerEndsAt: null })
       observe(code)
     } catch (err) {
       setSessionError(err instanceof Error ? err.message : String(err))
@@ -120,6 +153,7 @@ export function useTeacherSession() {
     try {
       const { endsAt } = await startTimer(sessionCode, minutes)
       setTimerEndsAt(endsAt)
+      setPersistedTeacherSession({ code: sessionCode, timerEndsAt: endsAt })
     } catch (err) {
       setTimerError(err instanceof Error ? err.message : String(err))
     } finally {
@@ -131,7 +165,17 @@ export function useTeacherSession() {
     setMinutes(Number(value))
   }
 
+  function handleEndSession() {
+    clearPersistedTeacherSession()
+    setSessionCode(null)
+    setStudents([])
+    setTimerEndsAt(null)
+    setSessionError(null)
+    setTimerError(null)
+  }
+
   function handleLogout() {
+    clearPersistedTeacherSession()
     revokeTeacher()
     window.location.reload()
   }
@@ -150,9 +194,11 @@ export function useTeacherSession() {
     isStartingTimer,
     timerEndsAt,
     timerError,
+    isRestoringSession,
     handleCreateSession,
     handleStartTimer,
     handleMinutesChange,
+    handleEndSession,
     handleLogout,
   }
 }

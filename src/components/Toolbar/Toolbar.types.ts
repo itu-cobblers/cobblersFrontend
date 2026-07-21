@@ -10,4 +10,9 @@ export interface ToolbarProps {
   onToggleSidebar: () => void
   onRun: () => void
   onSubmit: () => void
+  /** Current session status ("Room: XXXX" or "Solo practice"); omit to hide the status/leave cluster. */
+  sessionLabel?: string
+  /** Action button text next to sessionLabel ("Leave" or "Exit"). */
+  sessionActionLabel?: string
+  onLeaveSession?: () => void
 }

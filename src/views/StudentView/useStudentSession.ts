@@ -6,6 +6,11 @@ import { getStudentId, getDisplayName, setDisplayName } from '@lib/identity'
 import { getSession } from '@lib/sessionApi'
 import { joinSession } from '@lib/sessionHub'
 import { fetchStudentAssignmentSet, fetchAssignmentSet } from '@lib/assignmentSetApi'
+import {
+  getPersistedStudentSession,
+  setPersistedStudentSession,
+  clearPersistedStudentSession,
+} from '@lib/studentSession'
 
 interface Toast {
   message: string
@@ -24,13 +29,51 @@ const TOAST_DURATION_MS = 3500
  * content still loads if the hub hiccups. Solo: the hardcoded all-assignments set.
  */
 export function useStudentSession() {
+  // Read once on mount; drives the lazy initial state below and the rehydrate effect.
+  const [persistedSession] = useState(getPersistedStudentSession)
   const [name, setName] = useState(getDisplayName)
-  const [code, setCode] = useState('')
-  const [mode, setMode] = useState<JoinMode>('join')
+  const [code, setCode] = useState(() => (persistedSession?.mode === 'join' ? persistedSession.code : ''))
+  const [mode, setMode] = useState<JoinMode>(() => (persistedSession?.mode === 'solo' ? 'solo' : 'join'))
   const [assignmentSet, setAssignmentSet] = useState<AssignmentSet | null>(null)
   const [isJoining, setIsJoining] = useState(false)
   const [isStartingSolo, setIsStartingSolo] = useState(false)
+  const [isRestoring, setIsRestoring] = useState(persistedSession !== null)
   const [toast, setToast] = useState<Toast | null>(null)
+
+  // Rehydrate a persisted join/solo session on mount so a refresh resumes the
+  // IDE instead of dropping back to the entry screen. Assignment content is
+  // always re-fetched live — only the join-state pointer is persisted.
+  useEffect(() => {
+    if (!persistedSession) return
+
+    if (persistedSession.mode === 'solo') {
+      fetchStudentAssignmentSet()
+        .then((set) => setAssignmentSet(set))
+        .catch(() => {
+          clearPersistedStudentSession()
+          setToast({ message: 'Could not resume your session — please start again.', tone: 'error' })
+        })
+        .finally(() => setIsRestoring(false))
+      return
+    }
+
+    getSession(persistedSession.code)
+      .then(async (session) => {
+        if (!session.assignmentSetId) throw new Error('room has no assignment set')
+        const studentId = getStudentId()
+        joinSession({ code: persistedSession.code, studentId, displayName: getDisplayName() }).catch(
+          (err: unknown) => {
+            console.warn('[join] hub join failed:', err instanceof Error ? err.message : String(err))
+          },
+        )
+        setAssignmentSet(await fetchAssignmentSet(session.assignmentSetId))
+      })
+      .catch(() => {
+        clearPersistedStudentSession()
+        setToast({ message: 'Room no longer available — please rejoin.', tone: 'error' })
+      })
+      .finally(() => setIsRestoring(false))
+  }, [persistedSession])
 
   useEffect(() => {
     if (!toast) return
@@ -59,6 +102,7 @@ export function useStudentSession() {
       })
 
       setAssignmentSet(await fetchAssignmentSet(session.assignmentSetId))
+      setPersistedStudentSession({ mode: 'join', code: roomCode })
     } catch {
       setToast({ message: 'Room not found — check the code and try again.', tone: 'error' })
     } finally {
@@ -72,6 +116,7 @@ export function useStudentSession() {
     setIsStartingSolo(true)
     try {
       setAssignmentSet(await fetchStudentAssignmentSet())
+      setPersistedStudentSession({ mode: 'solo' })
     } catch {
       setToast({ message: 'Could not load the assignments — please try again in a moment.', tone: 'error' })
     } finally {
@@ -84,10 +129,22 @@ export function useStudentSession() {
     setMode(next)
   }
 
+  function handleLeaveSession() {
+    clearPersistedStudentSession()
+    setAssignmentSet(null)
+    setCode('')
+  }
+
   return {
     assignmentSet,
+    isRestoring,
     toast,
     dismissToast,
+    session: {
+      label: mode === 'solo' ? 'Solo practice' : `Room: ${code}`,
+      actionLabel: mode === 'solo' ? 'Exit' : 'Leave',
+      onLeave: handleLeaveSession,
+    },
     entry: {
       name,
       code,

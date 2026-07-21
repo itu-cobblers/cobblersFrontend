@@ -9,6 +9,7 @@ import {
   TOOLBAR_RIGHT_CLASS,
   TOOLBAR_LOGO_CLASS,
   TOOLBAR_SUBTITLE_CLASS,
+  TOOLBAR_SESSION_LABEL_CLASS,
 } from './Toolbar.constants'
 
 export default function Toolbar({
@@ -20,6 +21,9 @@ export default function Toolbar({
   onToggleSidebar,
   onRun,
   onSubmit,
+  sessionLabel,
+  sessionActionLabel,
+  onLeaveSession,
 }: ToolbarProps) {
   const isBusy = isRunning || isSubmitting
   const submitLabel = isSubmitting ? 'Submitting…' : 'Submit'
@@ -33,6 +37,14 @@ export default function Toolbar({
         <span className={TOOLBAR_LOGO_CLASS}>bootIT</span>
         {subtitle && <span className={TOOLBAR_SUBTITLE_CLASS}>{subtitle}</span>}
         <Badge tone="lang">Java</Badge>
+        {sessionLabel && onLeaveSession && (
+          <>
+            <span className={TOOLBAR_SESSION_LABEL_CLASS}>{sessionLabel}</span>
+            <Button variant="ghost" onClick={onLeaveSession}>
+              {sessionActionLabel ?? 'Leave'}
+            </Button>
+          </>
+        )}
       </div>
       <div className={TOOLBAR_RIGHT_CLASS}>
         <IconButton
