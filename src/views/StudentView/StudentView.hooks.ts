@@ -6,14 +6,13 @@ import type {
   PredictPanelProps,
   PredictStatus,
   ProjectPanelProps,
-  SidebarGroup,
-  AssignmentListEntry,
+  FeedbackBannerProps,
+  StepperStep,
 } from '@components'
 import { useExecutor } from '@hooks/useExecutor'
 import { useAssignments } from '@hooks/useAssignments'
 import { useSubmission } from '@hooks/useSubmission'
 import { defaultStarter } from '@lib/assignments'
-import { groupAssignments } from '@lib/assignmentSet'
 import { checkPrediction } from '@lib/quizApi'
 import { ACTIVE_THEME } from '@themes'
 
@@ -47,7 +46,7 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
   const [answerByAssignment, setAnswerByAssignment] = useState<Record<number, string>>({})
   const [statusByAssignment, setStatusByAssignment] = useState<Record<number, PredictStatus>>({})
   const [filesByAssignment, setFilesByAssignment] = useState<Record<number, SourceFile[]>>({})
-  const [isSidebarFolded, setIsSidebarFolded] = useState(false)
+  const [feedback, setFeedback] = useState<FeedbackBannerProps | null>(null)
 
   const executor = useExecutor()
   const assignmentProgress = useAssignments(assignments)
@@ -66,10 +65,7 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
     if (index === -1) return
     assignmentProgress.setActiveAssignment(index)
     executor.reset()
-  }
-
-  function handleToggleSidebar() {
-    setIsSidebarFolded((folded) => !folded)
+    setFeedback(null)
   }
 
   function handleEditorChange(value: string) {
@@ -93,7 +89,11 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
     const request = buildCodeRequest(code)
     if (!request) return
     const data = await executor.run(request)
-    if (data) assignmentProgress.grade(code, data)
+    if (!data) return
+    const verdict = assignmentProgress.grade(code, data)
+    // Feedback stays up while the student edits; it is replaced on the next
+    // run and cleared on assignment switch. Submission feedback lives in the modal.
+    setFeedback(verdict ? { tone: verdict.passed ? 'success' : 'hint', message: verdict.message } : null)
   }
 
   function handleOpenSubmit() {
@@ -139,16 +139,11 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
   }
 
   // ── display-ready props ─────────────────────────────────────────────────────
-  const toEntry = (id: number, title: string): AssignmentListEntry => ({
-    id,
-    title,
-    isActive: id === assignmentProgress.activeAssignmentId,
-    isDone: assignmentProgress.completedAssignments.has(id),
-  })
-
-  const groups: SidebarGroup[] = groupAssignments(assignments, assignmentSet.displayTitle).map((group) => ({
-    label: group.label,
-    items: group.items.map((assignment) => toEntry(assignment.id, assignment.title)),
+  const steps: StepperStep[] = assignments.map((assignment) => ({
+    id: assignment.id,
+    title: assignment.title,
+    isActive: assignment.id === assignmentProgress.activeAssignmentId,
+    isDone: assignmentProgress.completedAssignments.has(assignment.id),
   }))
 
   function buildActivePanel(): ActivePanel {
@@ -160,7 +155,6 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
           answer: answerByAssignment[active.id] ?? '',
           status: statusByAssignment[active.id] ?? 'idle',
           expectedOutput: active.expectedOutput,
-          hint: active.hint,
           onAnswerChange: handlePredictAnswerChange,
           onSubmit: handlePredictSubmit,
           onUnderstood: handlePredictUnderstood,
@@ -171,7 +165,6 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
       return {
         kind: 'project',
         project: {
-          brief: active.brief,
           files: filesByAssignment[active.id] ?? [],
           output: executor.output,
           status: executor.status,
@@ -198,16 +191,18 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
       isSubmitting: submission.isSubmitting,
       isRunDisabled: !isCodeAssignment,
       isSubmitDisabled: !isCodeAssignment,
-      onToggleSidebar: handleToggleSidebar,
       onRun: handleRunCode,
       onSubmit: handleOpenSubmit,
     },
-    sidebar: {
-      groups,
-      detail: { title: active.title, description: active.description, hint: active.hint },
-      progress: { completed: assignmentProgress.completedAssignments.size, total: assignments.length },
-      isFolded: isSidebarFolded,
-      onSelect: handleSelectAssignment,
+    assignmentPanel: {
+      steps,
+      onSelectStep: handleSelectAssignment,
+      title: active.title,
+      lesson: active.lesson,
+      description: active.description,
+      body: active.kind === 'project' ? active.brief : undefined,
+      hint: active.hint,
+      feedback: feedback ?? undefined,
     },
     submitModal: {
       isOpen: submission.showSubmit,

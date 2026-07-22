@@ -4,10 +4,9 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import Toolbar from './Toolbar'
 
 const baseProps = {
-  subtitle: '· Hygge Café ·',
+  subtitle: 'Java summer camp',
   isRunning: false,
   isSubmitting: false,
-  onToggleSidebar: vi.fn(),
   onRun: vi.fn(),
   onSubmit: vi.fn(),
 }
@@ -16,7 +15,7 @@ describe('Toolbar', () => {
   it('renders brand, subtitle and language badge', () => {
     render(createElement(Toolbar, baseProps))
     expect(screen.getByText('bootIT')).toBeInTheDocument()
-    expect(screen.getByText('· Hygge Café ·')).toBeInTheDocument()
+    expect(screen.getByText('Java summer camp')).toBeInTheDocument()
     expect(screen.getByText('Java')).toBeInTheDocument()
   })
 

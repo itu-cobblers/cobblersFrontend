@@ -8,6 +8,7 @@ import {
   TOOLBAR_SIDE_CLASS,
   TOOLBAR_RIGHT_CLASS,
   TOOLBAR_LOGO_CLASS,
+  TOOLBAR_LOGO_ACCENT_CLASS,
   TOOLBAR_SUBTITLE_CLASS,
   TOOLBAR_SESSION_LABEL_CLASS,
 } from './Toolbar.constants'
@@ -18,7 +19,6 @@ export default function Toolbar({
   isSubmitting,
   isRunDisabled = false,
   isSubmitDisabled = false,
-  onToggleSidebar,
   onRun,
   onSubmit,
   sessionLabel,
@@ -31,10 +31,10 @@ export default function Toolbar({
   return (
     <header className={TOOLBAR_CLASS}>
       <div className={TOOLBAR_SIDE_CLASS}>
-        <IconButton label="Toggle assignment panel" onClick={onToggleSidebar}>
-          <Icon name="menu" />
-        </IconButton>
-        <span className={TOOLBAR_LOGO_CLASS}>bootIT</span>
+        <span className={TOOLBAR_LOGO_CLASS}>
+          bootIT
+          <span className={TOOLBAR_LOGO_ACCENT_CLASS} />
+        </span>
         {subtitle && <span className={TOOLBAR_SUBTITLE_CLASS}>{subtitle}</span>}
         <Badge tone="lang">Java</Badge>
         {sessionLabel && onLeaveSession && (

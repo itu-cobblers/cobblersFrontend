@@ -1,9 +1,8 @@
 /**
- * assignmentSet.ts — shared, framework-agnostic helper for shaping an assignment set's assignment
- * list into sidebar/preview groups. Used by both the student sidebar and the
- * teacher assignment set preview so the grouping stays identical.
+ * assignmentSet.ts — shared, framework-agnostic helper for shaping an assignment set's
+ * assignment list into labelled groups, used by the teacher assignment set preview.
  *
- * Assignments no longer carry a `day` field (an assignment set IS one day's content — see
+ * Assignments carry no `day` field (an assignment set IS one day's content — see
  * the api repo's SCHEMA.md), so an assignment set renders as a single labelled group.
  */
 import type { Assignment } from '@types'

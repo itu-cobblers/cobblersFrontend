@@ -20,7 +20,7 @@ export default function IconButton({
       disabled={isDisabled || isLoading}
       onClick={onClick}
     >
-      {isLoading ? <Spinner variant="accent" /> : children}
+      {isLoading ? <Spinner variant="action" /> : children}
     </button>
   )
 }

@@ -11,7 +11,6 @@ export interface PredictPanelProps {
   status: PredictStatus
   /** Revealed once the answer is submitted (wrong, correct, or done). */
   expectedOutput: string
-  hint?: string
   onAnswerChange: (value: string) => void
   onSubmit: () => void
   /** "I understand now" — completes the assignment after a wrong answer. */

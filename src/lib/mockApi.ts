@@ -13,8 +13,8 @@
  * 0-based index instead of null.
  *
  * The assignment-set mock serves the legacy local bundle (assignments.ts), so
- * the whole student UI — entry screen, sidebar, all three assignment kinds,
- * and local check() grading — works with no backend at all.
+ * the whole student UI — entry screen, assignment panel, all three assignment
+ * kinds, and local check() grading — works with no backend at all.
  */
 import type { AssignmentSet, ExecuteResult, SubmissionResult } from '@types'
 import type { AssignmentSetSummary } from './assignmentSetApi'

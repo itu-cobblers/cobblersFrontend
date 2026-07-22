@@ -7,20 +7,19 @@
  *   GET /api/assignmentsets                     → assignment-set picker summaries
  *   GET /api/assignmentsets/:id/assignments    → the set's assignments, sorted by position
  *
- * The wire shape is { id, kind, title, description, hint?, content } where
- * `content` holds the kind-specific fields — `toAssignment()` flattens it into
- * the frontend's discriminated `Assignment` union. Two deliberate differences
- * from the old hardcoded bundle:
+ * The wire shape is { id, kind, title, description, lesson?, hint?, content }
+ * where `content` holds the kind-specific fields — `toAssignment()` flattens it
+ * into the frontend's discriminated `Assignment` union. One deliberate
+ * difference from the old hardcoded bundle:
  *
  *   - No `check()` — grading moved server-side (rules live in the DB). Code
  *     assignments won't auto-complete until the submissions endpoint lands;
  *     predict assignments still grade locally from `expectedOutput` / `accept`.
- *   - No `day` — a set IS one day's content; solo uses the all-assignments set.
  *
  * While the backend routes aren't live, both fetchers fall back to the legacy
  * local bundle via mockApi.ts (clearly-fenced branches, deletable in one step).
  */
-import type { Harness, Assignment, AssignmentKind, AssignmentSet } from '@types'
+import type { Harness, Assignment, AssignmentKind, AssignmentSet, LessonBlock } from '@types'
 import { mockAssignmentSets, mockAssignmentSet } from './mockApi' // MOCK: remove with the fallback branches below
 
 /** The assignment set the solo cohort hardcodes (CONTRACT.md, "Assignments"). */
@@ -37,6 +36,7 @@ interface ApiAssignment {
   kind: AssignmentKind
   title: string
   description: string
+  lesson?: LessonBlock[]
   hint?: string
   content: Record<string, unknown>
 }
@@ -53,6 +53,7 @@ function toAssignment(dto: ApiAssignment): Assignment {
     id: dto.id,
     title: dto.title,
     description: dto.description,
+    lesson: dto.lesson,
     hint: dto.hint,
   }
   switch (dto.kind) {

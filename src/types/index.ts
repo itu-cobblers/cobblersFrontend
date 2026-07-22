@@ -1,7 +1,7 @@
 export type { ExecuteStatus, ExecuteRequest, ExecuteResult, SubmissionResult } from './execution'
 export type {
-  Day,
   AssignmentKind,
+  LessonBlock,
   SourceFile,
   Signals,
   CheckResult,

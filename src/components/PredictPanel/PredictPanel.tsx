@@ -23,7 +23,6 @@ export default function PredictPanel({
   answer,
   status,
   expectedOutput,
-  hint,
   onAnswerChange,
   onSubmit,
   onUnderstood,
@@ -50,7 +49,7 @@ export default function PredictPanel({
         {isInput ? (
           <>
             <p className={PREDICT_HINT_CLASS}>
-              {hint ?? 'Read the code and type what you think it prints, line by line.'}
+              Read the code and type what you think it prints, line by line.
             </p>
             <textarea
               className={PREDICT_TEXTAREA_CLASS}

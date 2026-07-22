@@ -20,15 +20,15 @@ export default function OutputPanel({ output, status }: OutputPanelProps) {
         {status && (
           <span
             className={classNames(OUTPUT_STATUS_BASE_CLASS, {
-              'text-mint': !isError,
-              'text-berry': isError,
+              'text-term-ok': !isError,
+              'text-term-err': isError,
             })}
           >
             {statusLabel}
           </span>
         )}
       </div>
-      <pre className={classNames(OUTPUT_CONTENT_CLASS, { 'text-berry': isError })}>
+      <pre className={classNames(OUTPUT_CONTENT_CLASS, { 'text-term-err': isError })}>
         {output || <span className={OUTPUT_PLACEHOLDER_CLASS}>Press Run to see your output…</span>}
       </pre>
     </div>

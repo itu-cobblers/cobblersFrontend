@@ -21,7 +21,7 @@ describe('getProgressPercent', () => {
 describe('ProgressBar', () => {
   it('renders the fill at the computed width', () => {
     const { container } = render(createElement(ProgressBar, { value: 2, max: 4 }))
-    const fill = container.querySelector('.bg-caramel')
+    const fill = container.querySelector('.bg-accent')
     expect(fill).toHaveStyle({ width: '50%' })
   })
 })

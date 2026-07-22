@@ -7,7 +7,6 @@ export interface ToolbarProps {
   isRunDisabled?: boolean
   /** Disable Submit regardless of busy state (e.g. predict / project assignments). */
   isSubmitDisabled?: boolean
-  onToggleSidebar: () => void
   onRun: () => void
   onSubmit: () => void
   /** Current session status ("Room: XXXX" or "Solo practice"); omit to hide the status/leave cluster. */
