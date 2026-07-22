@@ -1,5 +1,5 @@
 import type { AssignmentSet } from '@types'
-import { Toolbar, Sidebar, CodeEditor, OutputPanel, PredictPanel, ProjectPanel, SubmitModal } from '@components'
+import { Toolbar, AssignmentPanel, CodeEditor, OutputPanel, PredictPanel, ProjectPanel, SubmitModal } from '@components'
 import { useStudentWorkspace } from './StudentView.hooks'
 import {
   STUDENT_LAYOUT_CLASS,
@@ -20,7 +20,7 @@ export default function StudentIde({
   sessionActionLabel,
   onLeaveSession,
 }: StudentIdeProps) {
-  const { activePanel, toolbar, sidebar, submitModal, scene } = useStudentWorkspace(assignmentSet)
+  const { activePanel, toolbar, assignmentPanel, submitModal, scene } = useStudentWorkspace(assignmentSet)
   const { Scene } = scene
 
   return (
@@ -32,7 +32,7 @@ export default function StudentIde({
         onLeaveSession={onLeaveSession}
       />
       <div className={STUDENT_MAIN_CLASS}>
-        <Sidebar {...sidebar} />
+        <AssignmentPanel {...assignmentPanel} />
         {activePanel.kind === 'project' ? (
           <ProjectPanel {...activePanel.project} />
         ) : (

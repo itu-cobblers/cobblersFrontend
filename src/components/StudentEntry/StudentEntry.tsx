@@ -40,7 +40,7 @@ export default function StudentEntry({
       <div className={ENTRY_CARD_CLASS}>
         <div>
           <h1 className={ENTRY_TITLE_CLASS}>Welcome to bootIT</h1>
-          <p className={ENTRY_SUBTITLE_CLASS}>Let's get you into the café.</p>
+          <p className={ENTRY_SUBTITLE_CLASS}>Three days from zero to Java — welcome to ITU.</p>
         </div>
 
         <label className={ENTRY_FIELD_CLASS}>

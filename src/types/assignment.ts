@@ -6,14 +6,19 @@
  *   - 'predict' — the student reads a read-only snippet and predicts its output.
  *   - 'project' — a multi-file mini-project uploaded from VS Code (scaffolded grading).
  *
- * The IDE core (sidebar, progress, day grouping) only ever touches the shared
- * base fields; only rendering + grading branch on `kind`.
+ * The IDE core (stepper, progress) only ever touches the shared base fields;
+ * only rendering + grading branch on `kind`.
  */
 
-/** Which day of the 3-day camp an assignment belongs to. */
-export type Day = 1 | 2 | 3
-
 export type AssignmentKind = 'code' | 'predict' | 'project'
+
+/**
+ * One block of teaching content shown above the task in the assignment panel.
+ * Kept structured (no markdown) so code examples render as real code cards.
+ */
+export type LessonBlock =
+  | { kind: 'text'; text: string }
+  | { kind: 'code'; code: string }
 
 /** One Java source file (name + contents) for multi-file execution. */
 export interface SourceFile {
@@ -23,7 +28,7 @@ export interface SourceFile {
 
 /**
  * Free-form, theme-agnostic payload an assignment broadcasts on success (e.g.
- * `{ cafeName }`). The core never interprets it — values are `unknown`.
+ * `{ studentName }`). The core never interprets it — values are `unknown`.
  */
 export type Signals = Record<string, unknown>
 
@@ -45,14 +50,11 @@ export interface Verdict {
 interface AssignmentBase {
   /** Server-assigned assignment id — used as the active/completed key. */
   id: number
-  /**
-   * Legacy day tag. Assignments fetched from the API don't carry it (day is
-   * expressed by which assignment set an assignment belongs to — see the api repo's
-   * SCHEMA.md); only the old local bundle in assignments.ts still sets it.
-   */
-  day?: Day
   title: string
+  /** The actual task the student must solve — shown under "Your task". */
   description: string
+  /** Teaching content (concept + example code) shown above the task. */
+  lesson?: LessonBlock[]
   hint?: string
   kind: AssignmentKind
 }
@@ -63,7 +65,7 @@ export interface Harness {
   entryClass: string
 }
 
-/** Write-and-run Java assignment (Day 1–3 coding exercises, incl. class-authoring). */
+/** Write-and-run Java assignment (coding exercises, incl. class-authoring). */
 export interface CodeAssignment extends AssignmentBase {
   kind: 'code'
   /** Initial Java shown when the assignment is opened. */

@@ -25,7 +25,7 @@ describe('OutputPanel', () => {
 
   it('colors the content on error', () => {
     render(createElement(OutputPanel, { output: 'boom', status: 'runtime_error' }))
-    expect(screen.getByText('boom')).toHaveClass('text-berry')
+    expect(screen.getByText('boom')).toHaveClass('text-term-err')
     expect(screen.getByText('Runtime error')).toBeInTheDocument()
   })
 })

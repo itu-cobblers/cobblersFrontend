@@ -13,6 +13,6 @@ describe('TextField', () => {
 
   it('shows the error border when hasError', () => {
     render(createElement(TextField, { value: '', placeholder: 'Code', hasError: true, onChange: vi.fn() }))
-    expect(screen.getByPlaceholderText('Code')).toHaveClass('border-berry')
+    expect(screen.getByPlaceholderText('Code')).toHaveClass('border-error')
   })
 })

@@ -37,17 +37,14 @@ export type { ProjectPanelProps } from './ProjectPanel'
 export { CodeEditor, useCodeEditorSetup } from './CodeEditor'
 export type { CodeEditorProps } from './CodeEditor'
 
-export { AssignmentItem } from './AssignmentItem'
-export type { AssignmentItemProps } from './AssignmentItem'
+export { AssignmentStepper } from './AssignmentStepper'
+export type { AssignmentStepperProps, StepperStep } from './AssignmentStepper'
 
-export { AssignmentList } from './AssignmentList'
-export type { AssignmentListProps, AssignmentListEntry } from './AssignmentList'
+export { FeedbackBanner } from './FeedbackBanner'
+export type { FeedbackBannerProps, FeedbackTone } from './FeedbackBanner'
 
-export { AssignmentDetail } from './AssignmentDetail'
-export type { AssignmentDetailProps } from './AssignmentDetail'
-
-export { Sidebar } from './Sidebar'
-export type { SidebarProps, SidebarProgress, SidebarGroup } from './Sidebar'
+export { AssignmentPanel } from './AssignmentPanel'
+export type { AssignmentPanelProps } from './AssignmentPanel'
 
 export { Toolbar } from './Toolbar'
 export type { ToolbarProps } from './Toolbar'

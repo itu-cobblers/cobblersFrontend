@@ -60,7 +60,7 @@ describe('StudentView', () => {
     render(createElement(StudentView))
     expect(screen.getByText('Welcome to bootIT')).toBeInTheDocument()
     expect(screen.queryByTestId('editor')).not.toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: 'Assignments' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('navigation', { name: 'Assignments' })).not.toBeInTheDocument()
   })
 
   it('reveals the workspace chrome after starting solo practice', async () => {
@@ -69,7 +69,7 @@ describe('StudentView', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Solo practice' }))
     fireEvent.click(screen.getByRole('button', { name: 'Start solo practice' }))
 
-    expect(await screen.findByRole('heading', { name: 'Assignments' })).toBeInTheDocument()
+    expect(await screen.findByRole('navigation', { name: 'Assignments' })).toBeInTheDocument()
     expect(screen.getByText('Terminal')).toBeInTheDocument()
     expect(screen.getByTestId('editor')).toBeInTheDocument()
   })
@@ -79,7 +79,7 @@ describe('StudentView', () => {
 
     render(createElement(StudentView))
 
-    expect(await screen.findByRole('heading', { name: 'Assignments' })).toBeInTheDocument()
+    expect(await screen.findByRole('navigation', { name: 'Assignments' })).toBeInTheDocument()
     expect(screen.getByText('Room: ABCD1234')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Leave' })).toBeInTheDocument()
   })
@@ -89,7 +89,7 @@ describe('StudentView', () => {
 
     render(createElement(StudentView))
 
-    expect(await screen.findByRole('heading', { name: 'Assignments' })).toBeInTheDocument()
+    expect(await screen.findByRole('navigation', { name: 'Assignments' })).toBeInTheDocument()
     expect(screen.getByText('Solo practice')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Exit' })).toBeInTheDocument()
   })
@@ -97,7 +97,7 @@ describe('StudentView', () => {
   it('leaving the session clears storage and returns to the entry screen', async () => {
     localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'solo' }))
     render(createElement(StudentView))
-    await screen.findByRole('heading', { name: 'Assignments' })
+    await screen.findByRole('navigation', { name: 'Assignments' })
 
     fireEvent.click(screen.getByRole('button', { name: 'Exit' }))
 

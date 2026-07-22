@@ -25,6 +25,11 @@ describe('Button', () => {
 
   it('applies ghost variant classes', () => {
     render(createElement(Button, { variant: 'ghost', children: 'Cancel' }))
-    expect(screen.getByRole('button')).toHaveClass('text-foam')
+    expect(screen.getByRole('button')).toHaveClass('text-ink-muted')
+  })
+
+  it('applies action colour on the primary variant', () => {
+    render(createElement(Button, { children: 'Run' }))
+    expect(screen.getByRole('button')).toHaveClass('bg-action')
   })
 })
