@@ -1,5 +1,4 @@
 import type { SubmissionResult } from '@types'
-import { mockSubmit } from './mockApi' // MOCK: remove with the fallback branch below
 import { getStudentId } from './identity'
 
 /**
@@ -20,20 +19,11 @@ export async function submitCode({
   assignmentId: number
   code: string
 }): Promise<SubmissionResult> {
-  try {
-    const res = await fetch('/api/submission', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentId: getStudentId(), assignmentId, code }),
-    })
-    if (!res.ok) throw new Error(`API returned ${res.status}`)
-    return await res.json()
-  } catch (err) {
-    // ─────────────── MOCK FALLBACK — remove when the backend is ready ───────────────
-    // Delete this catch block, the `mockSubmit` import above, and mockApi.ts.
-    const reason = err instanceof Error ? err.message : String(err)
-    console.warn('[submit] backend unavailable, using mock:', reason)
-    return mockSubmit()
-    // ──────────────────────────── END MOCK FALLBACK ─────────────────────────────────
-  }
+  const res = await fetch('/api/submission', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ studentId: getStudentId(), assignmentId, code }),
+  })
+  if (!res.ok) throw new Error(`API returned ${res.status}`)
+  return await res.json()
 }

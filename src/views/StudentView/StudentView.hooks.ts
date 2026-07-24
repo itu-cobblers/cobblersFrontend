@@ -12,7 +12,7 @@ import type {
 import { useExecutor } from '@hooks/useExecutor'
 import { useAssignments } from '@hooks/useAssignments'
 import { useSubmission } from '@hooks/useSubmission'
-import { defaultStarter } from '@lib/assignments'
+import { defaultStarter } from '@lib/defaultStarter'
 import { checkPrediction } from '@lib/quizApi'
 import { ACTIVE_THEME } from '@themes'
 
@@ -114,8 +114,6 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
     const { correct } = await checkPrediction({
       assignmentId: active.id,
       answer,
-      expectedOutput: active.expectedOutput,
-      accept: active.accept,
     })
     setStatusByAssignment((prev) => ({ ...prev, [active.id]: correct ? 'correct' : 'wrong' }))
     if (correct) assignmentProgress.complete(active.id)
