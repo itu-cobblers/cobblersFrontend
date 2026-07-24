@@ -5,7 +5,7 @@ import type { SourceFile } from './assignment'
  * These shapes flow through the single API seams in src/lib.
  */
 
-/** Outcome category returned by POST /api/execute and /api/submission. */
+/** Outcome category returned by POST /api/execute and nested under submission.result. */
 export type ExecuteStatus = 'success' | 'compile_error' | 'runtime_error'
 
 /**
@@ -27,10 +27,14 @@ export interface ExecuteResult {
   stderr: string
 }
 
-/** POST /api/submission → response (execute result + teacher-facing verdict). */
-export interface SubmissionResult extends ExecuteResult {
-  /** Did the submission satisfy the assignment? */
-  accepted: boolean
-  /** Beginner-friendly feedback to show in the submit modal. */
-  message: string
+/**
+ * POST /api/assignments/{assignmentId}/submissions → response.
+ * `passed` is server-computed (`null` when there is no automated grader).
+ * `result` mirrors execute's response for code/project; `null` for predict.
+ */
+export interface SubmissionResult {
+  subId: string
+  passed: boolean | null
+  result: ExecuteResult | null
+  submittedAt: string
 }

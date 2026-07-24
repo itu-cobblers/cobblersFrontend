@@ -48,11 +48,10 @@ export function useSubmission({ onResult }: UseSubmissionOptions = {}): UseSubmi
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err)
       setResult({
-        status: 'runtime_error',
-        stdout: '',
-        stderr: reason,
-        accepted: false,
-        message: 'Something went wrong submitting. Please try again.',
+        subId: '',
+        passed: false,
+        result: { status: 'runtime_error', stdout: '', stderr: reason },
+        submittedAt: new Date().toISOString(),
       })
       return null
     } finally {

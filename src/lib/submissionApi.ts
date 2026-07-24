@@ -3,14 +3,10 @@ import { getStudentId } from './identity'
 
 /**
  * Submits a finished assignment attempt to the teacher. The single seam to
- * POST /api/submission.
+ * POST /api/assignments/{assignmentId}/submissions (see CONTRACT.md).
  *
- * ⚠️ The submission contract is still an OPEN DECISION in the api repo's
- * CONTRACT.md. This is the frontend's working assumption — reconcile the exact
- * shape with the backend member before launch:
- *
- *   request:  { studentId, assignmentId, code }
- *   response: { status, stdout, stderr, accepted, message }
+ *   request:  { studentId, content } (+ optional sessionId when in a room)
+ *   response: { subId, passed, result, submittedAt }
  */
 export async function submitCode({
   assignmentId,
@@ -19,10 +15,10 @@ export async function submitCode({
   assignmentId: number
   code: string
 }): Promise<SubmissionResult> {
-  const res = await fetch('/api/submission', {
+  const res = await fetch(`/api/assignments/${assignmentId}/submissions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ studentId: getStudentId(), assignmentId, code }),
+    body: JSON.stringify({ studentId: getStudentId(), content: code }),
   })
   if (!res.ok) throw new Error(`API returned ${res.status}`)
   return await res.json()

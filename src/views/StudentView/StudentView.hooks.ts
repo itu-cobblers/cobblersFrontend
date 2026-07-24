@@ -53,9 +53,9 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
   const active = assignments[assignmentProgress.activeAssignment]
 
   const submission = useSubmission({
-    onResult: (submittedCode, result) => {
-      executor.showResult(result)
-      if (result.accepted) assignmentProgress.grade(submittedCode, result, { forceComplete: true })
+    onResult: (_submittedCode, submissionResult) => {
+      if (submissionResult.result) executor.showResult(submissionResult.result)
+      if (submissionResult.passed === true) assignmentProgress.complete(active.id)
     },
   })
 
