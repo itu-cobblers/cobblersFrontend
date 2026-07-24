@@ -2,7 +2,7 @@
  * grade.ts — shared, framework-agnostic helpers for grading stdout and for
  * inspecting the structure of the student's Java source.
  *
- * Used by assignment `check()` functions in assignments.ts and by predict-quiz grading
+ * Used by predict-quiz grading (predict.ts) and any client-side output helpers.
  * (predict.ts). Output comparison is lenient about surrounding whitespace
  * (beginners shouldn't fail on a trailing space) but otherwise faithful.
  *

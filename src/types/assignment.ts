@@ -1,5 +1,5 @@
 /**
- * Assignment domain types — the "assignment boundary" contract (see src/lib/assignments.ts).
+ * Assignment domain types — the "assignment boundary" contract (see src/lib/assignmentSetApi.ts).
  *
  * Assignments are a discriminated union on `kind`:
  *   - 'code'    — the student writes/runs Java; graded by check() on the run result.

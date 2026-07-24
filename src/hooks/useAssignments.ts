@@ -26,7 +26,7 @@ export interface UseAssignments {
 /**
  * Owns assignment selection, completion progress, and the theme-agnostic `signals`
  * bag. Grades against the `assignments` it's given (the active assignment set). Grading for
- * code assignments runs the assignment's own check() (assignments.ts); predict and project assignments
+ * code assignments may run an optional client-side check(); predict and project assignments
  * complete via `complete()`.
  */
 export function useAssignments(assignments: Assignment[]): UseAssignments {
@@ -47,7 +47,7 @@ export function useAssignments(assignments: Assignment[]): UseAssignments {
       return null
     }
     // The check() boundary speaks { code, output, stderr, exitCode }; map the
-    // contract shape onto it (status → exitCode) so assignments.ts stays untouched.
+    // contract shape onto it (status → exitCode).
     const verdict = assignment.check?.({
       code,
       output: result.stdout ?? '',
