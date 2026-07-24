@@ -13,6 +13,7 @@ import {
   PREDICT_REVEAL_LABEL_CLASS,
   PREDICT_REVEAL_CLASS,
   PREDICT_FOOTER_CLASS,
+  PREDICT_SECONDARY_BUTTON_CLASS,
 } from './PredictPanel.constants'
 
 /**
@@ -25,7 +26,8 @@ export default function PredictPanel({
   expectedOutput,
   onAnswerChange,
   onSubmit,
-  onUnderstood,
+  onRedo,
+  onReveal,
 }: PredictPanelProps) {
   function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
     onAnswerChange(event.target.value)
@@ -35,6 +37,7 @@ export default function PredictPanel({
   const isCorrect = status === 'correct'
   const isWrong = status === 'wrong'
   const isDone = status === 'done'
+  const showExpected = isCorrect || isDone
 
   return (
     <div className={PREDICT_PANEL_CLASS}>
@@ -46,7 +49,7 @@ export default function PredictPanel({
       </div>
 
       <div className={PREDICT_BODY_CLASS}>
-        {isInput ? (
+        {isInput && (
           <>
             <p className={PREDICT_HINT_CLASS}>
               Read the code and type what you think it prints, line by line.
@@ -59,13 +62,26 @@ export default function PredictPanel({
               spellCheck={false}
             />
           </>
-        ) : (
+        )}
+
+        {isWrong && (
+          <>
+            <p className={PREDICT_HINT_CLASS}>
+              Not quite — try again, or reveal the correct output if you are stuck.
+            </p>
+            <textarea
+              className={PREDICT_TEXTAREA_CLASS}
+              value={answer}
+              readOnly
+              spellCheck={false}
+            />
+          </>
+        )}
+
+        {showExpected && (
           <>
             {isCorrect && <p className={PREDICT_SUCCESS_CLASS}>✓ Correct — well predicted!</p>}
             {isDone && <p className={PREDICT_SUCCESS_CLASS}>✓ Marked complete.</p>}
-            {isWrong && (
-              <p className={PREDICT_HINT_CLASS}>Not quite — here&rsquo;s what it actually prints:</p>
-            )}
             <div className={PREDICT_REVEAL_LABEL_CLASS}>Correct output</div>
             <pre className={PREDICT_REVEAL_CLASS}>{expectedOutput}</pre>
           </>
@@ -81,7 +97,10 @@ export default function PredictPanel({
       )}
       {isWrong && (
         <div className={PREDICT_FOOTER_CLASS}>
-          <Button onClick={onUnderstood}>I understand now</Button>
+          <button type="button" className={PREDICT_SECONDARY_BUTTON_CLASS} onClick={onRedo}>
+            Redo
+          </button>
+          <Button onClick={onReveal}>Reveal answer</Button>
         </div>
       )}
     </div>

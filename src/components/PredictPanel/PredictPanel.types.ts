@@ -1,18 +1,20 @@
 /**
- * idle    — awaiting an answer
- * correct — the answer matched
- * wrong   — the answer missed (reveal + "I understand now")
- * done    — completed via "I understand now" after a wrong answer
+ * idle     — awaiting / editing an answer
+ * correct  — the answer matched (reveal expected output)
+ * wrong    — missed; offer Redo or Reveal answer (answer still hidden)
+ * done     — completed after revealing the answer
  */
 export type PredictStatus = 'idle' | 'correct' | 'wrong' | 'done'
 
 export interface PredictPanelProps {
   answer: string
   status: PredictStatus
-  /** Revealed once the answer is submitted (wrong, correct, or done). */
+  /** Shown after a correct submit, or after the student chooses Reveal answer. */
   expectedOutput: string
   onAnswerChange: (value: string) => void
   onSubmit: () => void
-  /** "I understand now" — completes the assignment after a wrong answer. */
-  onUnderstood: () => void
+  /** Redo — go back to editing without revealing the answer. */
+  onRedo: () => void
+  /** Reveal answer — show expected output and complete the assignment. */
+  onReveal: () => void
 }

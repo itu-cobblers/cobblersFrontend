@@ -5,19 +5,17 @@ import type { SubmissionResult } from '@types'
 import SubmitModal from './SubmitModal'
 
 const accepted: SubmissionResult = {
-  status: 'success',
-  stdout: 'Hi\n',
-  stderr: '',
-  accepted: true,
-  message: 'Submitted! ✅',
+  subId: 'sub-1',
+  passed: true,
+  result: { status: 'success', stdout: 'Hi\n', stderr: '' },
+  submittedAt: '2026-06-19T14:30:00Z',
 }
 
 const rejected: SubmissionResult = {
-  status: 'runtime_error',
-  stdout: '',
-  stderr: 'NullPointerException',
-  accepted: false,
-  message: 'Your code crashed.',
+  subId: 'sub-2',
+  passed: false,
+  result: { status: 'runtime_error', stdout: '', stderr: 'NullPointerException' },
+  submittedAt: '2026-06-19T14:31:00Z',
 }
 
 describe('SubmitModal', () => {
@@ -50,7 +48,7 @@ describe('SubmitModal', () => {
       }),
     )
     expect(screen.getByText('Submitted')).toBeInTheDocument()
-    expect(screen.getByText('Submitted! ✅')).toBeInTheDocument()
+    expect(screen.getByText(/Well done/)).toBeInTheDocument()
   })
 
   it('shows stderr for a rejected verdict', () => {
@@ -64,7 +62,7 @@ describe('SubmitModal', () => {
         onClose: vi.fn(),
       }),
     )
-    expect(screen.getByText('Not submitted')).toBeInTheDocument()
+    expect(screen.getByText('Not quite yet')).toBeInTheDocument()
     expect(screen.getByText('NullPointerException')).toBeInTheDocument()
   })
 })

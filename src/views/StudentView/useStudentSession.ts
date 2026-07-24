@@ -5,6 +5,7 @@ import type { ToastTone } from '@components'
 import { getStudentId, getDisplayName, setDisplayName } from '@lib/identity'
 import { getSession } from '@lib/sessionApi'
 import { joinSession } from '@lib/sessionHub'
+import { upsertStudent } from '@lib/studentApi'
 import { fetchStudentAssignmentSet, fetchAssignmentSet } from '@lib/assignmentSetApi'
 import {
   getPersistedStudentSession,
@@ -47,7 +48,8 @@ export function useStudentSession() {
     if (!persistedSession) return
 
     if (persistedSession.mode === 'solo') {
-      fetchStudentAssignmentSet()
+      upsertStudent(getDisplayName())
+        .then(() => fetchStudentAssignmentSet())
         .then((set) => setAssignmentSet(set))
         .catch(() => {
           clearPersistedStudentSession()
@@ -61,7 +63,9 @@ export function useStudentSession() {
       .then(async (session) => {
         if (!session.assignmentSetId) throw new Error('room has no assignment set')
         const studentId = getStudentId()
-        joinSession({ code: persistedSession.code, studentId, displayName: getDisplayName() }).catch(
+        const displayName = getDisplayName()
+        await upsertStudent(displayName)
+        joinSession({ code: persistedSession.code, studentId, displayName }).catch(
           (err: unknown) => {
             console.warn('[join] hub join failed:', err instanceof Error ? err.message : String(err))
           },
@@ -95,6 +99,8 @@ export function useStudentSession() {
       if (!session.assignmentSetId) throw new Error('room has no assignment set')
 
       const studentId = getStudentId() // ensure a persistent id exists before any submission
+      // Persist the student row before hub join / later submissions (FK required).
+      await upsertStudent(displayName)
       // Best-effort room membership (teacher roster + timer broadcasts); the
       // assignment set comes from REST either way.
       joinSession({ code: roomCode, studentId, displayName }).catch((err: unknown) => {
@@ -111,10 +117,12 @@ export function useStudentSession() {
   }
 
   async function handleStartSolo() {
-    setDisplayName(name.trim())
+    const displayName = name.trim()
+    setDisplayName(displayName)
     getStudentId() // ensure a persistent id exists before any solo submission
     setIsStartingSolo(true)
     try {
+      await upsertStudent(displayName)
       setAssignmentSet(await fetchStudentAssignmentSet())
       setPersistedStudentSession({ mode: 'solo' })
     } catch {

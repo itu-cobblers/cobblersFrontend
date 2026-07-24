@@ -45,6 +45,10 @@ vi.mock('@lib/sessionApi', () => ({
   getSession: vi.fn().mockResolvedValue({ code: 'ABCD1234', assignmentSetId: 'set-1' }),
 }))
 
+vi.mock('@lib/studentApi', () => ({
+  upsertStudent: vi.fn().mockResolvedValue(undefined),
+}))
+
 vi.mock('@lib/sessionHub', () => ({
   joinSession: vi.fn().mockResolvedValue(undefined),
 }))

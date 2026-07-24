@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { SubmissionResult } from '@types'
-import { submitCode } from '@lib/submissionApi'
+import { submitAssignment } from '@lib/submissionApi'
 
 interface UseSubmissionOptions {
   /** Cross-cutting effects on a result (mirror in terminal, grade the assignment). */
@@ -41,18 +41,17 @@ export function useSubmission({ onResult }: UseSubmissionOptions = {}): UseSubmi
     if (assignmentId === undefined) return null
     setIsSubmitting(true)
     try {
-      const r = await submitCode({ assignmentId, code })
+      const r = await submitAssignment({ assignmentId, content: code })
       setResult(r)
       onResult?.(code, r)
       return r
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err)
       setResult({
-        status: 'runtime_error',
-        stdout: '',
-        stderr: reason,
-        accepted: false,
-        message: 'Something went wrong submitting. Please try again.',
+        subId: '',
+        passed: false,
+        result: { status: 'runtime_error', stdout: '', stderr: reason },
+        submittedAt: new Date().toISOString(),
       })
       return null
     } finally {
