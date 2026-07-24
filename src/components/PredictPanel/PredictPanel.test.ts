@@ -8,7 +8,8 @@ const base = {
   expectedOutput: '1\n2\n3',
   onAnswerChange: vi.fn(),
   onSubmit: vi.fn(),
-  onUnderstood: vi.fn(),
+  onRedo: vi.fn(),
+  onReveal: vi.fn(),
 }
 
 describe('PredictPanel', () => {
@@ -24,24 +25,37 @@ describe('PredictPanel', () => {
     expect(screen.getByText('Submit answer').closest('button')).toBeDisabled()
   })
 
-  it('reveals the expected output and offers "I understand now" when wrong', () => {
-    const onUnderstood = vi.fn()
-    render(createElement(PredictPanel, { ...base, status: 'wrong', answer: 'nope', onUnderstood }))
+  it('offers Redo and Reveal answer when wrong, without revealing yet', () => {
+    const onRedo = vi.fn()
+    const onReveal = vi.fn()
+    render(
+      createElement(PredictPanel, {
+        ...base,
+        status: 'wrong',
+        answer: 'nope',
+        onRedo,
+        onReveal,
+      }),
+    )
+    expect(screen.queryByText('Correct output')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('Redo'))
+    expect(onRedo).toHaveBeenCalledOnce()
+    fireEvent.click(screen.getByText('Reveal answer'))
+    expect(onReveal).toHaveBeenCalledOnce()
+  })
+
+  it('shows a success note and expected output when correct', () => {
+    render(createElement(PredictPanel, { ...base, status: 'correct', answer: '1\n2\n3' }))
+    expect(screen.getByText(/well predicted/)).toBeInTheDocument()
+    expect(screen.getByText('Correct output')).toBeInTheDocument()
+  })
+
+  it('shows the expected output for the done (revealed) state', () => {
+    render(createElement(PredictPanel, { ...base, status: 'done', answer: 'nope' }))
+    expect(screen.getByText(/Marked complete/)).toBeInTheDocument()
     expect(screen.getByText('Correct output')).toBeInTheDocument()
     expect(
       screen.getByText((_, el) => el?.tagName === 'PRE' && el.textContent === '1\n2\n3'),
     ).toBeInTheDocument()
-    fireEvent.click(screen.getByText('I understand now'))
-    expect(onUnderstood).toHaveBeenCalledOnce()
-  })
-
-  it('shows a success note when correct', () => {
-    render(createElement(PredictPanel, { ...base, status: 'correct', answer: '1\n2\n3' }))
-    expect(screen.getByText(/well predicted/)).toBeInTheDocument()
-  })
-
-  it('shows a completed note for the done state', () => {
-    render(createElement(PredictPanel, { ...base, status: 'done', answer: 'nope' }))
-    expect(screen.getByText(/Marked complete/)).toBeInTheDocument()
   })
 })

@@ -13,7 +13,7 @@ import { useExecutor } from '@hooks/useExecutor'
 import { useAssignments } from '@hooks/useAssignments'
 import { useSubmission } from '@hooks/useSubmission'
 import { defaultStarter } from '@lib/defaultStarter'
-import { checkPrediction } from '@lib/quizApi'
+import { submitAssignment } from '@lib/submissionApi'
 import { ACTIVE_THEME } from '@themes'
 
 const noop = () => {
@@ -111,15 +111,30 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
   async function handlePredictSubmit() {
     if (active.kind !== 'predict') return
     const answer = answerByAssignment[active.id] ?? ''
-    const { correct } = await checkPrediction({
-      assignmentId: active.id,
-      answer,
-    })
-    setStatusByAssignment((prev) => ({ ...prev, [active.id]: correct ? 'correct' : 'wrong' }))
-    if (correct) assignmentProgress.complete(active.id)
+    try {
+      const submissionResult = await submitAssignment({
+        assignmentId: active.id,
+        content: answer,
+      })
+      // Server grades from Assignment.GradingJson `{ predict: { compare, expectedOutput } }`.
+      // `passed` is null only when the assignment has no grader — treat that as not correct.
+      const correct = submissionResult.passed === true
+      setStatusByAssignment((prev) => ({ ...prev, [active.id]: correct ? 'correct' : 'wrong' }))
+      if (correct) assignmentProgress.complete(active.id)
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : String(err)
+      setFeedback({
+        tone: 'hint',
+        message: `Could not submit your answer (${reason}). Please try again.`,
+      })
+    }
   }
 
-  function handlePredictUnderstood() {
+  function handlePredictRedo() {
+    setStatusByAssignment((prev) => ({ ...prev, [active.id]: 'idle' }))
+  }
+
+  function handlePredictReveal() {
     setStatusByAssignment((prev) => ({ ...prev, [active.id]: 'done' }))
     assignmentProgress.complete(active.id)
   }
@@ -155,7 +170,8 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
           expectedOutput: active.expectedOutput,
           onAnswerChange: handlePredictAnswerChange,
           onSubmit: handlePredictSubmit,
-          onUnderstood: handlePredictUnderstood,
+          onRedo: handlePredictRedo,
+          onReveal: handlePredictReveal,
         },
       }
     }
