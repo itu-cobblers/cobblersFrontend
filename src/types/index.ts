@@ -6,7 +6,6 @@ export type {
   Signals,
   CheckResult,
   Verdict,
-  Harness,
   Assignment,
   CodeAssignment,
   PredictAssignment,

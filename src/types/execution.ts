@@ -10,8 +10,9 @@ export type ExecuteStatus = 'success' | 'compile_error' | 'runtime_error'
 
 /**
  * POST /api/execute request. `code` is single-file sugar (one `Main.java`);
- * `files` + `entryClass` are used for multi-file runs (harness / mini-projects).
- * `stdin` feeds interactive programs. `code` and `files` are mutually exclusive.
+ * `files` + `entryClass` are used for multi-file runs (class-authoring
+ * assignments' `starterFiles` / mini-projects). `stdin` feeds interactive
+ * programs. `code` and `files` are mutually exclusive.
  */
 export interface ExecuteRequest {
   code?: string

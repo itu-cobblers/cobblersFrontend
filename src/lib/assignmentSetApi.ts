@@ -12,7 +12,7 @@
  * into the frontend's discriminated `Assignment` union. Grading rules live
  * server-side (`Assignment.GradingJson`); they are not sent to the client.
  */
-import type { Harness, Assignment, AssignmentKind, AssignmentSet, LessonBlock } from '@types'
+import type { Assignment, AssignmentKind, AssignmentSet, LessonBlock, SourceFile } from '@types'
 
 /** The assignment set the solo cohort hardcodes (CONTRACT.md, "Assignments"). */
 export const SOLO_ASSIGNMENT_SET_ID = 'all-assignments-for-solo-2026'
@@ -53,8 +53,8 @@ function toAssignment(dto: ApiAssignment): Assignment {
       const content = dto.content as {
         starter?: string
         stdin?: string
-        harness?: Harness
-        solutionFile?: string
+        starterFiles?: SourceFile[]
+        entryClass?: string
       }
       return { ...base, kind: 'code', ...content }
     }

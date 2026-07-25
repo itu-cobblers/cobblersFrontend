@@ -1,5 +1,14 @@
 import type { AssignmentSet } from '@types'
-import { Toolbar, AssignmentPanel, CodeEditor, OutputPanel, PredictPanel, ProjectPanel, SubmitModal } from '@components'
+import {
+  Toolbar,
+  AssignmentPanel,
+  CodeEditor,
+  FileTabs,
+  OutputPanel,
+  PredictPanel,
+  ProjectPanel,
+  SubmitModal,
+} from '@components'
 import { useStudentWorkspace } from './StudentView.hooks'
 import {
   STUDENT_LAYOUT_CLASS,
@@ -37,6 +46,7 @@ export default function StudentIde({
           <ProjectPanel {...activePanel.project} />
         ) : (
           <div className={STUDENT_EDITOR_COLUMN_CLASS}>
+            {activePanel.kind === 'code' && activePanel.tabs && <FileTabs {...activePanel.tabs} />}
             <CodeEditor {...activePanel.editor} />
             {activePanel.kind === 'code' ? (
               <OutputPanel {...activePanel.output} />

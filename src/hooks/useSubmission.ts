@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import type { SubmissionResult } from '@types'
+import type { SourceFile, SubmissionResult } from '@types'
 import { submitAssignment } from '@lib/submissionApi'
 
 interface UseSubmissionOptions {
   /** Cross-cutting effects on a result (mirror in terminal, grade the assignment). */
-  onResult?: (code: string, result: SubmissionResult) => void
+  onResult?: (content: string | SourceFile[], result: SubmissionResult) => void
 }
 
 export interface UseSubmission {
@@ -13,7 +13,8 @@ export interface UseSubmission {
   result: SubmissionResult | null
   open: () => void
   close: () => void
-  confirm: (code: string, assignmentId: number | undefined) => Promise<SubmissionResult | null>
+  /** `content` is a single Java source string, or a `{ name, content }[]` file list for multi-file code assignments. */
+  confirm: (content: string | SourceFile[], assignmentId: number | undefined) => Promise<SubmissionResult | null>
 }
 
 /**
@@ -37,13 +38,16 @@ export function useSubmission({ onResult }: UseSubmissionOptions = {}): UseSubmi
     setResult(null)
   }
 
-  async function confirm(code: string, assignmentId: number | undefined): Promise<SubmissionResult | null> {
+  async function confirm(
+    content: string | SourceFile[],
+    assignmentId: number | undefined,
+  ): Promise<SubmissionResult | null> {
     if (assignmentId === undefined) return null
     setIsSubmitting(true)
     try {
-      const r = await submitAssignment({ assignmentId, content: code })
+      const r = await submitAssignment({ assignmentId, content })
       setResult(r)
-      onResult?.(code, r)
+      onResult?.(content, r)
       return r
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err)
