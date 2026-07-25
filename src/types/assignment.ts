@@ -59,23 +59,23 @@ interface AssignmentBase {
   kind: AssignmentKind
 }
 
-/** A grader harness: extra files compiled WITH the student's code, run via `entryClass`. */
-export interface Harness {
-  files: SourceFile[]
-  entryClass: string
-}
-
 /** Write-and-run Java assignment (coding exercises, incl. class-authoring). */
 export interface CodeAssignment extends AssignmentBase {
   kind: 'code'
-  /** Initial Java shown when the assignment is opened. */
+  /** Initial Java shown when the assignment is opened (single-file assignments). */
   starter?: string
   /** Canned stdin for interactive programs (e.g. the guess game). */
   stdin?: string
-  /** Hidden grader code compiled with the student's file (e.g. a Main that drives a class). */
-  harness?: Harness
-  /** Filename for the student's code when a harness is used (e.g. `Container.java`). Default `Main.java`. */
-  solutionFile?: string
+  /**
+   * Multiple editable files shown as tabs (Day-3 class-authoring assignments —
+   * `person-class`, `container-class`, `flight-ticket-class` — e.g. a
+   * driver `Main.java` + a stubbed `Person.java`). Mutually exclusive with
+   * `starter`. File names are fixed by the assignment and are never renamed
+   * by the student, only their contents change.
+   */
+  starterFiles?: SourceFile[]
+  /** The class whose `main` is run/submitted when `starterFiles` is set. */
+  entryClass?: string
   /** Passing criteria. Omit ⇒ never auto-completes. */
   check?: (result: CheckResult) => Verdict
 }

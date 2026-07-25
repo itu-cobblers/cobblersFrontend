@@ -1,4 +1,4 @@
-import type { SubmissionResult } from '@types'
+import type { SourceFile, SubmissionResult } from '@types'
 import { getStudentId } from './identity'
 
 /**
@@ -8,16 +8,19 @@ import { getStudentId } from './identity'
  *   request:  { studentId, content } (+ optional sessionId when in a room)
  *   response: { subId, passed, result, submittedAt }
  *
- * `content` is the student's Java source for `code`, their typed prediction for
- * `predict`, or (later) a file list for `project`. Server-side GradingJson
- * decides `passed` — including predict's `{ "predict": { compare, expectedOutput } }`.
+ * `content` is the student's Java source for single-file `code` assignments,
+ * their typed prediction for `predict`, or a `{ name, content }[]` file list
+ * for multi-file `code` assignments (Day-3 class-authoring — `person-class`,
+ * `container-class`, `flight-ticket-class` — one entry per tab). Server-side
+ * GradingJson decides `passed` — including predict's
+ * `{ "predict": { compare, expectedOutput } }`.
  */
 export async function submitAssignment({
   assignmentId,
   content,
 }: {
   assignmentId: number
-  content: string
+  content: string | SourceFile[]
 }): Promise<SubmissionResult> {
   const res = await fetch(`/api/assignments/${assignmentId}/submissions`, {
     method: 'POST',

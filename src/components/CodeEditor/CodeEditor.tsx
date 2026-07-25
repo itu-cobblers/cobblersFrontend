@@ -7,7 +7,7 @@ import { useCodeEditorSetup } from './CodeEditor.hooks'
  * Monaco editor pane. Controlled: `value` + `onChange` are owned by the caller.
  * Editor setup lives in useCodeEditorSetup.
  */
-export default function CodeEditor({ value, onChange, isReadOnly = false }: CodeEditorProps) {
+export default function CodeEditor({ value, onChange, isReadOnly = false, path }: CodeEditorProps) {
   const { handleBeforeMount, handleMount } = useCodeEditorSetup()
 
   function handleChange(next: string | undefined) {
@@ -19,6 +19,7 @@ export default function CodeEditor({ value, onChange, isReadOnly = false }: Code
       <Editor
         height="100%"
         language="java"
+        path={path}
         value={value}
         onChange={handleChange}
         theme={EDITOR_THEME}

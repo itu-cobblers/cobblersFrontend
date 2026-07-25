@@ -37,6 +37,9 @@ export type { ProjectPanelProps } from './ProjectPanel'
 export { CodeEditor, useCodeEditorSetup } from './CodeEditor'
 export type { CodeEditorProps } from './CodeEditor'
 
+export { FileTabs } from './FileTabs'
+export type { FileTabsProps } from './FileTabs'
+
 export { AssignmentStepper } from './AssignmentStepper'
 export type { AssignmentStepperProps, StepperStep } from './AssignmentStepper'
 

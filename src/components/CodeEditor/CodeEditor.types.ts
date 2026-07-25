@@ -3,4 +3,6 @@ export interface CodeEditorProps {
   onChange: (value: string) => void
   /** Render the editor read-only (e.g. predict-the-output quizzes). */
   isReadOnly?: boolean
+  /** Distinct Monaco model path per open file (multi-file tabs) so each file keeps its own undo history. */
+  path?: string
 }

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ExecuteRequest, SourceFile, Assignment, AssignmentSet } from '@types'
 import type {
   CodeEditorProps,
+  FileTabsProps,
   OutputPanelProps,
   PredictPanelProps,
   PredictStatus,
@@ -22,15 +23,33 @@ const noop = () => {
 
 /** The center/right area to render for the active assignment — discriminated by kind. */
 export type ActivePanel =
-  | { kind: 'code'; editor: CodeEditorProps; output: OutputPanelProps }
+  | { kind: 'code'; editor: CodeEditorProps; output: OutputPanelProps; tabs?: FileTabsProps }
   | { kind: 'predict'; editor: CodeEditorProps; predict: PredictPanelProps }
   | { kind: 'project'; project: ProjectPanelProps }
 
-/** Seed editor content for every code assignment from its starter. */
+/** Seed editor content for every single-file code assignment from its starter. */
 function initialCode(assignmentList: Assignment[]): Record<number, string> {
   const map: Record<number, string> = {}
   for (const assignment of assignmentList) {
-    if (assignment.kind === 'code') map[assignment.id] = assignment.starter ?? defaultStarter
+    if (assignment.kind === 'code' && !assignment.starterFiles) map[assignment.id] = assignment.starter ?? defaultStarter
+  }
+  return map
+}
+
+/** Seed per-file tabs for every multi-file (class-authoring) code assignment from its `starterFiles`. */
+function initialFiles(assignmentList: Assignment[]): Record<number, SourceFile[]> {
+  const map: Record<number, SourceFile[]> = {}
+  for (const assignment of assignmentList) {
+    if (assignment.kind === 'code' && assignment.starterFiles) map[assignment.id] = assignment.starterFiles
+  }
+  return map
+}
+
+/** Seed the active tab (first file) for every multi-file code assignment. */
+function initialActiveFile(assignmentList: Assignment[]): Record<number, string> {
+  const map: Record<number, string> = {}
+  for (const assignment of assignmentList) {
+    if (assignment.kind === 'code' && assignment.starterFiles?.[0]) map[assignment.id] = assignment.starterFiles[0].name
   }
   return map
 }
@@ -46,11 +65,23 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
   const [answerByAssignment, setAnswerByAssignment] = useState<Record<number, string>>({})
   const [statusByAssignment, setStatusByAssignment] = useState<Record<number, PredictStatus>>({})
   const [filesByAssignment, setFilesByAssignment] = useState<Record<number, SourceFile[]>>({})
+  // Multi-file class-authoring assignments (person-class, container-class, flight-ticket-class):
+  // one entry per assignment id holding every tab's current file content, plus which tab is active.
+  const [multiFilesByAssignment, setMultiFilesByAssignment] = useState<Record<number, SourceFile[]>>(() =>
+    initialFiles(assignments),
+  )
+  const [activeFileByAssignment, setActiveFileByAssignment] = useState<Record<number, string>>(() =>
+    initialActiveFile(assignments),
+  )
   const [feedback, setFeedback] = useState<FeedbackBannerProps | null>(null)
 
   const executor = useExecutor()
   const assignmentProgress = useAssignments(assignments)
   const active = assignments[assignmentProgress.activeAssignment]
+
+  const activeFiles = active.kind === 'code' ? multiFilesByAssignment[active.id] : undefined
+  const isMultiFile = Boolean(activeFiles && activeFiles.length > 0)
+  const activeFileName = activeFiles?.length ? activeFileByAssignment[active.id] ?? activeFiles[0].name : undefined
 
   const submission = useSubmission({
     onResult: (_submittedCode, submissionResult) => {
@@ -69,27 +100,38 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
   }
 
   function handleEditorChange(value: string) {
+    if (isMultiFile && activeFileName) {
+      setMultiFilesByAssignment((prev) => ({
+        ...prev,
+        [active.id]: (prev[active.id] ?? []).map((file) =>
+          file.name === activeFileName ? { ...file, content: value } : file,
+        ),
+      }))
+      return
+    }
     setCodeByAssignment((prev) => ({ ...prev, [active.id]: value }))
   }
 
-  function buildCodeRequest(code: string): ExecuteRequest | null {
+  function handleSelectFile(name: string) {
+    setActiveFileByAssignment((prev) => ({ ...prev, [active.id]: name }))
+  }
+
+  function buildCodeRequest(): ExecuteRequest | null {
     if (active.kind !== 'code') return null
-    if (active.harness) {
-      return {
-        files: [{ name: active.solutionFile ?? 'Main.java', content: code }, ...active.harness.files],
-        entryClass: active.harness.entryClass,
-        stdin: active.stdin,
-      }
+    if (isMultiFile) {
+      return { files: activeFiles ?? [], entryClass: active.entryClass, stdin: active.stdin }
     }
-    return { code, stdin: active.stdin }
+    return { code: codeByAssignment[active.id] ?? '', stdin: active.stdin }
   }
 
   async function handleRunCode() {
-    const code = codeByAssignment[active.id] ?? ''
-    const request = buildCodeRequest(code)
+    const request = buildCodeRequest()
     if (!request) return
     const data = await executor.run(request)
     if (!data) return
+    // check() is only ever attached to single-file assignments — multi-file
+    // (starterFiles) assignments are graded server-side on submit.
+    const code = isMultiFile ? '' : codeByAssignment[active.id] ?? ''
     const verdict = assignmentProgress.grade(code, data)
     // Feedback stays up while the student edits; it is replaced on the next
     // run and cleared on assignment switch. Submission feedback lives in the modal.
@@ -101,7 +143,8 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
   }
 
   function handleConfirmSubmit() {
-    submission.confirm(codeByAssignment[active.id] ?? '', assignmentProgress.activeAssignmentId)
+    const content = isMultiFile ? activeFiles ?? [] : codeByAssignment[active.id] ?? ''
+    submission.confirm(content, assignmentProgress.activeAssignmentId)
   }
 
   function handlePredictAnswerChange(value: string) {
@@ -186,6 +229,15 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
           onFilesChange: handleProjectFilesChange,
           onRun: handleProjectRun,
         },
+      }
+    }
+    if (isMultiFile) {
+      const activeFile = activeFiles?.find((file) => file.name === activeFileName)
+      return {
+        kind: 'code',
+        editor: { value: activeFile?.content ?? '', onChange: handleEditorChange, path: activeFileName },
+        output: { output: executor.output, status: executor.status },
+        tabs: { files: activeFiles ?? [], activeFileName: activeFileName ?? '', onSelectFile: handleSelectFile },
       }
     }
     return {
