@@ -54,7 +54,7 @@ vi.mock('@lib/assignmentSetApi', () => ({
 
 vi.mock('@lib/sessionApi', () => ({
   getSession: vi.fn().mockResolvedValue({ code: 'ABCD1234', assignmentSetId: 'set-1' }),
-  fetchResumeSuggestion: vi.fn().mockResolvedValue(null),
+  fetchTodayLatestSession: vi.fn().mockResolvedValue(null),
 }))
 
 vi.mock('@lib/submissionApi', () => ({
@@ -67,6 +67,7 @@ vi.mock('@lib/studentApi', () => ({
 
 interface JoinSessionCallbacks {
   onAssignmentFocused?: (id: number) => void
+  onSessionEnded?: () => void
 }
 let capturedJoinCallbacks: JoinSessionCallbacks | null = null
 vi.mock('@lib/sessionHub', () => ({
@@ -85,16 +86,15 @@ describe('StudentView', () => {
 
   it('shows the entry screen first, not the IDE', () => {
     render(createElement(StudentView))
-    expect(screen.getByText('Welcome to bootIT')).toBeInTheDocument()
+    expect(screen.getByText('Welcome to BootIT')).toBeInTheDocument()
     expect(screen.queryByTestId('editor')).not.toBeInTheDocument()
     expect(screen.queryByRole('navigation', { name: 'Assignments' })).not.toBeInTheDocument()
   })
 
   it('reveals the workspace chrome after starting solo practice', async () => {
     render(createElement(StudentView))
-    fireEvent.change(screen.getByPlaceholderText('e.g. Maria'), { target: { value: 'Maria' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Solo practice' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Start solo practice' }))
+    fireEvent.change(screen.getByRole('textbox', { name: 'Your name' }), { target: { value: 'Maria' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Solo Practice' }))
 
     expect(await screen.findByRole('navigation', { name: 'Assignments' })).toBeInTheDocument()
     expect(screen.getByText('Terminal')).toBeInTheDocument()
@@ -141,6 +141,18 @@ describe('StudentView', () => {
     expect(screen.queryByText('Follow →')).not.toBeInTheDocument()
   })
 
+  it('bounces back to the entry screen when the teacher ends the session', async () => {
+    localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'join', code: 'ABCD1234' }))
+    render(createElement(StudentView))
+    await screen.findByRole('navigation', { name: 'Assignments' })
+
+    capturedJoinCallbacks?.onSessionEnded?.()
+
+    expect(await screen.findByText('Welcome to BootIT')).toBeInTheDocument()
+    expect(screen.getByText('This session has ended — ask your teacher for the new code.')).toBeInTheDocument()
+    expect(localStorage.getItem('bootit.studentSession')).toBeNull()
+  })
+
   it('leaving the session clears storage and returns to the entry screen', async () => {
     localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'solo' }))
     render(createElement(StudentView))
@@ -148,7 +160,7 @@ describe('StudentView', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Exit' }))
 
-    expect(screen.getByText('Welcome to bootIT')).toBeInTheDocument()
+    expect(screen.getByText('Welcome to BootIT')).toBeInTheDocument()
     expect(localStorage.getItem('bootit.studentSession')).toBeNull()
   })
 })

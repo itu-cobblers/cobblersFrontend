@@ -11,6 +11,7 @@ vi.mock('@lib/sessionApi', () => ({
   createSession: vi.fn().mockResolvedValue({ code: 'ABCD1234' }),
   getSession: vi.fn().mockResolvedValue({ code: 'WXYZ5678', assignmentSetId: 'set-1' }),
   startTimer: vi.fn().mockResolvedValue({ endsAt: '2026-07-21T12:00:00.000Z' }),
+  endSession: vi.fn().mockResolvedValue(undefined),
 }))
 
 vi.mock('@lib/sessionHub', () => ({

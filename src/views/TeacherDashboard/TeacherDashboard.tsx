@@ -39,6 +39,7 @@ export default function TeacherDashboard() {
     previewTitle,
     sessionCode,
     isCreatingSession,
+    isEndingSession,
     sessionError,
     students,
     minutes,
@@ -67,7 +68,7 @@ export default function TeacherDashboard() {
             <span className={TEACHER_ROOM_CODE_CLASS}>
               Room: <strong>{sessionCode}</strong>
             </span>
-            <Button variant="ghost" onClick={handleEndSession}>
+            <Button variant="ghost" onClick={handleEndSession} isLoading={isEndingSession}>
               End session
             </Button>
           </>

@@ -268,10 +268,10 @@
 }
 .bootit-caret {
   display: inline-block;
-  width: 3px;
-  height: 1.05em;
+  width: 4px;
+  height: 1.8em;
   background: color-mix(in oklab, var(--accent) 70%, white);
-  margin-left: 3px;
+  margin-left: 0px;
   vertical-align: -0.12em;
   border-radius: 1px;
   animation: bootit-caret 1s step-end infinite;
@@ -282,6 +282,13 @@
 .bootit-caret.is-typing {
   animation: none;
   opacity: 1;
+}
+
+/* Entry-screen name prompt: a fixed-width (monospace) input with the native
+   caret hidden, so `.bootit-caret` can be positioned in `ch` units right
+   after the typed text — see EntryPortal.tsx. */
+.bootit-name-input {
+  caret-color: transparent;
 }
 
 /* Keeps a region scrollable while hiding its scrollbar chrome (e.g. the

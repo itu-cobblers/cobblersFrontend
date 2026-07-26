@@ -1,6 +1,6 @@
-import classNames from 'classnames'
-import { TextField } from '@components/TextField'
-import type { EntryPortalProps, JoinMode } from './EntryPortal.types.ts'
+import { type ChangeEvent } from 'react'
+import { Icon } from '@components/Icon'
+import type { EntryPortalProps } from './EntryPortal.types.ts'
 import {
   ENTRY_PORTAL_SCREEN_CLASS,
   ENTRY_PORTAL_GRID_CLASS,
@@ -14,43 +14,44 @@ import {
   ENTRY_PORTAL_TITLE_CLASS,
   ENTRY_PORTAL_SUBTITLE_CLASS,
   ENTRY_PORTAL_NAME_LABEL_CLASS,
+  ENTRY_PORTAL_NAME_ROW_CLASS,
+  ENTRY_PORTAL_NAME_MEASURE_CLASS,
   ENTRY_PORTAL_NAME_INPUT_CLASS,
-  ENTRY_PORTAL_TOGGLE_CLASS,
-  ENTRY_PORTAL_TOGGLE_BTN_BASE_CLASS,
-  ENTRY_PORTAL_TOGGLE_BTN_ACTIVE_CLASS,
-  ENTRY_PORTAL_TOGGLE_BTN_IDLE_CLASS,
-  ENTRY_PORTAL_FIELD_CLASS,
-  ENTRY_PORTAL_FIELD_LABEL_CLASS,
-  ENTRY_PORTAL_HINT_CLASS,
   ENTRY_PORTAL_CTA_ROW_CLASS,
   ENTRY_PORTAL_SOLO_BTN_CLASS,
   ENTRY_PORTAL_JOIN_BTN_CLASS,
+  ENTRY_PORTAL_JOIN_BTN_CODE_CLASS,
+  ENTRY_PORTAL_NO_SESSION_ROW_CLASS,
+  ENTRY_PORTAL_REFRESH_BTN_CLASS,
   ENTRY_PORTAL_FOOTER_CLASS,
-  ENTRY_PORTAL_TOGGLE_LABELS,
-  ENTRY_PORTAL_SOLO_HINT,
+  ENTRY_PORTAL_NO_SESSION_LABEL,
+  ENTRY_PORTAL_CHECKING_LABEL,
 } from './EntryPortal.constants.ts'
 
-const MODES: JoinMode[] = ['join', 'solo']
-
 /**
- * Full-screen "boot" entry — type your name, then join a class or practice
- * solo. Presentational only; the student flow owns the join/solo logic via
- * `src/views/EntryPortal`. Designed to be reused by the teacher gate later.
+ * Full-screen "boot" entry — type your name, then either join today's
+ * session with one click (no code to type — see `todayLatestSessionCode`)
+ * or start solo practice. Presentational only; the student flow owns the
+ * join/solo logic via `src/views/StudentView/useStudentSession`.
  */
 export default function EntryPortal({
   name,
-  code,
-  mode,
+  isReturningStudent,
+  todayLatestSessionCode,
   isJoining,
   isStartingSolo,
   onNameChange,
-  onCodeChange,
-  onModeChange,
-  onJoin,
+  onJoinToday,
   onStartSolo,
+  onRefreshTodayLatestSession,
 }: EntryPortalProps) {
   const hasName = Boolean(name.trim())
-  const isJoin = mode === 'join'
+  const isCheckingSession = todayLatestSessionCode === undefined
+  const canJoinToday = hasName && !isCheckingSession && todayLatestSessionCode !== null && !isJoining
+
+  function handleNameInputChange(event: ChangeEvent<HTMLInputElement>) {
+    onNameChange(event.target.value)
+  }
 
   return (
     <main className={ENTRY_PORTAL_SCREEN_CLASS}>
@@ -62,68 +63,71 @@ export default function EntryPortal({
       <header className={ENTRY_PORTAL_HEADER_CLASS}>
         <div className={ENTRY_PORTAL_BRAND_CLASS}>
           <span className={ENTRY_PORTAL_DOT_CLASS} />
-          <span>ITU</span>
-          <span className="text-foreground/25">/</span>
-          <span className="text-foreground/90">BOOTIT</span>
+          <span>IT University of Copenhagen</span>
         </div>
       </header>
 
       <section className={ENTRY_PORTAL_CENTER_CLASS}>
-        <h1 className={ENTRY_PORTAL_TITLE_CLASS}>Welcome to bootIT</h1>
-        <p className={ENTRY_PORTAL_SUBTITLE_CLASS}>Three days from zero to Java — welcome to ITU.</p>
+        <h1 className={ENTRY_PORTAL_TITLE_CLASS}>
+          {isReturningStudent && name.trim() ? `Welcome to BootIT, ${name.trim()}` : 'Welcome to BootIT'}
+        </h1>
+        <p className={ENTRY_PORTAL_SUBTITLE_CLASS}>Your first step in programming</p>
 
-        <p className={ENTRY_PORTAL_NAME_LABEL_CLASS}>Your name — anything you'd like to be called</p>
-        <TextField
-          value={name}
-          onChange={onNameChange}
-          placeholder="e.g. Maria"
-          autoFocus
-          className={ENTRY_PORTAL_NAME_INPUT_CLASS}
-        />
-
-        <div className={ENTRY_PORTAL_TOGGLE_CLASS}>
-          {MODES.map((option) => (
-            <button
-              key={option}
-              type="button"
-              className={classNames(ENTRY_PORTAL_TOGGLE_BTN_BASE_CLASS, {
-                [ENTRY_PORTAL_TOGGLE_BTN_ACTIVE_CLASS]: mode === option,
-                [ENTRY_PORTAL_TOGGLE_BTN_IDLE_CLASS]: mode !== option,
-              })}
-              onClick={() => onModeChange(option)}
-            >
-              {ENTRY_PORTAL_TOGGLE_LABELS[option]}
-            </button>
-          ))}
+        <p className={ENTRY_PORTAL_NAME_LABEL_CLASS}>Please type anything you'd like to be called</p>
+        <div className={ENTRY_PORTAL_NAME_ROW_CLASS}>
+          <span className={ENTRY_PORTAL_NAME_MEASURE_CLASS}>
+            <input
+              type="text"
+              value={name}
+              onChange={handleNameInputChange}
+              aria-label="Your name"
+              autoFocus
+              className={ENTRY_PORTAL_NAME_INPUT_CLASS}
+            />
+            <span className="bootit-caret" aria-hidden="true" />
+          </span>
         </div>
 
-        {isJoin ? (
-          <div className={ENTRY_PORTAL_FIELD_CLASS}>
-            <p className={ENTRY_PORTAL_FIELD_LABEL_CLASS}>Class code</p>
-            <TextField value={code} onChange={onCodeChange} placeholder="e.g. ABCD" />
-          </div>
-        ) : (
-          <p className={ENTRY_PORTAL_HINT_CLASS}>{ENTRY_PORTAL_SOLO_HINT}</p>
-        )}
-
         <div className={ENTRY_PORTAL_CTA_ROW_CLASS}>
-          {isJoin ? (
-            <button
-              type="button"
-              onClick={onJoin}
-              disabled={!hasName || !code.trim() || isJoining}
-              className={ENTRY_PORTAL_JOIN_BTN_CLASS}
-            >
-              {isJoining ? 'Joining…' : 'Join a class'}
-            </button>
+          <button
+            type="button"
+            onClick={onStartSolo}
+            disabled={!hasName || isStartingSolo}
+            className={ENTRY_PORTAL_SOLO_BTN_CLASS}
+          >
+            {isStartingSolo ? 'Starting…' : 'Solo Practice'}
+          </button>
+          {!isCheckingSession && todayLatestSessionCode === null ? (
+            <div className={ENTRY_PORTAL_NO_SESSION_ROW_CLASS}>
+              <span>{ENTRY_PORTAL_NO_SESSION_LABEL}</span>
+              <button
+                type="button"
+                onClick={onRefreshTodayLatestSession}
+                aria-label="Check again for a session"
+                title="Check again for a session"
+                className={ENTRY_PORTAL_REFRESH_BTN_CLASS}
+              >
+                <Icon name="refresh" />
+              </button>
+            </div>
           ) : (
             <button
               type="button"
-              onClick={onStartSolo}
-              disabled={!hasName || isStartingSolo}
-              className={ENTRY_PORTAL_SOLO_BTN_CLASS}
+              onClick={onJoinToday}
+              disabled={!canJoinToday}
+              className={ENTRY_PORTAL_JOIN_BTN_CLASS}
             >
-              {isStartingSolo ? 'Starting…' : 'Start solo practice'}
+              {isJoining ? (
+                'Joining…'
+              ) : isCheckingSession ? (
+                ENTRY_PORTAL_CHECKING_LABEL
+              ) : (
+                <>
+                  Join current Session{' '}
+                  <span className={ENTRY_PORTAL_JOIN_BTN_CODE_CLASS}>{todayLatestSessionCode}</span>{' '}
+                  <span aria-hidden="true">&rarr;</span>
+                </>
+              )}
             </button>
           )}
         </div>

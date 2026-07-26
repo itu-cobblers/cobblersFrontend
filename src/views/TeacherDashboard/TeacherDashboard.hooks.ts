@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createSession, getSession, startTimer } from '@lib/sessionApi'
+import { createSession, getSession, startTimer, endSession } from '@lib/sessionApi'
 import { fetchAssignmentSets, fetchAssignmentSet, type AssignmentSetSummary } from '@lib/assignmentSetApi'
 import { groupAssignments } from '@lib/assignmentSet'
 import { observeSession, focusAssignment, type Student } from '@lib/sessionHub'
@@ -20,6 +20,7 @@ export function useTeacherSession() {
 
   const [sessionCode, setSessionCode] = useState<string | null>(null)
   const [isCreatingSession, setIsCreatingSession] = useState(false)
+  const [isEndingSession, setIsEndingSession] = useState(false)
   const [sessionError, setSessionError] = useState<string | null>(null)
 
   const [students, setStudents] = useState<RosterEntry[]>([])
@@ -167,7 +168,24 @@ export function useTeacherSession() {
     setMinutes(Number(value))
   }
 
-  function handleEndSession() {
+  /**
+   * The teacher's manual "End session" action: marks the room ended in the DB
+   * (`POST /api/sessions/:code/end`), which fans out `SessionEnded` over the
+   * hub so any still-connected students bounce back to their entry screen —
+   * then clears the local teacher-side state regardless of the request's
+   * outcome, since there's nothing useful to keep around either way.
+   */
+  async function handleEndSession() {
+    if (sessionCode) {
+      setIsEndingSession(true)
+      try {
+        await endSession(sessionCode)
+      } catch (err) {
+        console.warn('[teacher] endSession failed:', err instanceof Error ? err.message : String(err))
+      } finally {
+        setIsEndingSession(false)
+      }
+    }
     clearPersistedTeacherSession()
     setSessionCode(null)
     setStudents([])
@@ -200,6 +218,7 @@ export function useTeacherSession() {
     previewTitle,
     sessionCode,
     isCreatingSession,
+    isEndingSession,
     sessionError,
     students,
     minutes,

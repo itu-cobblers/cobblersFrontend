@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react'
-import type { AssignmentSet, ResumeSuggestion, SubmissionHistoryItem } from '@types'
+import { useEffect, useRef, useState } from 'react'
+import type { AssignmentSet, SubmissionHistoryItem } from '@types'
 import type { JoinMode } from '@components'
 import type { ToastTone } from '@components'
 import { getStudentId, getDisplayName, setDisplayName } from '@lib/identity'
 import { upsertStudent } from '@lib/studentApi'
-import { getSession, fetchResumeSuggestion } from '@lib/sessionApi'
+import { getSession, fetchTodayLatestSession, type SessionInfo } from '@lib/sessionApi'
 import { joinSession } from '@lib/sessionHub'
 import { fetchStudentAssignmentSet, fetchAssignmentSet } from '@lib/assignmentSetApi'
 import { fetchSubmissionHistory } from '@lib/submissionApi'
@@ -20,24 +20,34 @@ interface Toast {
 }
 
 const TOAST_DURATION_MS = 3500
+// The teacher's "end session" broadcast reaches the student slightly before
+// the backend's own today-latest lookup stops returning that room (API lag)
+// — an immediate re-fetch right after bouncing to the entry screen would
+// just get the same, now-stale, code back. Wait this long before retrying.
+const SESSION_ENDED_REFETCH_DELAY_MS = 2000
 
 /**
- * Student entry: pick a display name, then either Join a class (needs a class
- * code) or Solo Practice. Both resolve to an `assignmentSet` that the caller uses to
- * reveal the IDE. Until then the student sees the entry screen.
+ * Student entry: pick a display name, then either join today's session (one
+ * click — no code to type, see `todayLatestSession`) or start Solo Practice.
+ * Both resolve to an `assignmentSet` that the caller uses to reveal the IDE.
+ * Until then the student sees the entry screen.
  *
  * Join: GET /api/sessions/:code resolves the room's assignment set (404 ⇒ toast),
  * then the SignalR JoinSession is attempted best-effort (roster + timer) —
  * content still loads if the hub hiccups. Solo: the hardcoded all-assignments set.
  *
  * Also owns two cross-day concerns that don't depend on which screen is
- * showing (entry or IDE): the "welcome back, join today's session?" resume
- * prompt (CONTRACT.md S9) and the student's full submission history — both
- * fetched once identity exists, regardless of join/solo/no-session-yet.
+ * showing (entry or IDE): `GET /api/sessions/today-latest` (today's newest
+ * still-active room, so the entry screen can offer a one-click join) and the
+ * student's full submission history — both fetched once identity exists,
+ * regardless of join/solo/no-session-yet.
  */
 export function useStudentSession() {
   // Read once on mount; drives the lazy initial state below and the rehydrate effect.
   const [persistedSession] = useState(getPersistedStudentSession)
+  // A non-empty saved name means this browser has been through entry before —
+  // drives the "Welcome back" vs "Welcome to bootIT" headline, nothing more.
+  const [isReturningStudent] = useState(() => Boolean(getDisplayName()))
   const [name, setName] = useState(getDisplayName)
   const [code, setCode] = useState(() => (persistedSession?.mode === 'join' ? persistedSession.code : ''))
   const [mode, setMode] = useState<JoinMode>(() => (persistedSession?.mode === 'solo' ? 'solo' : 'join'))
@@ -52,11 +62,28 @@ export function useStudentSession() {
   const [catalog, setCatalog] = useState<AssignmentSet | null>(null)
   const [submissionHistory, setSubmissionHistory] = useState<SubmissionHistoryItem[]>([])
   const [isHistoryLoading, setIsHistoryLoading] = useState(true)
-  const [resumeSuggestion, setResumeSuggestion] = useState<ResumeSuggestion | null>(null)
-  const [isAcceptingSuggestion, setIsAcceptingSuggestion] = useState(false)
+  // Today's newest still-active room — powers the entry screen's one-click
+  // "Join session (CODE)" button; `undefined` while loading, `null` once
+  // resolved to "nothing to join today".
+  const [todayLatestSession, setTodayLatestSession] = useState<SessionInfo | null | undefined>(undefined)
   // The assignment the teacher is currently focused on, broadcast over the
   // hub (best-effort — join-mode only, `null` in solo practice or offline).
   const [teacherFocusedAssignmentId, setTeacherFocusedAssignmentId] = useState<number | null>(null)
+  // Tracks the delayed re-fetch scheduled after a session-ended bounce, so it
+  // can be cancelled if the view unmounts before it fires.
+  const sessionEndedRefetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (sessionEndedRefetchTimer.current !== null) clearTimeout(sessionEndedRefetchTimer.current)
+    }
+  }, [])
+
+  /** Re-checks today-latest on demand — the entry screen's refresh button. */
+  function handleRefreshTodayLatestSession() {
+    setTodayLatestSession(undefined)
+    fetchTodayLatestSession().then(setTodayLatestSession)
+  }
 
   async function joinRoom(roomCode: string, displayName: string) {
     const session = await getSession(roomCode) // 404 ⇒ no such room
@@ -68,7 +95,10 @@ export function useStudentSession() {
     // to" broadcasts); the assignment set comes from REST either way.
     joinSession(
       { code: roomCode, studentId, displayName },
-      { onAssignmentFocused: setTeacherFocusedAssignmentId },
+      {
+        onAssignmentFocused: setTeacherFocusedAssignmentId,
+        onSessionEnded: handleSessionEnded,
+      },
     ).catch((err: unknown) => {
       console.warn('[join] hub join failed:', err instanceof Error ? err.message : String(err))
     })
@@ -79,10 +109,23 @@ export function useStudentSession() {
     setCode(roomCode)
   }
 
+  /** The teacher ended the room — bounce back to the entry screen with an explanation. */
+  function handleSessionEnded() {
+    handleLeaveSession()
+    setToast({ message: 'This session has ended — ask your teacher for the new code.', tone: 'error' })
+    // Show "checking…" instead of leaving the just-ended code on screen, and
+    // only re-fetch after a short delay — see SESSION_ENDED_REFETCH_DELAY_MS.
+    setTodayLatestSession(undefined)
+    if (sessionEndedRefetchTimer.current !== null) clearTimeout(sessionEndedRefetchTimer.current)
+    sessionEndedRefetchTimer.current = setTimeout(() => {
+      fetchTodayLatestSession().then(setTodayLatestSession)
+    }, SESSION_ENDED_REFETCH_DELAY_MS)
+  }
+
   // Fetch the cross-day review data once identity exists — regardless of
   // whether the student ends up joining a room, going solo, or is still on
-  // the entry screen. Neither call is built on the backend yet (S5/S9); both
-  // degrade to "nothing yet" on failure, so this can never block entry.
+  // the entry screen. `fetchSubmissionHistory` isn't built on the backend yet
+  // (S5); it degrades to "nothing yet" on failure, so this can never block entry.
   useEffect(() => {
     const studentId = getStudentId()
     // isHistoryLoading already starts `true` — nothing to set synchronously here.
@@ -94,13 +137,8 @@ export function useStudentSession() {
       .catch(() => {
         /* the My Progress panel just shows nothing yet */
       })
-    fetchResumeSuggestion(studentId).then((suggested) => {
-      // Don't nag about the room the student is already in.
-      if (suggested && persistedSession?.mode === 'join' && persistedSession.code === suggested.code) return
-      setResumeSuggestion(suggested)
-    })
+    fetchTodayLatestSession().then(setTodayLatestSession)
     // Runs once on mount — identity is stable for the lifetime of this view.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // Rehydrate a persisted join/solo session on mount so a refresh resumes the
@@ -133,6 +171,10 @@ export function useStudentSession() {
         setToast({ message: 'Room no longer available — please rejoin.', tone: 'error' })
       })
       .finally(() => setIsRestoring(false))
+    // `joinRoom` is recreated every render (it closes over no memoized
+    // deps) — this is a mount-only rehydrate keyed on the stable
+    // `persistedSession` value, not on `joinRoom` identity.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [persistedSession])
 
   useEffect(() => {
@@ -145,15 +187,17 @@ export function useStudentSession() {
     setToast(null)
   }
 
-  async function handleJoin() {
-    const roomCode = code.trim().toUpperCase()
+  /** One-click join of today's session — no code to type, see `todayLatestSession`. */
+  async function handleJoinToday() {
+    if (!todayLatestSession) return
     const displayName = name.trim()
     setDisplayName(displayName)
     setIsJoining(true)
     try {
-      await joinRoom(roomCode, displayName)
+      await joinRoom(todayLatestSession.code, displayName)
     } catch {
-      setToast({ message: 'Room not found — check the code and try again.', tone: 'error' })
+      setToast({ message: 'That session is no longer available — ask your teacher for a new code.', tone: 'error' })
+      setTodayLatestSession(null)
     } finally {
       setIsJoining(false)
     }
@@ -175,33 +219,11 @@ export function useStudentSession() {
     }
   }
 
-  function handleModeChange(next: JoinMode) {
-    setToast(null)
-    setMode(next)
-  }
-
   function handleLeaveSession() {
     clearPersistedStudentSession()
     setAssignmentSet(null)
     setCode('')
     setTeacherFocusedAssignmentId(null)
-  }
-
-  async function handleAcceptResumeSuggestion() {
-    if (!resumeSuggestion) return
-    setIsAcceptingSuggestion(true)
-    try {
-      await joinRoom(resumeSuggestion.code, name.trim() || getDisplayName())
-      setResumeSuggestion(null)
-    } catch {
-      setToast({ message: 'Could not join that session — please use the code manually.', tone: 'error' })
-    } finally {
-      setIsAcceptingSuggestion(false)
-    }
-  }
-
-  function handleDismissResumeSuggestion() {
-    setResumeSuggestion(null)
   }
 
   // Refetches this student's full submission history — called after every
@@ -231,23 +253,15 @@ export function useStudentSession() {
     },
     entry: {
       name,
-      code,
-      mode,
+      isReturningStudent,
+      /** `undefined` while the today-latest lookup is in flight, `null` once resolved to "none". */
+      todayLatestSessionCode: todayLatestSession?.code ?? (todayLatestSession === undefined ? undefined : null),
       isJoining,
       isStartingSolo,
       onNameChange: setName,
-      onCodeChange: setCode,
-      onModeChange: handleModeChange,
-      onJoin: handleJoin,
+      onJoinToday: handleJoinToday,
       onStartSolo: handleStartSolo,
-    },
-    resume: resumeSuggestion && {
-      displayName: getDisplayName(),
-      code: resumeSuggestion.code,
-      assignmentSetDisplayTitle: resumeSuggestion.assignmentSetDisplayTitle,
-      isJoining: isAcceptingSuggestion,
-      onJoin: handleAcceptResumeSuggestion,
-      onDismiss: handleDismissResumeSuggestion,
+      onRefreshTodayLatestSession: handleRefreshTodayLatestSession,
     },
     progress: {
       isLoading: isHistoryLoading,

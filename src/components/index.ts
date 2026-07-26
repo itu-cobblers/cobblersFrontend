@@ -74,9 +74,6 @@ export type {
 export { StudentRoster } from './StudentRoster'
 export type { StudentRosterProps, RosterEntry, RosterStatus } from './StudentRoster'
 
-export { WelcomeBackBanner } from './WelcomeBackBanner'
-export type { WelcomeBackBannerProps } from './WelcomeBackBanner'
-
 export { SubmitButton } from './SubmitButton'
 export type { SubmitButtonProps, SubmitButtonStatus } from './SubmitButton'
 
