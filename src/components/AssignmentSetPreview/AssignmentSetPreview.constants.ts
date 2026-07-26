@@ -31,6 +31,14 @@ export const PREVIEW_DESC_CLASS = 'text-[12px] leading-relaxed text-ink-muted'
 
 export const PREVIEW_HINT_CLASS = 'text-[12px] leading-relaxed text-accent'
 
+export const PREVIEW_FOCUS_BTN_CLASS =
+  'ml-auto shrink-0 rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-accent opacity-0 transition-opacity group-hover:opacity-100 hover:underline'
+
+export const PREVIEW_FOCUSED_BADGE_CLASS =
+  'ml-auto shrink-0 rounded bg-accent px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-accent-foreground'
+
+export const PREVIEW_ITEM_FOCUSED_CLASS = 'border-accent bg-accent/5'
+
 export const KIND_LABEL: Record<AssignmentKind, string> = {
   code: 'Code',
   predict: 'Predict',

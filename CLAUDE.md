@@ -43,7 +43,7 @@ src/
   types/                    # cross-cutting domain types (Assignment, ExecuteResult, Theme, …) + barrel
   components/               # PURE, reusable presentational components (visual props only)
     Button/ Spinner/ Icon/ Badge/ ProgressBar/ TextField/ Modal/ IconButton/
-    OutputPanel/ CodeEditor/ Toolbar/ AssignmentPanel/ AssignmentStepper/ FeedbackBanner/ SubmitModal/
+    OutputPanel/ CodeEditor/ AssignmentPanel/ AssignmentStepper/ FeedbackBanner/ SubmitButton/
     PredictPanel/ FileUpload/ ProjectPanel/ StudentEntry/   # quiz, mini-project upload, entry screen
     index.ts                # barrel re-exporting every component + its types
   views/                    # page-level views — OWN state/business logic via co-located hooks

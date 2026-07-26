@@ -5,7 +5,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 // Monaco can't run in jsdom.
 vi.mock('@monaco-editor/react', () => ({
   default: ({ value }: { value: string }) =>
-    createElement('textarea', { 'data-testid': 'editor', defaultValue: value }),
+    createElement('textarea', { 'data-testid': 'editor', value, readOnly: true }),
 }))
 
 // The assignment set now comes from the backend; stub the seam so the solo flow
@@ -24,6 +24,13 @@ vi.mock('@lib/assignmentSetApi', () => ({
         description: 'Make the program print exactly: Hello World!',
         starter: 'public class Main {}',
       },
+      {
+        id: 2,
+        kind: 'code',
+        title: 'Variables',
+        description: 'Declare a variable.',
+        starter: 'public class Main {}',
+      },
     ],
   }),
   fetchStudentAssignmentSet: vi.fn().mockResolvedValue({
@@ -33,9 +40,13 @@ vi.mock('@lib/assignmentSetApi', () => ({
       {
         id: 1,
         kind: 'code',
-        title: 'Hello, World!',
-        description: 'Make the program print exactly: Hello World!',
-        starter: 'public class Main {}',
+        title: 'Person class',
+        description: 'Create a Person class.',
+        starterFiles: [
+          { name: 'Main.java', content: 'public class Main {}' },
+          { name: 'Person.java', content: 'public class Person {}' },
+        ],
+        entryClass: 'Main',
       },
     ],
   }),
@@ -43,14 +54,26 @@ vi.mock('@lib/assignmentSetApi', () => ({
 
 vi.mock('@lib/sessionApi', () => ({
   getSession: vi.fn().mockResolvedValue({ code: 'ABCD1234', assignmentSetId: 'set-1' }),
+  fetchResumeSuggestion: vi.fn().mockResolvedValue(null),
+}))
+
+vi.mock('@lib/submissionApi', () => ({
+  fetchSubmissionHistory: vi.fn().mockResolvedValue([]),
 }))
 
 vi.mock('@lib/studentApi', () => ({
   upsertStudent: vi.fn().mockResolvedValue(undefined),
 }))
 
+interface JoinSessionCallbacks {
+  onAssignmentFocused?: (id: number) => void
+}
+let capturedJoinCallbacks: JoinSessionCallbacks | null = null
 vi.mock('@lib/sessionHub', () => ({
-  joinSession: vi.fn().mockResolvedValue(undefined),
+  joinSession: vi.fn((_args: unknown, callbacks: JoinSessionCallbacks) => {
+    capturedJoinCallbacks = callbacks
+    return Promise.resolve(undefined)
+  }),
 }))
 
 const { default: StudentView } = await import('./StudentView')
@@ -76,6 +99,11 @@ describe('StudentView', () => {
     expect(await screen.findByRole('navigation', { name: 'Assignments' })).toBeInTheDocument()
     expect(screen.getByText('Terminal')).toBeInTheDocument()
     expect(screen.getByTestId('editor')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Main\.java/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Person\.java/ })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /Person\.java/ }))
+    expect(screen.getByTestId('editor')).toHaveValue('public class Person {}')
   })
 
   it('resumes a joined room from a persisted session after refresh', async () => {
@@ -96,6 +124,21 @@ describe('StudentView', () => {
     expect(await screen.findByRole('navigation', { name: 'Assignments' })).toBeInTheDocument()
     expect(screen.getByText('Solo practice')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Exit' })).toBeInTheDocument()
+  })
+
+  it('shows a follow banner when the teacher moves to a different assignment, and follows on click', async () => {
+    localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'join', code: 'ABCD1234' }))
+    render(createElement(StudentView))
+    await screen.findByRole('navigation', { name: 'Assignments' })
+    expect(screen.getByRole('heading', { name: 'Hello, World!' })).toBeInTheDocument()
+
+    capturedJoinCallbacks?.onAssignmentFocused?.(2)
+
+    expect(await screen.findByText('Follow →')).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Follow →'))
+
+    expect(screen.getByRole('heading', { name: 'Variables' })).toBeInTheDocument()
+    expect(screen.queryByText('Follow →')).not.toBeInTheDocument()
   })
 
   it('leaving the session clears storage and returns to the entry screen', async () => {

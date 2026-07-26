@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { createSession, getSession, startTimer } from '@lib/sessionApi'
 import { fetchAssignmentSets, fetchAssignmentSet, type AssignmentSetSummary } from '@lib/assignmentSetApi'
 import { groupAssignments } from '@lib/assignmentSet'
-import { observeSession, type Student } from '@lib/sessionHub'
+import { observeSession, focusAssignment, type Student } from '@lib/sessionHub'
 import { revokeTeacher } from '@lib/teacherAuth'
 import {
   getPersistedTeacherSession,
@@ -23,6 +23,8 @@ export function useTeacherSession() {
   const [sessionError, setSessionError] = useState<string | null>(null)
 
   const [students, setStudents] = useState<RosterEntry[]>([])
+  // The assignment last broadcast to the room via the hub (best-effort; see focusAssignment).
+  const [focusedAssignmentId, setFocusedAssignmentId] = useState<number | null>(null)
 
   const [minutes, setMinutes] = useState(10)
   const [isStartingTimer, setIsStartingTimer] = useState(false)
@@ -172,6 +174,16 @@ export function useTeacherSession() {
     setTimerEndsAt(null)
     setSessionError(null)
     setTimerError(null)
+    setFocusedAssignmentId(null)
+  }
+
+  /** Broadcasts "teacher moved to this assignment" to every student in the room (best-effort). */
+  function handleFocusAssignment(id: number) {
+    if (!sessionCode) return
+    setFocusedAssignmentId(id)
+    focusAssignment(sessionCode, id).catch((err: unknown) => {
+      console.warn('[room] focusAssignment failed:', err instanceof Error ? err.message : String(err))
+    })
   }
 
   function handleLogout() {
@@ -195,10 +207,12 @@ export function useTeacherSession() {
     timerEndsAt,
     timerError,
     isRestoringSession,
+    focusedAssignmentId,
     handleCreateSession,
     handleStartTimer,
     handleMinutesChange,
     handleEndSession,
+    handleFocusAssignment,
     handleLogout,
   }
 }

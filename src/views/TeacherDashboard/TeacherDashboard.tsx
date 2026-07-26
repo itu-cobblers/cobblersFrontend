@@ -46,10 +46,12 @@ export default function TeacherDashboard() {
     timerEndsAt,
     timerError,
     isRestoringSession,
+    focusedAssignmentId,
     handleCreateSession,
     handleStartTimer,
     handleMinutesChange,
     handleEndSession,
+    handleFocusAssignment,
     handleLogout,
   } = useTeacherSession()
 
@@ -157,7 +159,11 @@ export default function TeacherDashboard() {
 
             <section className={TEACHER_SECTION_CLASS}>
               <h2 className={TEACHER_SECTION_TITLE_CLASS}>Assignment set</h2>
-              <AssignmentSetPreview groups={previewGroups} />
+              <AssignmentSetPreview
+                groups={previewGroups}
+                onFocusAssignment={handleFocusAssignment}
+                focusedAssignmentId={focusedAssignmentId}
+              />
             </section>
           </aside>
 

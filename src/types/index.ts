@@ -1,4 +1,11 @@
-export type { ExecuteStatus, ExecuteRequest, ExecuteResult, SubmissionResult } from './execution'
+export type {
+  ExecuteStatus,
+  ExecuteRequest,
+  ExecuteResult,
+  SubmissionResult,
+  SubmissionHistoryItem,
+} from './execution'
+export type { ResumeSuggestion } from './resume'
 export type {
   AssignmentKind,
   LessonBlock,

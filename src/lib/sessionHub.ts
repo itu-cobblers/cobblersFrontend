@@ -20,6 +20,7 @@ export interface Timer {
 /** State the hub replies with on join (so late joiners sync). */
 interface SessionState {
   activeTimer?: Timer
+  focusedAssignmentId?: number
 }
 
 export interface JoinArgs {
@@ -30,6 +31,8 @@ export interface JoinArgs {
 
 export interface StudentCallbacks {
   onTimerStarted?: (timer: Timer) => void
+  /** The teacher moved to a different assignment — id of the newly-focused assignment. */
+  onAssignmentFocused?: (assignmentId: number) => void
 }
 
 export interface TeacherCallbacks {
@@ -49,14 +52,24 @@ async function getConnection(): Promise<signalR.HubConnection> {
   return conn
 }
 
-/** Student joins a room; receives the timer broadcast. */
+/** Student joins a room; receives the timer + "teacher moved to" broadcasts. */
 export async function joinSession(args: JoinArgs, callbacks: StudentCallbacks = {}): Promise<void> {
   const conn = await getConnection()
   if (callbacks.onTimerStarted) {
     conn.on('TimerStarted', (timer: Timer) => callbacks.onTimerStarted?.(timer))
   }
+  if (callbacks.onAssignmentFocused) {
+    conn.on('AssignmentFocused', (assignmentId: number) => callbacks.onAssignmentFocused?.(assignmentId))
+  }
   const state = await conn.invoke<SessionState>('JoinSession', args)
   if (state?.activeTimer) callbacks.onTimerStarted?.(state.activeTimer)
+  if (state?.focusedAssignmentId != null) callbacks.onAssignmentFocused?.(state.focusedAssignmentId)
+}
+
+/** Teacher moves to a different assignment; broadcasts it to every student in the room (best-effort — see CONTRACT.md). */
+export async function focusAssignment(code: string, assignmentId: number): Promise<void> {
+  const conn = await getConnection()
+  await conn.invoke('FocusAssignment', code, assignmentId)
 }
 
 /** Teacher observes a room; receives the live roster of students. */

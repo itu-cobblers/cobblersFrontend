@@ -17,6 +17,7 @@ export default defineConfig({
       '@lib': alias('./src/lib'),
       '@themes': alias('./src/themes'),
       '@types': alias('./src/types'),
+      '@constants': alias('./src/constants'),
     },
   },
   server: {

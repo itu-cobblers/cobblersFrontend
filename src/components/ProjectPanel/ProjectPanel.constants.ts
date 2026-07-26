@@ -1,4 +1,5 @@
-export const PROJECT_PANEL_CLASS = 'flex min-w-0 flex-1 flex-col overflow-hidden'
+// 4:6 split with AssignmentPanel (PANEL_CLASS) — description gets 4, project gets 6.
+export const PROJECT_PANEL_CLASS = 'flex min-w-0 flex-[6] flex-col overflow-hidden'
 
 export const PROJECT_CONTROLS_CLASS = 'flex flex-1 flex-col gap-2.5 p-3.5'
 

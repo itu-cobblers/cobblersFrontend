@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { ExecuteResult, Signals, Assignment, Verdict } from '@types'
 
 interface GradeOptions {
@@ -28,14 +28,25 @@ export interface UseAssignments {
  * bag. Grades against the `assignments` it's given (the active assignment set). Grading for
  * code assignments may run an optional client-side check(); predict and project assignments
  * complete via `complete()`.
+ *
+ * `initiallyCompleted` (e.g. from `GET /api/students/{studentId}/submissions`)
+ * seeds "already passed" assignments — a reload or a return visit the next
+ * day still shows yesterday's passes as done. It's merged in via `useMemo`,
+ * not copied into state on mount, because it's fetched async and may resolve
+ * *after* this hook's first render — a one-time seed would miss it.
  */
-export function useAssignments(assignments: Assignment[]): UseAssignments {
+export function useAssignments(assignments: Assignment[], initiallyCompleted: number[] = []): UseAssignments {
   const [activeAssignment, setActiveAssignment] = useState(0)
-  const [completedAssignments, setCompletedAssignments] = useState<Set<number>>(new Set())
+  const [locallyCompleted, setLocallyCompleted] = useState<Set<number>>(new Set())
   const [signals, setSignals] = useState<Signals>({})
 
+  const completedAssignments = useMemo(() => {
+    if (initiallyCompleted.length === 0) return locallyCompleted
+    return new Set([...locallyCompleted, ...initiallyCompleted])
+  }, [locallyCompleted, initiallyCompleted])
+
   function complete(assignmentId: number, newSignals?: Signals) {
-    setCompletedAssignments((prev) => new Set(prev).add(assignmentId))
+    setLocallyCompleted((prev) => new Set(prev).add(assignmentId))
     if (newSignals) setSignals((prev) => ({ ...prev, ...newSignals }))
   }
 

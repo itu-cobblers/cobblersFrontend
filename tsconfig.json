@@ -34,7 +34,9 @@
       "@themes": ["./src/themes"],
       "@themes/*": ["./src/themes/*"],
       "@types": ["./src/types"],
-      "@types/*": ["./src/types/*"]
+      "@types/*": ["./src/types/*"],
+      "@constants": ["./src/constants"],
+      "@constants/*": ["./src/constants/*"]
     },
 
     "types": ["node", "vite/client"]
