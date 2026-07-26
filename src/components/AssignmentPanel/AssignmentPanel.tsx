@@ -4,6 +4,7 @@ import { FeedbackBanner } from '@components/FeedbackBanner'
 import { formatAttemptTime, describeSource } from '@components/ProblemsList'
 import { Icon } from '@components/Icon'
 import type { AssignmentPanelProps, AssignmentPanelTab } from './AssignmentPanel.types'
+import { useHintDisclosure } from './AssignmentPanel.hooks'
 import {
   PANEL_CLASS,
   PANEL_SCROLL_CLASS,
@@ -14,6 +15,10 @@ import {
   PANEL_TASK_CLASS,
   PANEL_BODY_CLASS,
   PANEL_HINT_CLASS,
+  PANEL_HINT_TOGGLE_CLASS,
+  PANEL_HINT_ARROW_CLASS,
+  PANEL_HINT_ARROW_EXPANDED_CLASS,
+  PANEL_HINT_BODY_CLASS,
   PANEL_HINT_CODE_CLASS,
   PANEL_TABS_CLASS,
   PANEL_TAB_BASE_CLASS,
@@ -57,6 +62,8 @@ export default function AssignmentPanel({
   hint,
   feedback,
 }: AssignmentPanelProps) {
+  const [isHintExpanded, handleHintToggle] = useHintDisclosure(hint)
+
   return (
     <section className={PANEL_CLASS}>
       <div className={classNames({ 'sr-only': !isStepperVisible })}>
@@ -99,7 +106,19 @@ export default function AssignmentPanel({
           {body && <p className={PANEL_BODY_CLASS}>{body}</p>}
           {hint && (
             <div className={PANEL_HINT_CLASS}>
-              💡 Hint: <code className={PANEL_HINT_CODE_CLASS}>{hint}</code>
+              <button type="button" onClick={handleHintToggle} className={PANEL_HINT_TOGGLE_CLASS}>
+                💡 Hint
+                <span
+                  className={classNames(PANEL_HINT_ARROW_CLASS, { [PANEL_HINT_ARROW_EXPANDED_CLASS]: isHintExpanded })}
+                >
+                  ▸
+                </span>
+              </button>
+              {isHintExpanded && (
+                <div className={PANEL_HINT_BODY_CLASS}>
+                  <code className={PANEL_HINT_CODE_CLASS}>{hint}</code>
+                </div>
+              )}
             </div>
           )}
         </div>

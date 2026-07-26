@@ -20,14 +20,22 @@ const baseProps: AssignmentPanelProps = {
 }
 
 describe('AssignmentPanel', () => {
-  it('renders title, lesson blocks, task and hint', () => {
+  it('renders title, lesson blocks and task, with the hint folded by default', () => {
     render(createElement(AssignmentPanel, baseProps))
     expect(screen.getByRole('heading', { name: 'Hello ITU' })).toBeInTheDocument()
     expect(screen.getByText('Printing a message is the most basic thing.')).toBeInTheDocument()
     expect(screen.getByText('System.out.println("Hello World!");')).toBeInTheDocument()
     expect(screen.getByText('Your task')).toBeInTheDocument()
     expect(screen.getByText('Print exactly: Hello ITU!')).toBeInTheDocument()
+    expect(screen.queryByText('System.out.println("Hello ITU!");')).not.toBeInTheDocument()
+  })
+
+  it('expands the hint on click, and re-folds when the hint changes', () => {
+    const { rerender } = render(createElement(AssignmentPanel, baseProps))
+    fireEvent.click(screen.getByText('💡 Hint'))
     expect(screen.getByText('System.out.println("Hello ITU!");')).toBeInTheDocument()
+    rerender(createElement(AssignmentPanel, { ...baseProps, hint: 'System.out.println("Bye!");' }))
+    expect(screen.queryByText('System.out.println("Bye!");')).not.toBeInTheDocument()
   })
 
   it('shows the feedback banner only when feedback is present', () => {
