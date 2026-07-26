@@ -40,15 +40,39 @@ interface SubmitFlash {
 
 /** The center/right area to render for the active assignment — discriminated by kind. */
 export type ActivePanel =
-  | { kind: 'code'; editor: CodeEditorProps; output: OutputPanelProps; files: CodeFileTab[]; activeFileIndex: number }
+  | { kind: 'code'; editor: CodeEditorProps; output: OutputPanelProps }
   | { kind: 'predict'; editor: CodeEditorProps; predict: PredictPanelProps }
   | { kind: 'project'; project: ProjectPanelProps }
 
-/** Seed editor content for every code assignment from its starter. */
+/** Seed editor content for every single-file code assignment from its starter. */
 function initialCode(assignmentList: Assignment[]): Record<number, string> {
   const map: Record<number, string> = {}
   for (const assignment of assignmentList) {
-    if (assignment.kind === 'code') map[assignment.id] = assignment.starter ?? defaultStarter
+    if (assignment.kind === 'code' && !assignment.starterFiles) {
+      map[assignment.id] = assignment.starter ?? defaultStarter
+    }
+  }
+  return map
+}
+
+/** Seed the editable contents for every multi-file code assignment. */
+function initialMultiFiles(assignmentList: Assignment[]): Record<number, SourceFile[]> {
+  const map: Record<number, SourceFile[]> = {}
+  for (const assignment of assignmentList) {
+    if (assignment.kind === 'code' && assignment.starterFiles) {
+      map[assignment.id] = assignment.starterFiles
+    }
+  }
+  return map
+}
+
+/** Seed each multi-file assignment with its first source file selected. */
+function initialActiveFiles(assignmentList: Assignment[]): Record<number, string> {
+  const map: Record<number, string> = {}
+  for (const assignment of assignmentList) {
+    if (assignment.kind === 'code' && assignment.starterFiles?.[0]) {
+      map[assignment.id] = assignment.starterFiles[0].name
+    }
   }
   return map
 }
@@ -98,14 +122,11 @@ function problemStatus(
 
 /**
  * The file tabs for a code assignment's editor: the student's own file
- * first, then any read-only harness/grader files (real filenames from the
- * assignment's `harness`, not invented) — a single-file assignment still
- * gets exactly one tab.
+ * assignment's `starterFiles`; a single-file assignment still gets one tab.
  */
 function codeFiles(assignment: Assignment): CodeFileTab[] {
   if (assignment.kind !== 'code') return []
-  if (!assignment.harness) return [{ name: assignment.solutionFile ?? 'Main.java' }]
-  return [{ name: assignment.solutionFile ?? 'Main.java' }, ...assignment.harness.files.map((file) => ({ name: file.name }))]
+  return assignment.starterFiles?.map((file) => ({ name: file.name })) ?? [{ name: 'Main.java' }]
 }
 
 export interface UseStudentWorkspaceOptions {
@@ -159,6 +180,12 @@ export function useStudentWorkspace({
   // and never flashes the (now different) active assignment's Submit button.
   const submitGenerationRef = useRef(0)
   const [filesByAssignment, setFilesByAssignment] = useState<Record<number, SourceFile[]>>({})
+  const [multiFilesByAssignment, setMultiFilesByAssignment] = useState<Record<number, SourceFile[]>>(() =>
+    initialMultiFiles(allAssignments),
+  )
+  const [activeFileByAssignment, setActiveFileByAssignment] = useState<Record<number, string>>(() =>
+    initialActiveFiles(allAssignments),
+  )
   const [feedback, setFeedback] = useState<FeedbackBannerProps | null>(null)
   const [isRailOpen, setIsRailOpen] = useState(true)
   const [railTab, setRailTab] = useState<ProblemsListTab>('session')
@@ -167,7 +194,6 @@ export function useStudentWorkspace({
   // flipped back and forth without changing what's actually open.
   const [selectionSource, setSelectionSource] = useState<ProblemsListTab>('session')
   const [panelTab, setPanelTab] = useState<AssignmentPanelTab>('description')
-  const [activeFileIndex, setActiveFileIndex] = useState(0)
 
   const executor = useExecutor()
   const assignmentProgress = useAssignments(allAssignments, passedIds(submissionHistory, allAssignments))
@@ -178,10 +204,12 @@ export function useStudentWorkspace({
   const submission = useSubmission({
     // Only fires for `code` assignments (Submit is disabled otherwise), so
     // `result.result` is always the executor's result when this runs.
-    onResult: (submittedCode, result) => {
+    onResult: (content, result) => {
       if (!result.result) return
       executor.showResult(result.result)
-      if (result.passed === true) assignmentProgress.grade(submittedCode, result.result, { forceComplete: true })
+      if (result.passed === true && typeof content === 'string') {
+        assignmentProgress.grade(content, result.result, { forceComplete: true })
+      }
       onSubmissionMade?.()
     },
   })
@@ -205,7 +233,6 @@ export function useStudentWorkspace({
     setSubmitFlash(null)
     setFeedback(null)
     setPanelTab('description')
-    setActiveFileIndex(0)
     setSelectionSource(source)
   }
 
@@ -214,27 +241,46 @@ export function useStudentWorkspace({
   }
 
   function handleEditorChange(value: string) {
+    const activeFiles = active.kind === 'code' ? multiFilesByAssignment[active.id] : undefined
+    const activeFileName = active.kind === 'code' ? activeFileByAssignment[active.id] : undefined
+    if (activeFiles && activeFileName) {
+      setMultiFilesByAssignment((previous) => ({
+        ...previous,
+        [active.id]: (previous[active.id] ?? activeFiles).map((file) =>
+          file.name === activeFileName ? { ...file, content: value } : file,
+        ),
+      }))
+      return
+    }
     setCodeByAssignment((prev) => ({ ...prev, [active.id]: value }))
   }
 
-  function buildCodeRequest(code: string): ExecuteRequest | null {
+  function handleSelectFile(index: number) {
+    if (active.kind !== 'code') return
+    const file = multiFilesByAssignment[active.id]?.[index]
+    if (!file) return
+    setActiveFileByAssignment((previous) => ({ ...previous, [active.id]: file.name }))
+  }
+
+  function buildCodeRequest(): ExecuteRequest | null {
     if (active.kind !== 'code') return null
-    if (active.harness) {
+    const activeFiles = multiFilesByAssignment[active.id]
+    if (activeFiles) {
       return {
-        files: [{ name: active.solutionFile ?? 'Main.java', content: code }, ...active.harness.files],
-        entryClass: active.harness.entryClass,
+        files: activeFiles,
+        entryClass: active.entryClass,
         stdin: active.stdin,
       }
     }
-    return { code, stdin: active.stdin }
+    return { code: codeByAssignment[active.id] ?? '', stdin: active.stdin }
   }
 
   async function handleRunCode() {
-    const code = codeByAssignment[active.id] ?? ''
-    const request = buildCodeRequest(code)
+    const request = buildCodeRequest()
     if (!request) return
     const data = await executor.run(request)
     if (!data) return
+    const code = multiFilesByAssignment[active.id] ? '' : codeByAssignment[active.id] ?? ''
     const verdict = assignmentProgress.grade(code, data)
     // Feedback stays up while the student edits; it is replaced on the next
     // run and cleared on assignment switch. Submission feedback drives the
@@ -246,7 +292,8 @@ export function useStudentWorkspace({
     const assignmentId = assignmentProgress.activeAssignmentId
     if (assignmentId === undefined) return
     const generation = submitGenerationRef.current
-    const result = await submission.confirm(codeByAssignment[active.id] ?? '', assignmentId, effectiveSessionCode)
+    const content = multiFilesByAssignment[active.id] ?? codeByAssignment[active.id] ?? ''
+    const result = await submission.confirm(content, assignmentId, effectiveSessionCode)
     // Only flash the Submit button if the student is still looking at the
     // assignment this result belongs to — a response that lands after they've
     // already moved on must not animate whatever button they're on now.
@@ -335,6 +382,13 @@ export function useStudentWorkspace({
     isDone: assignmentProgress.completedAssignments.has(assignment.id),
   }))
 
+  function activeCodeFileIndex(assignmentId: number): number {
+    const files = multiFilesByAssignment[assignmentId]
+    const activeFileName = activeFileByAssignment[assignmentId]
+    const index = files?.findIndex((file) => file.name === activeFileName) ?? 0
+    return index === -1 ? 0 : index
+  }
+
   function buildActivePanel(): ActivePanel {
     if (active.kind === 'predict') {
       return {
@@ -373,18 +427,14 @@ export function useStudentWorkspace({
         },
       }
     }
-    const files = codeFiles(active)
-    const isOwnFile = activeFileIndex === 0
-    const harnessFile = active.harness?.files[activeFileIndex - 1]
+    const activeFiles = multiFilesByAssignment[active.id]
+    const activeFileName = activeFileByAssignment[active.id] ?? activeFiles?.[0]?.name
+    const activeFile = activeFiles?.find((file) => file.name === activeFileName)
     return {
       kind: 'code',
-      files,
-      activeFileIndex,
-      // Tab 0 is always the student's own file (editable); any further tabs
-      // are the harness's real grader files, shown read-only.
-      editor: isOwnFile
-        ? { value: codeByAssignment[active.id] ?? defaultStarter, onChange: handleEditorChange }
-        : { value: harnessFile?.content ?? '', onChange: noop, isReadOnly: true },
+      editor: activeFiles
+        ? { value: activeFile?.content ?? '', onChange: handleEditorChange, path: activeFileName }
+        : { value: codeByAssignment[active.id] ?? defaultStarter, onChange: handleEditorChange },
       output: {
         output: executor.output,
         status: executor.status,
@@ -454,8 +504,8 @@ export function useStudentWorkspace({
       active.kind === 'code'
         ? {
             files: codeFiles(active),
-            activeIndex: activeFileIndex,
-            onSelectFile: setActiveFileIndex,
+            activeIndex: activeCodeFileIndex(active.id),
+            onSelectFile: handleSelectFile,
             isRunning: executor.isRunning,
             onRun: handleRunCode,
           }

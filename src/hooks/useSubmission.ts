@@ -1,16 +1,20 @@
 import { useState } from 'react'
-import type { SubmissionResult } from '@types'
+import type { SourceFile, SubmissionResult } from '@types'
 import { submitAssignment } from '@lib/submissionApi'
 
 interface UseSubmissionOptions {
   /** Cross-cutting effects on a result (mirror in terminal, grade the assignment). */
-  onResult?: (code: string, result: SubmissionResult) => void
+  onResult?: (content: string | SourceFile[], result: SubmissionResult) => void
 }
 
 export interface UseSubmission {
   isSubmitting: boolean
   result: SubmissionResult | null
-  confirm: (code: string, assignmentId: number | undefined, sessionCode: string | undefined) => Promise<SubmissionResult | null>
+  confirm: (
+    content: string | SourceFile[],
+    assignmentId: number | undefined,
+    sessionCode: string | undefined,
+  ) => Promise<SubmissionResult | null>
   /** Clears the last result — called on assignment switch so a stale "well done"/"not quite" hold doesn't bleed into the next assignment's fresh Submit button. */
   reset: () => void
 }
@@ -26,16 +30,16 @@ export function useSubmission({ onResult }: UseSubmissionOptions = {}): UseSubmi
   const [result, setResult] = useState<SubmissionResult | null>(null)
 
   async function confirm(
-    code: string,
+    content: string | SourceFile[],
     assignmentId: number | undefined,
     sessionCode: string | undefined,
   ): Promise<SubmissionResult | null> {
     if (assignmentId === undefined) return null
     setIsSubmitting(true)
     try {
-      const r = await submitAssignment({ assignmentId, content: code, sessionCode })
+      const r = await submitAssignment({ assignmentId, content, sessionCode })
       setResult(r)
-      onResult?.(code, r)
+      onResult?.(content, r)
       return r
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err)

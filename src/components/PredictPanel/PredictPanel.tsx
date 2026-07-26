@@ -2,7 +2,7 @@ import { type ChangeEvent } from 'react'
 import {Icon} from "@/components";
 import { SubmitButton, type SubmitButtonStatus } from '@components/SubmitButton'
 import { ShowAnswerButton } from '@components/ShowAnswerButton'
-import type { PredictPanelProps } from './PredictPanel.types'
+import type { PredictPanelProps } from '@/components'
 import {
   PREDICT_PANEL_CLASS,
   PREDICT_HEADER_CLASS,

@@ -9,7 +9,7 @@ import { getStudentId } from './identity'
  * CONTRACT.md. This is the frontend's working assumption — reconcile the exact
  * shape with the backend member before launch:
  *
- *   request:  { studentId, assignmentId, code }
+ *   request:  { studentId, assignmentId, content }
  *   response: { status, stdout, stderr, accepted, message }
  */
 export async function submitAssignment({
@@ -18,19 +18,19 @@ export async function submitAssignment({
   sessionCode,
 }: {
   assignmentId: number
-  code: string | SourceFile[]
-    sessionCode?: string
+  content: string | SourceFile[]
+  sessionCode?: string
 }): Promise<SubmissionResult> {
-    const body: { studentId: string; sessionId?: string; content: string } = {
-        studentId: getStudentId(),
-        content,
-    }
-    if (sessionCode) body.sessionId = sessionCode
+  const body: { studentId: string; sessionId?: string; content: string | SourceFile[] } = {
+    studentId: getStudentId(),
+    content,
+  }
+  if (sessionCode) body.sessionId = sessionCode
 
   const res = await fetch(`/api/assignments/${assignmentId}/submissions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+    body: JSON.stringify(body),
   })
   if (!res.ok) throw new Error(`API returned ${res.status}`)
   return await res.json()

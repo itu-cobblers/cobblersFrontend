@@ -5,7 +5,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 // Monaco can't run in jsdom.
 vi.mock('@monaco-editor/react', () => ({
   default: ({ value }: { value: string }) =>
-    createElement('textarea', { 'data-testid': 'editor', defaultValue: value }),
+    createElement('textarea', { 'data-testid': 'editor', value, readOnly: true }),
 }))
 
 // The assignment set now comes from the backend; stub the seam so the solo flow
@@ -40,9 +40,13 @@ vi.mock('@lib/assignmentSetApi', () => ({
       {
         id: 1,
         kind: 'code',
-        title: 'Hello, World!',
-        description: 'Make the program print exactly: Hello World!',
-        starter: 'public class Main {}',
+        title: 'Person class',
+        description: 'Create a Person class.',
+        starterFiles: [
+          { name: 'Main.java', content: 'public class Main {}' },
+          { name: 'Person.java', content: 'public class Person {}' },
+        ],
+        entryClass: 'Main',
       },
     ],
   }),
@@ -95,6 +99,11 @@ describe('StudentView', () => {
     expect(await screen.findByRole('navigation', { name: 'Assignments' })).toBeInTheDocument()
     expect(screen.getByText('Terminal')).toBeInTheDocument()
     expect(screen.getByTestId('editor')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Main\.java/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Person\.java/ })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /Person\.java/ }))
+    expect(screen.getByTestId('editor')).toHaveValue('public class Person {}')
   })
 
   it('resumes a joined room from a persisted session after refresh', async () => {
