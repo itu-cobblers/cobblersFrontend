@@ -17,7 +17,7 @@ export const PREDICT_HINT_CLASS = 'mb-2 font-sans text-[12px] text-terminal-mute
 export const PREDICT_SUCCESS_CLASS = 'font-sans text-[13px] text-term-ok'
 
 export const PREDICT_TEXTAREA_CLASS =
-  'h-24 w-full resize-none rounded-md border border-terminal-line bg-black/30 px-3 py-2 text-[13px] text-terminal-ink outline-none focus:border-terminal-muted'
+  'h-[70%] w-full resize-none rounded-md border border-terminal-line bg-black/30 px-3 py-2 text-[13px] text-terminal-ink outline-none focus:border-terminal-muted'
 
 export const PREDICT_REVEAL_LABEL_CLASS =
   'mb-1 mt-3 text-[11px] uppercase tracking-[0.8px] text-terminal-muted'
