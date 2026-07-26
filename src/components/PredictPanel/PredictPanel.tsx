@@ -25,6 +25,7 @@ export default function PredictPanel({
   status,
   isSubmitting = false,
   isMarkingDone = false,
+  lastAnswerCorrect = null,
   expectedOutput,
   onAnswerChange,
   onSubmit,
@@ -43,14 +44,17 @@ export default function PredictPanel({
   // answer — only "revealed"/"correct"/"done" replace it with the result view.
   const isInput = status === 'idle' || isTried
 
-  // The button itself never leaves the DOM on submit — it holds its final
-  // frame (well done / not quite) once the answer is graded, so the shared
-  // component in both panels always reads as the source of truth for outcome.
+  // The Submit button's own well-done/not-quite flash is driven only by
+  // `lastAnswerCorrect` — the *this-exact-submit's* outcome — never by
+  // `status`, which is the persisted, de-facto record (used for the header
+  // badge, the reveal, "show answer", …) and stays true across assignment
+  // switches. Deriving the button from `status` instead would replay/hold a
+  // stale flash every time this same assignment is revisited.
   const buttonStatus: SubmitButtonStatus = isSubmitting
     ? 'waiting'
-    : isCorrect
+    : lastAnswerCorrect === true
       ? 'success'
-      : isTried || isRevealed || isDone
+      : lastAnswerCorrect === false
         ? 'error'
         : 'idle'
 

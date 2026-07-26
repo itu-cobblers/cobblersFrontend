@@ -16,6 +16,15 @@ export interface PredictPanelProps {
   isSubmitting?: boolean
   /** True while "Marked as done" is recording the completing submission. */
   isMarkingDone?: boolean
+  /**
+   * Whether *this exact* submit attempt was correct, once known — drives only
+   * the shared Submit button's "well done"/"not quite" flash. `null`/omitted
+   * while no fresh outcome is available (idle, mid-submission, or simply
+   * revisiting an assignment without resubmitting) — deliberately separate
+   * from `status`, which is the persisted record and must never itself
+   * replay/hold the button's animation on revisit.
+   */
+  lastAnswerCorrect?: boolean | null
   /** Revealed once the answer is submitted (tried, revealed, correct, or done). */
   expectedOutput: string
   onAnswerChange: (value: string) => void

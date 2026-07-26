@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { ExecuteRequest, SourceFile, Assignment, AssignmentSet, SubmissionHistoryItem } from '@types'
 import type {
   CodeEditorProps,
@@ -23,6 +23,19 @@ import { ACTIVE_THEME } from '@themes'
 
 const noop = () => {
   /* read-only editor: changes are ignored */
+}
+
+/**
+ * The shared Submit button's transient "well done"/"not quite" flash — tied
+ * to the exact submission that produced it (`assignmentId`), never to an
+ * assignment's persisted status (which also drives badges/checkmarks and
+ * must survive switching away and back unchanged). Consumers only read
+ * `passed` when `assignmentId` still matches the active assignment, so a
+ * flash from one assignment can never bleed into another's button.
+ */
+interface SubmitFlash {
+  assignmentId: number
+  passed: boolean
 }
 
 /** The center/right area to render for the active assignment — discriminated by kind. */
@@ -140,6 +153,11 @@ export function useStudentWorkspace({
   const [statusByAssignment, setStatusByAssignment] = useState<Record<number, PredictStatus>>({})
   const [isSubmittingPredict, setIsSubmittingPredict] = useState(false)
   const [isMarkingPredictDone, setIsMarkingPredictDone] = useState(false)
+  const [submitFlash, setSubmitFlash] = useState<SubmitFlash | null>(null)
+  // Bumped on every assignment switch so an in-flight submit's response,
+  // arriving after the student has already moved on, is recognized as stale
+  // and never flashes the (now different) active assignment's Submit button.
+  const submitGenerationRef = useRef(0)
   const [filesByAssignment, setFilesByAssignment] = useState<Record<number, SourceFile[]>>({})
   const [feedback, setFeedback] = useState<FeedbackBannerProps | null>(null)
   const [isRailOpen, setIsRailOpen] = useState(true)
@@ -180,9 +198,11 @@ export function useStudentWorkspace({
   function handleSelectAssignment(id: number, source: ProblemsListTab = 'session') {
     const index = allAssignments.findIndex((assignment) => assignment.id === id)
     if (index === -1) return
+    submitGenerationRef.current += 1
     assignmentProgress.setActiveAssignment(index)
     executor.reset()
     submission.reset()
+    setSubmitFlash(null)
     setFeedback(null)
     setPanelTab('description')
     setActiveFileIndex(0)
@@ -222,8 +242,17 @@ export function useStudentWorkspace({
     setFeedback(verdict ? { tone: verdict.passed ? 'success' : 'hint', message: verdict.message } : null)
   }
 
-  function handleSubmitCode() {
-    submission.confirm(codeByAssignment[active.id] ?? '', assignmentProgress.activeAssignmentId, effectiveSessionCode)
+  async function handleSubmitCode() {
+    const assignmentId = assignmentProgress.activeAssignmentId
+    if (assignmentId === undefined) return
+    const generation = submitGenerationRef.current
+    const result = await submission.confirm(codeByAssignment[active.id] ?? '', assignmentId, effectiveSessionCode)
+    // Only flash the Submit button if the student is still looking at the
+    // assignment this result belongs to — a response that lands after they've
+    // already moved on must not animate whatever button they're on now.
+    // (`confirm` only resolves `null` once `assignmentId` is already known to
+    // be defined — i.e. a request genuinely failed — which still flashes "not quite".)
+    if (submitGenerationRef.current === generation) setSubmitFlash({ assignmentId, passed: result?.passed === true })
   }
 
   function handlePredictAnswerChange(value: string) {
@@ -232,19 +261,24 @@ export function useStudentWorkspace({
 
   async function handlePredictSubmit() {
     if (active.kind !== 'predict') return
-    const answer = answerByAssignment[active.id] ?? ''
+    const assignmentId = active.id
+    const answer = answerByAssignment[assignmentId] ?? ''
+    const generation = submitGenerationRef.current
     setIsSubmittingPredict(true)
     try {
       // Predict shares the same submission endpoint as `code` (CONTRACT.md
       // "Submission") — this is what makes a predict attempt show up in
       // GET /api/students/{id}/submissions and the My Progress panel too.
-      const result = await submitAssignment({ assignmentId: active.id, content: answer, sessionCode: effectiveSessionCode })
+      const result = await submitAssignment({ assignmentId, content: answer, sessionCode: effectiveSessionCode })
       const correct = result.passed === true
       // A wrong answer goes to "tried" rather than staying an opaque failure —
       // the input reopens for another attempt, with "Show answer" alongside
       // Submit, until the student either gets it or reveals the answer.
-      setStatusByAssignment((prev) => ({ ...prev, [active.id]: correct ? 'correct' : 'tried' }))
-      if (correct) assignmentProgress.complete(active.id)
+      setStatusByAssignment((prev) => ({ ...prev, [assignmentId]: correct ? 'correct' : 'tried' }))
+      if (correct) assignmentProgress.complete(assignmentId)
+      // Only flash the Submit button if the student is still looking at the
+      // assignment this result belongs to — see `handleSubmitCode`.
+      if (submitGenerationRef.current === generation) setSubmitFlash({ assignmentId, passed: correct })
       onSubmissionMade?.()
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err)
@@ -256,18 +290,22 @@ export function useStudentWorkspace({
 
   function handlePredictShowAnswer() {
     setStatusByAssignment((prev) => ({ ...prev, [active.id]: 'revealed' }))
+    // Revealing isn't a fresh submit outcome — don't let a leftover flash
+    // from the earlier wrong attempt bleed into this new view.
+    setSubmitFlash(null)
   }
 
   async function handlePredictMarkAsDone() {
     if (active.kind !== 'predict') return
+    const assignmentId = active.id
     setIsMarkingPredictDone(true)
     try {
       // Records a completing submission with the correct answer so this
       // assignment shows up as passed in submission history going forward,
       // even though the student never typed it themselves.
-      await submitAssignment({ assignmentId: active.id, content: active.expectedOutput, sessionCode: effectiveSessionCode })
-      setStatusByAssignment((prev) => ({ ...prev, [active.id]: 'done' }))
-      assignmentProgress.complete(active.id)
+      await submitAssignment({ assignmentId, content: active.expectedOutput, sessionCode: effectiveSessionCode })
+      setStatusByAssignment((prev) => ({ ...prev, [assignmentId]: 'done' }))
+      assignmentProgress.complete(assignmentId)
       onSubmissionMade?.()
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err)
@@ -307,8 +345,15 @@ export function useStudentWorkspace({
           status: statusByAssignment[active.id] ?? 'idle',
           isSubmitting: isSubmittingPredict,
           isMarkingDone: isMarkingPredictDone,
+          lastAnswerCorrect: submitFlash && submitFlash.assignmentId === active.id ? submitFlash.passed : null,
           expectedOutput: active.expectedOutput,
           onAnswerChange: handlePredictAnswerChange,
+          // `handlePredictSubmit` only reads `submitGenerationRef.current` from
+          // inside its own async body, after the click that invokes it — never
+          // during render — but the lint rule can't see through the closure and
+          // flags it as if passing the ref itself. Known false positive, same
+          // shape as the `react-hooks/set-state-in-effect` one further down.
+          // eslint-disable-next-line react-hooks/refs
           onSubmit: handlePredictSubmit,
           onShowAnswer: handlePredictShowAnswer,
           onMarkAsDone: handlePredictMarkAsDone,
@@ -345,8 +390,11 @@ export function useStudentWorkspace({
         status: executor.status,
         submit: {
           isSubmitting: submission.isSubmitting,
+          // Same known false positive as `handlePredictSubmit` above — the ref
+          // is only ever read inside the async body, after the click.
+          // eslint-disable-next-line react-hooks/refs
           onSubmit: handleSubmitCode,
-          lastResultPassed: submission.result?.passed ?? null,
+          lastResultPassed: submitFlash && submitFlash.assignmentId === active.id ? submitFlash.passed : null,
         },
         // TODO: wire this once the teacher's reveal-answer signal is added to
         // sessionHub.ts (CONTRACT.md) — code assignments should only offer
