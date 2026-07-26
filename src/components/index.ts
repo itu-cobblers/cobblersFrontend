@@ -20,7 +20,7 @@ export { IconButton } from './IconButton'
 export type { IconButtonProps } from './IconButton'
 
 export { Modal, useEscapeToClose } from './Modal'
-export type { ModalProps } from './Modal'
+export type { ModalProps, ModalSize } from './Modal'
 
 export { OutputPanel } from './OutputPanel'
 export type { OutputPanelProps } from './OutputPanel'
@@ -47,13 +47,22 @@ export { FeedbackBanner } from './FeedbackBanner'
 export type { FeedbackBannerProps, FeedbackTone } from './FeedbackBanner'
 
 export { AssignmentPanel } from './AssignmentPanel'
-export type { AssignmentPanelProps } from './AssignmentPanel'
+export type { AssignmentPanelProps, AssignmentPanelTab } from './AssignmentPanel'
 
 export { Toolbar } from './Toolbar'
 export type { ToolbarProps } from './Toolbar'
 
-export { StudentEntry } from './StudentEntry'
-export type { StudentEntryProps, JoinMode } from './StudentEntry'
+export { ProblemsList, formatAttemptTime, describeSource } from './ProblemsList'
+export type { ProblemsListProps, ProblemListItem, ProblemStatus, ProblemsListTab } from './ProblemsList'
+
+export { TeacherFollowBanner } from './TeacherFollowBanner'
+export type { TeacherFollowBannerProps } from './TeacherFollowBanner'
+
+export { CodeFileTabs } from './CodeFileTabs'
+export type { CodeFileTabsProps, CodeFileTab } from './CodeFileTabs'
+
+export { EntryPortal } from '@views/EntryPortal'
+export type { EntryPortalProps, JoinMode } from '@views/EntryPortal'
 
 export { Toast } from './Toast'
 export type { ToastProps, ToastTone } from './Toast'
@@ -68,5 +77,11 @@ export type {
 export { StudentRoster } from './StudentRoster'
 export type { StudentRosterProps, RosterEntry, RosterStatus } from './StudentRoster'
 
-export { SubmitModal, getSubmitResultView } from './SubmitModal'
-export type { SubmitModalProps } from './SubmitModal'
+export { WelcomeBackBanner } from './WelcomeBackBanner'
+export type { WelcomeBackBannerProps } from './WelcomeBackBanner'
+
+export { SubmitButton } from './SubmitButton'
+export type { SubmitButtonProps, SubmitButtonStatus } from './SubmitButton'
+
+export { ShowAnswerButton } from './ShowAnswerButton'
+export type { ShowAnswerButtonProps } from './ShowAnswerButton'

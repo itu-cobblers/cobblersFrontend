@@ -1,6 +1,9 @@
+import classNames from 'classnames'
 import { AssignmentStepper } from '@components/AssignmentStepper'
 import { FeedbackBanner } from '@components/FeedbackBanner'
-import type { AssignmentPanelProps } from './AssignmentPanel.types'
+import { formatAttemptTime, describeSource } from '@components/ProblemsList'
+import { Icon } from '@components/Icon'
+import type { AssignmentPanelProps, AssignmentPanelTab } from './AssignmentPanel.types'
 import {
   PANEL_CLASS,
   PANEL_SCROLL_CLASS,
@@ -12,16 +15,41 @@ import {
   PANEL_BODY_CLASS,
   PANEL_HINT_CLASS,
   PANEL_HINT_CODE_CLASS,
+  PANEL_TABS_CLASS,
+  PANEL_TAB_BASE_CLASS,
+  PANEL_TAB_ACTIVE_CLASS,
+  PANEL_TAB_IDLE_CLASS,
+  PANEL_TAB_UNDERLINE_CLASS,
+  PANEL_TAB_COUNT_CLASS,
+  PANEL_SUBMISSIONS_EMPTY_CLASS,
+  PANEL_SUBMISSIONS_LIST_CLASS,
+  PANEL_SUBMISSION_ROW_CLASS,
+  PANEL_SUBMISSION_BADGE_PASSED_CLASS,
+  PANEL_SUBMISSION_BADGE_FAILED_CLASS,
+  PANEL_SUBMISSION_TITLE_CLASS,
+  PANEL_SUBMISSION_META_CLASS,
 } from './AssignmentPanel.constants'
 
+const TABS: AssignmentPanelTab[] = ['description', 'submissions']
+
+const TAB_LABEL: Record<AssignmentPanelTab, string> = {
+  description: 'Description',
+  submissions: 'Submissions',
+}
+
 /**
- * The left column of the IDE: progress stepper on top, then the active
- * assignment — teaching content (lesson blocks), the task itself, an optional
- * hint — with check feedback pinned at the bottom, outside the scroll region.
+ * The left column of the IDE: progress stepper on top, Description/Submissions
+ * tabs, then either the active assignment's teaching content + task + hint,
+ * or this assignment's attempt history — with check feedback pinned at the
+ * bottom, outside the scroll region.
  */
 export default function AssignmentPanel({
   steps,
   onSelectStep,
+  isStepperVisible = true,
+  activeTab,
+  onTabChange,
+  submissions,
   title,
   lesson,
   description,
@@ -31,29 +59,87 @@ export default function AssignmentPanel({
 }: AssignmentPanelProps) {
   return (
     <section className={PANEL_CLASS}>
-      <AssignmentStepper steps={steps} onSelect={onSelectStep} />
-      <div className={PANEL_SCROLL_CLASS}>
-        <h2 className={PANEL_TITLE_CLASS}>{title}</h2>
-        {lesson?.map((block, index) =>
-          block.kind === 'code' ? (
-            <pre key={index} className={PANEL_LESSON_CODE_CLASS}>
-              {block.code}
-            </pre>
-          ) : (
-            <p key={index} className={PANEL_LESSON_TEXT_CLASS}>
-              {block.text}
-            </p>
-          ),
-        )}
-        <h3 className={PANEL_TASK_LABEL_CLASS}>Your task</h3>
-        <p className={PANEL_TASK_CLASS}>{description}</p>
-        {body && <p className={PANEL_BODY_CLASS}>{body}</p>}
-        {hint && (
-          <div className={PANEL_HINT_CLASS}>
-            💡 Hint: <code className={PANEL_HINT_CODE_CLASS}>{hint}</code>
-          </div>
-        )}
+      <div className={classNames({ 'sr-only': !isStepperVisible })}>
+        <AssignmentStepper steps={steps} onSelect={onSelectStep} />
       </div>
+
+      <div className={PANEL_TABS_CLASS}>
+        {TABS.map((tab) => (
+          <button
+            key={tab}
+            type="button"
+            onClick={() => onTabChange(tab)}
+            className={classNames(PANEL_TAB_BASE_CLASS, activeTab === tab ? PANEL_TAB_ACTIVE_CLASS : PANEL_TAB_IDLE_CLASS)}
+          >
+            {TAB_LABEL[tab]}
+            {tab === 'submissions' && submissions.length > 0 && (
+              <span className={PANEL_TAB_COUNT_CLASS}>{submissions.length}</span>
+            )}
+            {activeTab === tab && <span className={PANEL_TAB_UNDERLINE_CLASS} />}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'description' ? (
+        <div className={PANEL_SCROLL_CLASS}>
+          <h2 className={PANEL_TITLE_CLASS}>{title}</h2>
+          {lesson?.map((block, index) =>
+            block.kind === 'code' ? (
+              <pre key={index} className={PANEL_LESSON_CODE_CLASS}>
+                {block.code}
+              </pre>
+            ) : (
+              <p key={index} className={PANEL_LESSON_TEXT_CLASS}>
+                {block.text}
+              </p>
+            ),
+          )}
+          <h3 className={PANEL_TASK_LABEL_CLASS}>Your task</h3>
+          <p className={PANEL_TASK_CLASS}>{description}</p>
+          {body && <p className={PANEL_BODY_CLASS}>{body}</p>}
+          {hint && (
+            <div className={PANEL_HINT_CLASS}>
+              💡 Hint: <code className={PANEL_HINT_CODE_CLASS}>{hint}</code>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className={PANEL_SCROLL_CLASS}>
+          {submissions.length === 0 ? (
+            <div className={PANEL_SUBMISSIONS_EMPTY_CLASS}>
+              <Icon name="history" />
+              <p className="mt-3">No submissions yet.</p>
+            </div>
+          ) : (
+            <ul className={PANEL_SUBMISSIONS_LIST_CLASS}>
+              {submissions.map((submission) => (
+                <li key={submission.subId} className={PANEL_SUBMISSION_ROW_CLASS}>
+                  <div className="flex items-center gap-3">
+                    <span
+                      className={
+                        submission.passed === false
+                          ? PANEL_SUBMISSION_BADGE_FAILED_CLASS
+                          : PANEL_SUBMISSION_BADGE_PASSED_CLASS
+                      }
+                    >
+                      <Icon name={submission.passed === false ? 'x' : 'check'} />
+                    </span>
+                    <div>
+                      <div className={PANEL_SUBMISSION_TITLE_CLASS}>
+                        {submission.passed === false ? 'Not accepted' : 'Accepted'}
+                      </div>
+                      <div className={PANEL_SUBMISSION_META_CLASS}>
+                        {formatAttemptTime(submission.submittedAt)} · {describeSource(submission.sessionId)}
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
       {feedback && <FeedbackBanner {...feedback} />}
     </section>
   )

@@ -8,54 +8,77 @@ const base = {
   expectedOutput: '1\n2\n3',
   onAnswerChange: vi.fn(),
   onSubmit: vi.fn(),
-  onRedo: vi.fn(),
-  onReveal: vi.fn(),
+  onShowAnswer: vi.fn(),
+  onMarkAsDone: vi.fn(),
 }
 
 describe('PredictPanel', () => {
   it('submits the typed answer (idle)', () => {
     const onSubmit = vi.fn()
     render(createElement(PredictPanel, { ...base, status: 'idle', answer: '1', onSubmit }))
-    fireEvent.click(screen.getByText('Submit answer'))
+    fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
     expect(onSubmit).toHaveBeenCalledOnce()
   })
 
   it('disables submit when the answer is empty', () => {
     render(createElement(PredictPanel, { ...base, status: 'idle' }))
-    expect(screen.getByText('Submit answer').closest('button')).toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Submit' })).toBeDisabled()
   })
 
-  it('offers Redo and Reveal answer when wrong, without revealing yet', () => {
-    const onRedo = vi.fn()
-    const onReveal = vi.fn()
-    render(
-      createElement(PredictPanel, {
-        ...base,
-        status: 'wrong',
-        answer: 'nope',
-        onRedo,
-        onReveal,
-      }),
-    )
-    expect(screen.queryByText('Correct output')).not.toBeInTheDocument()
-    fireEvent.click(screen.getByText('Redo'))
-    expect(onRedo).toHaveBeenCalledOnce()
-    fireEvent.click(screen.getByText('Reveal answer'))
-    expect(onReveal).toHaveBeenCalledOnce()
+  it('shows the waiting state while grading', () => {
+    render(createElement(PredictPanel, { ...base, status: 'idle', answer: '1', isSubmitting: true }))
+    expect(screen.getByRole('button', { name: 'Submitting…' })).toBeDisabled()
   })
 
-  it('shows a success note and expected output when correct', () => {
-    render(createElement(PredictPanel, { ...base, status: 'correct', answer: '1\n2\n3' }))
-    expect(screen.getByText(/well predicted/)).toBeInTheDocument()
-    expect(screen.getByText('Correct output')).toBeInTheDocument()
+  it('reopens the input and offers "Show answer" once tried', () => {
+    const onShowAnswer = vi.fn()
+    const onSubmit = vi.fn()
+    render(createElement(PredictPanel, { ...base, status: 'tried', answer: 'nope', onShowAnswer, onSubmit }))
+    // the input stays open for another attempt
+    expect(screen.getByPlaceholderText(/type what you think it prints/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Not Quite' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Not Quite' }))
+    expect(onSubmit).toHaveBeenCalledOnce()
+    fireEvent.click(screen.getByText('Show answer'))
+    expect(onShowAnswer).toHaveBeenCalledOnce()
   })
 
-  it('shows the expected output for the done (revealed) state', () => {
-    render(createElement(PredictPanel, { ...base, status: 'done', answer: 'nope' }))
-    expect(screen.getByText(/Marked complete/)).toBeInTheDocument()
+  it('places "Show answer" to the left of Submit', () => {
+    render(createElement(PredictPanel, { ...base, status: 'tried', answer: 'nope' }))
+    const buttons = screen.getAllByRole('button')
+    const showAnswerIndex = buttons.findIndex((button) => button.textContent === 'Show answer')
+    const submitIndex = buttons.findIndex((button) => button.textContent?.includes('Not Quite'))
+    expect(showAnswerIndex).toBeGreaterThanOrEqual(0)
+    expect(showAnswerIndex).toBeLessThan(submitIndex)
+  })
+
+  it('reveals the expected output and offers "Marked as done" once revealed', () => {
+    const onMarkAsDone = vi.fn()
+    render(createElement(PredictPanel, { ...base, status: 'revealed', answer: 'nope', onMarkAsDone }))
     expect(screen.getByText('Correct output')).toBeInTheDocument()
     expect(
       screen.getByText((_, el) => el?.tagName === 'PRE' && el.textContent === '1\n2\n3'),
     ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Not Quite' })).toBeDisabled()
+    fireEvent.click(screen.getByText('Marked as done'))
+    expect(onMarkAsDone).toHaveBeenCalledOnce()
+  })
+
+  it('disables "Marked as done" while the completing submission is in flight', () => {
+    render(createElement(PredictPanel, { ...base, status: 'revealed', answer: 'nope', isMarkingDone: true }))
+    expect(screen.getByText('Marked as done').closest('button')).toBeDisabled()
+  })
+
+  it('shows a success note when correct', () => {
+    render(createElement(PredictPanel, { ...base, status: 'correct', answer: '1\n2\n3' }))
+    expect(screen.getByText(/well predicted/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Well Done' })).toBeDisabled()
+  })
+
+  it('shows a completed note for the done state, with no more actions offered', () => {
+    render(createElement(PredictPanel, { ...base, status: 'done', answer: 'nope' }))
+    expect(screen.getByText(/Marked complete/)).toBeInTheDocument()
+    expect(screen.queryByText('Show answer')).not.toBeInTheDocument()
+    expect(screen.queryByText('Marked as done')).not.toBeInTheDocument()
   })
 })

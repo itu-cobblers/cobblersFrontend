@@ -1,10 +1,10 @@
 import { type MouseEvent } from 'react'
 import classNames from 'classnames'
 import type { ModalProps } from './Modal.types'
-import { MODAL_OVERLAY_CLASS, MODAL_DIALOG_CLASS } from './Modal.constants'
+import { MODAL_OVERLAY_CLASS, MODAL_DIALOG_CLASS, MODAL_DIALOG_SIZE_CLASS } from './Modal.constants'
 import { useEscapeToClose } from './Modal.hooks'
 
-export default function Modal({ isOpen, onClose, closeOnOverlay = true, children }: ModalProps) {
+export default function Modal({ isOpen, onClose, closeOnOverlay = true, size = 'sm', children }: ModalProps) {
   useEscapeToClose(isOpen && closeOnOverlay, onClose)
 
   function handleOverlayClick() {
@@ -22,7 +22,7 @@ export default function Modal({ isOpen, onClose, closeOnOverlay = true, children
       <div
         role="dialog"
         aria-modal="true"
-        className={classNames(MODAL_DIALOG_CLASS)}
+        className={classNames(MODAL_DIALOG_CLASS, MODAL_DIALOG_SIZE_CLASS[size])}
         onClick={handleDialogClick}
       >
         {children}

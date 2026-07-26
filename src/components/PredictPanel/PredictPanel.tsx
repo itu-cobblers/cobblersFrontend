@@ -1,19 +1,19 @@
 import { type ChangeEvent } from 'react'
-import { Button } from '@components/Button'
+import {Icon} from "@/components";
+import { SubmitButton, type SubmitButtonStatus } from '@components/SubmitButton'
+import { ShowAnswerButton } from '@components/ShowAnswerButton'
 import type { PredictPanelProps } from './PredictPanel.types'
 import {
   PREDICT_PANEL_CLASS,
   PREDICT_HEADER_CLASS,
   PREDICT_STATUS_OK_CLASS,
-  PREDICT_STATUS_BAD_CLASS,
   PREDICT_BODY_CLASS,
   PREDICT_HINT_CLASS,
   PREDICT_SUCCESS_CLASS,
   PREDICT_TEXTAREA_CLASS,
   PREDICT_REVEAL_LABEL_CLASS,
   PREDICT_REVEAL_CLASS,
-  PREDICT_FOOTER_CLASS,
-  PREDICT_SECONDARY_BUTTON_CLASS,
+  PREDICT_FOOTER_CLASS, PREDICT_HEADER_LEFT_CLASS,
 } from './PredictPanel.constants'
 
 /**
@@ -23,65 +23,68 @@ import {
 export default function PredictPanel({
   answer,
   status,
+  isSubmitting = false,
+  isMarkingDone = false,
   expectedOutput,
   onAnswerChange,
   onSubmit,
-  onRedo,
-  onReveal,
+  onShowAnswer,
+  onMarkAsDone,
 }: PredictPanelProps) {
   function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
     onAnswerChange(event.target.value)
   }
 
-  const isInput = status === 'idle'
+  const isTried = status === 'tried'
+  const isRevealed = status === 'revealed'
   const isCorrect = status === 'correct'
-  const isWrong = status === 'wrong'
   const isDone = status === 'done'
-  const showExpected = isCorrect || isDone
+  // The input stays open for another attempt until the student reveals the
+  // answer — only "revealed"/"correct"/"done" replace it with the result view.
+  const isInput = status === 'idle' || isTried
+
+  // The button itself never leaves the DOM on submit — it holds its final
+  // frame (well done / not quite) once the answer is graded, so the shared
+  // component in both panels always reads as the source of truth for outcome.
+  const buttonStatus: SubmitButtonStatus = isSubmitting
+    ? 'waiting'
+    : isCorrect
+      ? 'success'
+      : isTried || isRevealed || isDone
+        ? 'error'
+        : 'idle'
 
   return (
     <div className={PREDICT_PANEL_CLASS}>
       <div className={PREDICT_HEADER_CLASS}>
-        <span>Your prediction</span>
-        {isCorrect && <span className={PREDICT_STATUS_OK_CLASS}>Correct</span>}
-        {isWrong && <span className={PREDICT_STATUS_BAD_CLASS}>Not quite</span>}
-        {isDone && <span className={PREDICT_STATUS_OK_CLASS}>Completed</span>}
+        <span className={PREDICT_HEADER_LEFT_CLASS}>
+          <Icon name="terminal" />
+          Terminal
+          {isCorrect && <span className={PREDICT_STATUS_OK_CLASS}>Correct</span>}
+          {isDone && <span className={PREDICT_STATUS_OK_CLASS}>Completed</span>}
+        </span>
       </div>
-
       <div className={PREDICT_BODY_CLASS}>
-        {isInput && (
+        {isInput ? (
           <>
-            <p className={PREDICT_HINT_CLASS}>
-              Read the code and type what you think it prints, line by line.
-            </p>
+            {isTried && (
+              <p className={PREDICT_HINT_CLASS}>Not quite — try again, or show the answer below.</p>
+            )}
             <textarea
               className={PREDICT_TEXTAREA_CLASS}
               value={answer}
               onChange={handleChange}
-              placeholder="Type the output here…"
+              placeholder="Read the code and type what you think it prints, line by line."
               spellCheck={false}
             />
           </>
-        )}
-
-        {isWrong && (
-          <>
-            <p className={PREDICT_HINT_CLASS}>
-              Not quite — try again, or reveal the correct output if you are stuck.
-            </p>
-            <textarea
-              className={PREDICT_TEXTAREA_CLASS}
-              value={answer}
-              readOnly
-              spellCheck={false}
-            />
-          </>
-        )}
-
-        {showExpected && (
+        ) : (
           <>
             {isCorrect && <p className={PREDICT_SUCCESS_CLASS}>✓ Correct — well predicted!</p>}
             {isDone && <p className={PREDICT_SUCCESS_CLASS}>✓ Marked complete.</p>}
+            {isRevealed && (
+              <p className={PREDICT_HINT_CLASS}>Not quite — here&rsquo;s what it actually prints:</p>
+            )}
             <div className={PREDICT_REVEAL_LABEL_CLASS}>Correct output</div>
             <pre className={PREDICT_REVEAL_CLASS}>{expectedOutput}</pre>
           </>
@@ -90,17 +93,16 @@ export default function PredictPanel({
 
       {isInput && (
         <div className={PREDICT_FOOTER_CLASS}>
-          <Button onClick={onSubmit} isDisabled={!answer.trim()}>
-            Submit answer
-          </Button>
+          {isTried && <ShowAnswerButton onClick={onShowAnswer} label="Show answer" />}
+          <SubmitButton status={buttonStatus} onClick={onSubmit} isDisabled={!answer.trim()} />
         </div>
       )}
-      {isWrong && (
+      {!isInput && (
         <div className={PREDICT_FOOTER_CLASS}>
-          <button type="button" className={PREDICT_SECONDARY_BUTTON_CLASS} onClick={onRedo}>
-            Redo
-          </button>
-          <Button onClick={onReveal}>Reveal answer</Button>
+          {isRevealed && (
+            <ShowAnswerButton onClick={onMarkAsDone} label="Marked as done" isDisabled={isMarkingDone} />
+          )}
+          <SubmitButton status={buttonStatus} onClick={onSubmit} isDisabled />
         </div>
       )}
     </div>

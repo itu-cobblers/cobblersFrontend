@@ -1,53 +1,41 @@
 import { useState } from 'react'
-import type { SourceFile, SubmissionResult } from '@types'
+import type { SubmissionResult } from '@types'
 import { submitAssignment } from '@lib/submissionApi'
 
 interface UseSubmissionOptions {
   /** Cross-cutting effects on a result (mirror in terminal, grade the assignment). */
-  onResult?: (content: string | SourceFile[], result: SubmissionResult) => void
+  onResult?: (code: string, result: SubmissionResult) => void
 }
 
 export interface UseSubmission {
-  showSubmit: boolean
   isSubmitting: boolean
   result: SubmissionResult | null
-  open: () => void
-  close: () => void
-  /** `content` is a single Java source string, or a `{ name, content }[]` file list for multi-file code assignments. */
-  confirm: (content: string | SourceFile[], assignmentId: number | undefined) => Promise<SubmissionResult | null>
+  confirm: (code: string, assignmentId: number | undefined, sessionCode: string | undefined) => Promise<SubmissionResult | null>
+  /** Clears the last result — called on assignment switch so a stale "well done"/"not quite" hold doesn't bleed into the next assignment's fresh Submit button. */
+  reset: () => void
 }
 
 /**
- * Owns the submit-to-teacher flow: the confirm/result modal state and the
- * submit lifecycle. Cross-cutting effects are injected via `onResult` so this
- * hook stays decoupled from the executor/assignments.
+ * Owns the submit-to-teacher flow: the submit lifecycle behind the shared
+ * SubmitButton (isSubmitting drives its "waiting" frames, result its
+ * "well done"/"not quite" hold). Cross-cutting effects are injected via
+ * `onResult` so this hook stays decoupled from the executor/assignments.
  */
 export function useSubmission({ onResult }: UseSubmissionOptions = {}): UseSubmission {
-  const [showSubmit, setShowSubmit] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [result, setResult] = useState<SubmissionResult | null>(null)
 
-  function open() {
-    setResult(null)
-    setShowSubmit(true)
-  }
-
-  function close() {
-    if (isSubmitting) return
-    setShowSubmit(false)
-    setResult(null)
-  }
-
   async function confirm(
-    content: string | SourceFile[],
+    code: string,
     assignmentId: number | undefined,
+    sessionCode: string | undefined,
   ): Promise<SubmissionResult | null> {
     if (assignmentId === undefined) return null
     setIsSubmitting(true)
     try {
-      const r = await submitAssignment({ assignmentId, content })
+      const r = await submitAssignment({ assignmentId, content: code, sessionCode })
       setResult(r)
-      onResult?.(content, r)
+      onResult?.(code, r)
       return r
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err)
@@ -63,5 +51,9 @@ export function useSubmission({ onResult }: UseSubmissionOptions = {}): UseSubmi
     }
   }
 
-  return { showSubmit, isSubmitting, result, open, close, confirm }
+  function reset() {
+    setResult(null)
+  }
+
+  return { isSubmitting, result, confirm, reset }
 }

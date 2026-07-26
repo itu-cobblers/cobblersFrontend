@@ -1,3 +1,3 @@
 export { default as Modal } from './Modal'
 export { useEscapeToClose } from './Modal.hooks'
-export type { ModalProps } from './Modal.types'
+export type { ModalProps, ModalSize } from './Modal.types'

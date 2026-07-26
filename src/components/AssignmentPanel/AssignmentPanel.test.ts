@@ -1,12 +1,15 @@
 import { describe, it, expect, vi } from 'vitest'
 import { createElement } from 'react'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import AssignmentPanel from './AssignmentPanel'
 import type { AssignmentPanelProps } from './AssignmentPanel.types'
 
 const baseProps: AssignmentPanelProps = {
   steps: [{ id: 0, title: 'Hello ITU', isDone: false, isActive: true }],
   onSelectStep: vi.fn(),
+  activeTab: 'description',
+  onTabChange: vi.fn(),
+  submissions: [],
   title: 'Hello ITU',
   lesson: [
     { kind: 'text', text: 'Printing a message is the most basic thing.' },
@@ -39,5 +42,28 @@ describe('AssignmentPanel', () => {
   it('renders a project brief as body text', () => {
     render(createElement(AssignmentPanel, { ...baseProps, lesson: undefined, body: 'Build a Tree®' }))
     expect(screen.getByText('Build a Tree®')).toBeInTheDocument()
+  })
+
+  it('fires onTabChange when Submissions is clicked', () => {
+    const onTabChange = vi.fn()
+    render(createElement(AssignmentPanel, { ...baseProps, onTabChange }))
+    fireEvent.click(screen.getByText('Description'))
+    expect(onTabChange).toHaveBeenCalledWith('description')
+  })
+
+  it('shows an empty state on the Submissions tab with no attempts', () => {
+    render(createElement(AssignmentPanel, { ...baseProps, activeTab: 'submissions' }))
+    expect(screen.getByText('No submissions yet.')).toBeInTheDocument()
+  })
+
+  it('lists submissions with their outcome on the Submissions tab', () => {
+    render(
+      createElement(AssignmentPanel, {
+        ...baseProps,
+        activeTab: 'submissions',
+        submissions: [{ subId: 's1', assignmentId: 0, sessionId: null, passed: true, submittedAt: '2026-07-24T14:30:00Z' }],
+      }),
+    )
+    expect(screen.getByText('Accepted')).toBeInTheDocument()
   })
 })
