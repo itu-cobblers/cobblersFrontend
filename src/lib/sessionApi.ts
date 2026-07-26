@@ -3,7 +3,6 @@
  * and the backend's session API (proxied via /api). The SignalR hub that will
  * broadcast the timer to a room is planned — see the api repo's CONTRACT.md.
  */
-import type { ResumeSuggestion } from '@types'
 
 export interface Session {
   code: string
@@ -49,21 +48,28 @@ export async function startTimer(sessionCode: string, durationMinutes: number): 
 }
 
 /**
- * `GET /api/students/{studentId}/resume-suggestion` (CONTRACT.md "Resume
- * suggestion (planned)") — the most recently created room this student
- * hasn't already attended, so a returning student can be offered "today's"
- * session instead of asking the teacher for a new code.
- *
- * ⚠️ Not implemented on the backend yet (see STORIES.md S9) — resolves to
- * `null` ("nothing to suggest") on any failure, so the welcome-back banner
- * simply never appears until the endpoint exists, instead of breaking entry.
+ * `POST /api/sessions/:code/end` — the teacher's manual "End session" action.
+ * Marks the room ended server-side and fans out a `SessionEnded` broadcast
+ * (see `@lib/sessionHub`) so any still-connected students bounce back to the
+ * entry screen instead of being left in a dead room.
  */
-export async function fetchResumeSuggestion(studentId: string): Promise<ResumeSuggestion | null> {
+export async function endSession(code: string): Promise<void> {
+  const res = await fetch(`/api/sessions/${encodeURIComponent(code)}/end`, { method: 'POST' })
+  if (!res.ok) throw new Error(`HTTP ${res.status}`)
+}
+
+/**
+ * `GET /api/sessions/today-latest` — today's newest still-active room, so
+ * the entry screen can offer a one-click "Join session (CODE)" instead of
+ * making the student ask the teacher for, and type, a code. `null` when
+ * there's no such room (nothing created today, or it's already ended) —
+ * the entry screen shows a disabled "no current active session" button.
+ */
+export async function fetchTodayLatestSession(): Promise<SessionInfo | null> {
   try {
-    const res = await fetch(`/api/students/${encodeURIComponent(studentId)}/resume-suggestion`)
+    const res = await fetch('/api/sessions/today-latest')
     if (!res.ok) return null
-    const data = (await res.json()) as { suggested: ResumeSuggestion | null }
-    return data.suggested
+    return await res.json()
   } catch {
     return null
   }

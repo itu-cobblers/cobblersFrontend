@@ -33,6 +33,8 @@ export interface StudentCallbacks {
   onTimerStarted?: (timer: Timer) => void
   /** The teacher moved to a different assignment — id of the newly-focused assignment. */
   onAssignmentFocused?: (assignmentId: number) => void
+  /** The teacher ended the room (POST /api/sessions/:code/end) — bounce back to entry. */
+  onSessionEnded?: () => void
 }
 
 export interface TeacherCallbacks {
@@ -60,6 +62,9 @@ export async function joinSession(args: JoinArgs, callbacks: StudentCallbacks = 
   }
   if (callbacks.onAssignmentFocused) {
     conn.on('AssignmentFocused', (assignmentId: number) => callbacks.onAssignmentFocused?.(assignmentId))
+  }
+  if (callbacks.onSessionEnded) {
+    conn.on('SessionEnded', () => callbacks.onSessionEnded?.())
   }
   const state = await conn.invoke<SessionState>('JoinSession', args)
   if (state?.activeTimer) callbacks.onTimerStarted?.(state.activeTimer)
