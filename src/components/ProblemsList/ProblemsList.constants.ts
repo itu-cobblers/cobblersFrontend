@@ -15,7 +15,8 @@ export const LIST_HEADER_RIGHT_CLASS = 'ml-auto flex items-center gap-1.5'
 export const LIST_SESSION_CLASS =
   'flex flex-col gap-1 border-b border-border px-3 py-2 text-[11px] text-muted-foreground'
 
-export const LIST_SESSION_LABEL_CLASS = 'w-fit rounded bg-accent/10 px-2 py-0.5 font-medium text-accent'
+export const LIST_SESSION_LABEL_CLASS =
+  'w-fit rounded-md border px-2 py-0.5 text-[11px] font-semibold border-accent/30 bg-accent/20 text-muted-foreground'
 
 export const LIST_SESSION_NAME_CLASS = 'truncate'
 
@@ -62,7 +63,7 @@ export const LIST_ITEM_KIND_BADGE_CLASS =
 
 export const LIST_ITEM_TITLE_CLASS = 'mt-0.5 truncate text-[13px] leading-tight'
 
-export const LIST_ITEM_LIVE_CLASS = 'ml-auto text-[9px] uppercase tracking-widest text-accent'
+export const LIST_ITEM_LIVE_CLASS = 'ml-auto text-[9px] uppercase tracking-widest bg-accent text-white px-2 rounded-md'
 
 export const LIST_FOOTER_CLASS = 'flex items-center gap-3 border-t border-border px-4 py-2 text-[10px] uppercase tracking-widest text-foreground/30'
 

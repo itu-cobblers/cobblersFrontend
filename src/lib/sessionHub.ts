@@ -20,6 +20,7 @@ export interface Timer {
 /** State the hub replies with on join (so late joiners sync). */
 interface SessionState {
   activeTimer?: Timer
+  focusedAssignmentId?: number
 }
 
 export interface JoinArgs {
@@ -62,6 +63,7 @@ export async function joinSession(args: JoinArgs, callbacks: StudentCallbacks = 
   }
   const state = await conn.invoke<SessionState>('JoinSession', args)
   if (state?.activeTimer) callbacks.onTimerStarted?.(state.activeTimer)
+  if (state?.focusedAssignmentId != null) callbacks.onAssignmentFocused?.(state.focusedAssignmentId)
 }
 
 /** Teacher moves to a different assignment; broadcasts it to every student in the room (best-effort — see CONTRACT.md). */

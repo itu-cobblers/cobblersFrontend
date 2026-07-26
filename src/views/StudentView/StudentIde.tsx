@@ -1,6 +1,5 @@
 import type { Assignment, AssignmentSet, SubmissionHistoryItem } from '@types'
 import {
-  Toolbar,
   ProblemsList,
   TeacherFollowBanner,
   AssignmentPanel,
@@ -54,7 +53,7 @@ export default function StudentIde({
   isHistoryLoading,
   onSubmissionMade,
 }: StudentIdeProps) {
-  const { activePanel, problemsList, followBanner, toolbar, codeFileTabs, assignmentPanel} =
+  const { activePanel, problemsList, followBanner, codeFileTabs, assignmentPanel} =
     useStudentWorkspace({
       assignmentSet,
       sessionCode,
@@ -77,7 +76,6 @@ export default function StudentIde({
           leaveLabel={sessionActionLabel}
         />
         <div className={STUDENT_CONTENT_COLUMN_CLASS}>
-          <Toolbar {...toolbar} />
           {followBanner && <TeacherFollowBanner {...followBanner} />}
           <div className={STUDENT_WORKSPACE_CLASS}>
             <AssignmentPanel {...assignmentPanel} />

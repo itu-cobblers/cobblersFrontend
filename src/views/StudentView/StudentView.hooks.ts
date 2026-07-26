@@ -448,9 +448,6 @@ export function useStudentWorkspace({
             onFollow: () => handleSelectAssignment(teacherFocusedAssignment.id),
           }
         : null,
-    toolbar: {
-      isFollowingTeacher: teacherFocusedAssignmentId != null && teacherFocusedAssignmentId === active.id,
-    },
     codeFileTabs:
       active.kind === 'code'
         ? {
