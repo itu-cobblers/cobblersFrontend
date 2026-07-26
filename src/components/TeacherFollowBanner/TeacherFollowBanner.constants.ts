@@ -1,7 +1,7 @@
 export const FOLLOW_BANNER_CLASS =
-  'flex items-center justify-between gap-3 border-b border-accent/30 bg-accent/10 px-4 py-2 text-xs'
+  'flex h-10 shrink-0 items-center justify-between gap-3 border-b border-accent/30 bg-accent/10 px-4 text-xs'
 
-export const FOLLOW_BANNER_TEXT_CLASS = 'flex items-center gap-2 text-accent'
+export const FOLLOW_BANNER_TEXT_CLASS = 'flex min-w-0 flex-1 items-center gap-2 truncate text-accent'
 
 export const FOLLOW_BANNER_DOT_CLASS = 'h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-accent'
 

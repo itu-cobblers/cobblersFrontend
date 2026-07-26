@@ -8,7 +8,7 @@ export const LIST_CLASS_OPEN = 'w-64'
 export const LIST_CLASS_CLOSED = 'w-12'
 
 export const LIST_HEADER_CLASS =
-  'flex items-center gap-2 border-b border-border px-2 py-3 text-[11px] uppercase tracking-[0.25em] text-muted-foreground'
+  'flex h-10 shrink-0 items-center gap-2 border-b border-border px-2 text-[11px] uppercase tracking-[0.25em] text-muted-foreground'
 
 export const LIST_HEADER_RIGHT_CLASS = 'ml-auto flex items-center gap-1.5'
 

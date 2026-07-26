@@ -426,6 +426,15 @@ export function useStudentWorkspace({
   const teacherFocusedAssignment =
     teacherFocusedAssignmentId != null ? assignments.find((assignment) => assignment.id === teacherFocusedAssignmentId) : undefined
 
+  const followBanner =
+    teacherFocusedAssignment && teacherFocusedAssignment.id !== active.id
+      ? {
+          assignmentId: teacherFocusedAssignment.id,
+          assignmentTitle: teacherFocusedAssignment.title,
+          onFollow: () => handleSelectAssignment(teacherFocusedAssignment.id),
+        }
+      : undefined
+
   return {
     activePanel: buildActivePanel(),
     problemsList: {
@@ -440,14 +449,7 @@ export function useStudentWorkspace({
       isOpen: isRailOpen,
       onToggleOpen: handleToggleRail,
     },
-    followBanner:
-      teacherFocusedAssignment && teacherFocusedAssignment.id !== active.id
-        ? {
-            assignmentId: teacherFocusedAssignment.id,
-            assignmentTitle: teacherFocusedAssignment.title,
-            onFollow: () => handleSelectAssignment(teacherFocusedAssignment.id),
-          }
-        : null,
+    followBanner,
     codeFileTabs:
       active.kind === 'code'
         ? {

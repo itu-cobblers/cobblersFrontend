@@ -30,9 +30,9 @@ export const PANEL_HINT_BODY_CLASS = 'mt-1.5'
 
 export const PANEL_HINT_CODE_CLASS = 'font-mono text-[11px] text-foreground'
 
-export const PANEL_TABS_CLASS = 'flex shrink-0 items-center gap-1 border-b border-border px-3 pt-3'
+export const PANEL_TABS_CLASS = 'flex h-10 shrink-0 items-stretch gap-1 border-b border-border px-3'
 
-export const PANEL_TAB_BASE_CLASS = 'relative px-3 py-2 text-sm transition-colors'
+export const PANEL_TAB_BASE_CLASS = 'relative flex h-full items-center px-3 text-sm transition-colors'
 
 export const PANEL_TAB_ACTIVE_CLASS = 'text-foreground'
 
