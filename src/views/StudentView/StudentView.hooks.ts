@@ -159,8 +159,6 @@ export function useStudentWorkspace(assignmentSet: AssignmentSet) {
         assignmentId: active.id,
         content: answer,
       })
-      // Server grades from Assignment.GradingJson `{ predict: { compare, expectedOutput } }`.
-      // `passed` is null only when the assignment has no grader — treat that as not correct.
       const correct = submissionResult.passed === true
       setStatusByAssignment((prev) => ({ ...prev, [active.id]: correct ? 'correct' : 'wrong' }))
       if (correct) assignmentProgress.complete(active.id)
