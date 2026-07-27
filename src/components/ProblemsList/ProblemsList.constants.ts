@@ -65,6 +65,10 @@ export const LIST_ITEM_TITLE_CLASS = 'mt-0.5 truncate text-[13px] leading-tight'
 
 export const LIST_ITEM_LIVE_CLASS = 'ml-auto text-[9px] uppercase tracking-widest bg-accent text-white px-2 rounded-md'
 
+// Same "live" pill as LIST_ITEM_LIVE_CLASS but without `ml-auto` — for stacking
+// under a sibling (e.g. TeacherProblemsList's passed-count) instead of sharing its row.
+export const LIST_ITEM_LIVE_BADGE_CLASS = 'text-[9px] uppercase tracking-widest bg-accent text-white px-2 rounded-md'
+
 export const LIST_FOOTER_CLASS = 'flex items-center gap-3 border-t border-border px-4 py-2 text-[10px] uppercase tracking-widest text-foreground/30'
 
 // Footer action bar pinned to the bottom of the rail — just Leave/Exit now

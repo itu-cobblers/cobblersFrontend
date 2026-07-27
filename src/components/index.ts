@@ -74,8 +74,21 @@ export type {
 export { StudentRoster } from './StudentRoster'
 export type { StudentRosterProps, RosterEntry, RosterStatus } from './StudentRoster'
 
+export { TeacherProblemsList } from './TeacherProblemsList'
+export type { TeacherProblemsListProps, TeacherProblemItem } from './TeacherProblemsList'
+
+export { AttendanceList } from './AttendanceList'
+export type { AttendanceListProps, AttendanceStudent } from './AttendanceList'
+
+export { TeacherAssignmentPanel } from './TeacherAssignmentPanel'
+export type { TeacherAssignmentPanelProps, TeacherSubmissionItem } from './TeacherAssignmentPanel'
+
+export { TeacherCodeViewer } from './TeacherCodeViewer'
+export type { TeacherCodeViewerProps } from './TeacherCodeViewer'
+
 export { SubmitButton } from './SubmitButton'
 export type { SubmitButtonProps, SubmitButtonStatus } from './SubmitButton'
+
 
 export { ShowAnswerButton } from './ShowAnswerButton'
 export type { ShowAnswerButtonProps } from './ShowAnswerButton'

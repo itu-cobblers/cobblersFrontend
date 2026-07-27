@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import type { Assignment } from '@types'
 import { createSession, getSession, startTimer, endSession } from '@lib/sessionApi'
 import { fetchAssignmentSets, fetchAssignmentSet, type AssignmentSetSummary } from '@lib/assignmentSetApi'
 import { groupAssignments } from '@lib/assignmentSet'
@@ -17,6 +18,9 @@ export function useTeacherSession() {
   const [selectedAssignmentSetId, setSelectedAssignmentSetId] = useState('')
   const [previewGroups, setPreviewGroups] = useState<AssignmentSetPreviewGroup[]>([])
   const [previewTitle, setPreviewTitle] = useState('')
+  // Full assignment objects (incl. starter/starterFiles) — the flattened preview
+  // items above only carry the fields the read-only AssignmentSetPreview needs.
+  const [assignments, setAssignments] = useState<Assignment[]>([])
 
   const [sessionCode, setSessionCode] = useState<string | null>(null)
   const [isCreatingSession, setIsCreatingSession] = useState(false)
@@ -78,6 +82,7 @@ export function useTeacherSession() {
       .then((assignmentSet) => {
         if (cancelled) return
         setPreviewTitle(assignmentSet.displayTitle)
+        setAssignments(assignmentSet.assignments)
         setPreviewGroups(
           groupAssignments(assignmentSet.assignments, 'Assignments').map((group) => ({
             label: group.label,
@@ -164,9 +169,37 @@ export function useTeacherSession() {
     }
   }
 
-  function handleMinutesChange(value: string) {
-    setMinutes(Number(value))
+  function handleMinutesChange(value: number) {
+    setMinutes(value)
   }
+
+  // Dual-selection states for Col 1 (Assignment) and Col 2 (Student).
+  // Unlike the student toggle, the assignment side can never be empty — the
+  // teacher always lands on some task. Rather than defaulting via an effect
+  // (which would setState during render's commit phase), the raw selection
+  // is derived against the current preview list on every render: `null` (or
+  // a stale id from a since-changed set) falls back to the first assignment.
+  const [selectedAssignmentIdRaw, setSelectedAssignmentIdRaw] = useState<number | null>(null)
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null)
+
+  const previewAssignmentIds = previewGroups.flatMap((group) => group.items.map((item) => item.id))
+  const selectedAssignmentId =
+    selectedAssignmentIdRaw !== null && previewAssignmentIds.includes(selectedAssignmentIdRaw)
+      ? selectedAssignmentIdRaw
+      : previewAssignmentIds[0] ?? null
+
+  function handleSelectAssignment(id: number) {
+    setSelectedAssignmentIdRaw(id)
+  }
+
+  function handleSelectStudent(studentId: string | null) {
+    setSelectedStudentId((prev) => (prev === studentId ? null : studentId))
+  }
+
+  function handleClearStudentFilter() {
+    setSelectedStudentId(null)
+  }
+
 
   /**
    * The teacher's manual "End session" action: marks the room ended in the DB
@@ -216,6 +249,7 @@ export function useTeacherSession() {
     onAssignmentSetChange: setSelectedAssignmentSetId,
     previewGroups,
     previewTitle,
+    assignments,
     sessionCode,
     isCreatingSession,
     isEndingSession,
@@ -233,5 +267,11 @@ export function useTeacherSession() {
     handleEndSession,
     handleFocusAssignment,
     handleLogout,
+    // Dual selection state & handlers
+    selectedAssignmentId,
+    selectedStudentId,
+    handleSelectAssignment,
+    handleSelectStudent,
+    handleClearStudentFilter,
   }
 }
