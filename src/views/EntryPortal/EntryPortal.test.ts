@@ -21,9 +21,9 @@ describe('EntryPortal', () => {
     expect(screen.getByText('Welcome to BootIT')).toBeInTheDocument()
   })
 
-  it('shows "Welcome back, {name}" for a returning student', () => {
+  it('shows "Welcome to BootIT, {name}" for a returning student', () => {
     render(createElement(EntryPortal, { ...baseProps, name: 'Maria', isReturningStudent: true }))
-    expect(screen.getByText('Welcome back, Maria')).toBeInTheDocument()
+    expect(screen.getByText('Welcome to BootIT, Maria')).toBeInTheDocument()
   })
 
   it('disables the join button and shows a checking label while the today-latest lookup is in flight', () => {
