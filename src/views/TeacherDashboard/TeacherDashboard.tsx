@@ -1,34 +1,40 @@
-import { Button, Spinner, TextField, AssignmentSetPreview, StudentRoster } from '@components'
+import { useState } from 'react'
+import {
+  Button,
+  Spinner,
+  TeacherProblemsList,
+  AttendanceList,
+  TeacherAssignmentPanel,
+  TeacherCodeViewer,
+  type TeacherProblemItem,
+  type AttendanceStudent,
+  type TeacherSubmissionItem,
+  type CodeFileTab,
+} from '@components'
+import { defaultStarter } from '@lib/defaultStarter'
 import { useTeacherSession } from './TeacherDashboard.hooks'
-import { formatTimerEnds } from './TeacherDashboard.utils'
 import {
   TEACHER_LAYOUT_CLASS,
+  TEACHER_GRID_CLASS,
+  TEACHER_GLOW_CLASS,
   TEACHER_RESTORING_CLASS,
-  TEACHER_HEADER_CLASS,
-  TEACHER_BRAND_CLASS,
-  TEACHER_ROOM_CODE_CLASS,
   TEACHER_BODY_CLASS,
-  TEACHER_SECTION_CLASS,
-  TEACHER_SECTION_TITLE_CLASS,
-  TEACHER_CODE_DISPLAY_CLASS,
-  TEACHER_CODE_CAPTION_CLASS,
-  TEACHER_ASSIGNMENT_SET_ROW_CLASS,
-  TEACHER_ASSIGNMENT_SET_LABEL_CLASS,
-  TEACHER_ASSIGNMENT_SET_SELECT_CLASS,
-  TEACHER_TIMER_ROW_CLASS,
-  TEACHER_MINUTES_INPUT_CLASS,
-  TEACHER_MINUTES_LABEL_CLASS,
-  TEACHER_TIMER_STATUS_CLASS,
   TEACHER_ERROR_CLASS,
-  TEACHER_HINT_CLASS,
   TEACHER_BROWSE_CLASS,
   TEACHER_BROWSE_HEAD_CLASS,
   TEACHER_BROWSE_TITLE_CLASS,
   TEACHER_BROWSE_SUBTITLE_CLASS,
   TEACHER_BROWSE_ACTIONS_CLASS,
-  TEACHER_SESSION_ASIDE_CLASS,
-  TEACHER_STUDENTS_CLASS,
+  TEACHER_ASSIGNMENT_SET_ROW_CLASS,
+  TEACHER_ASSIGNMENT_SET_LABEL_CLASS,
+  TEACHER_ASSIGNMENT_SET_SELECT_CLASS,
 } from './TeacherDashboard.constants'
+import type { AssignmentPanelTab } from '@components/AssignmentPanel/AssignmentPanel.types'
+
+/** The file tabs for a code assignment's starter — mirrors the student view's `codeFiles`. */
+function starterFileTabs(files?: { name: string }[]): CodeFileTab[] {
+  return files?.map((file) => ({ name: file.name })) ?? [{ name: 'Main.java' }]
+}
 
 export default function TeacherDashboard() {
   const {
@@ -37,6 +43,7 @@ export default function TeacherDashboard() {
     onAssignmentSetChange,
     previewGroups,
     previewTitle,
+    assignments,
     sessionCode,
     isCreatingSession,
     isEndingSession,
@@ -54,130 +61,202 @@ export default function TeacherDashboard() {
     handleEndSession,
     handleFocusAssignment,
     handleLogout,
+    // Dual selection states & handlers
+    selectedAssignmentId,
+    selectedStudentId,
+    handleSelectAssignment,
+    handleSelectStudent,
+    handleClearStudentFilter,
   } = useTeacherSession()
 
+  const [isRailOpen, setIsRailOpen] = useState(true)
+  const [activeTab, setActiveTab] = useState<AssignmentPanelTab>('description')
+  const [activeSubId, setActiveSubId] = useState<string | null>(null)
+  const [activeFileIndex, setActiveFileIndex] = useState(0)
+
   const createLabel = isCreatingSession ? 'Creating…' : 'Create session'
-  const startLabel = isStartingTimer ? 'Starting…' : 'Start timer'
+
+  // Flatten preview groups into TeacherProblemItems for Col 1
+  const problemItems: TeacherProblemItem[] = previewGroups.flatMap((group) =>
+    group.items.map((item) => {
+      // Find selected student's status for this item if student selected
+      const studentStatus = selectedStudentId ? 'untried' : undefined
+      return {
+        id: item.id,
+        title: item.title,
+        kind: item.kind,
+        passedNum: 0,
+        totalNum: students.length,
+        studentStatus,
+      }
+    }),
+  )
+
+  // Map students into AttendanceStudents for Col 2
+  const attendanceStudents: AttendanceStudent[] = students.map((s) => ({
+    studentId: s.studentId,
+    displayName: s.displayName,
+    isActive: true,
+    assignmentStatus: selectedAssignmentId ? 'untried' : undefined,
+  }))
+
+  // Selected assignment (full object, with starter/starterFiles — for the Col4 starter preview)
+  const activeAssignment = assignments.find((a) => a.id === selectedAssignmentId)
+  const activeAssignmentItem = problemItems.find((p) => p.id === selectedAssignmentId) || problemItems[0]
+
+  // Selected student item
+  const activeStudent = students.find((s) => s.studentId === selectedStudentId)
+
+  // Submissions placeholder array based on selection
+  const mockSubmissions: TeacherSubmissionItem[] = []
+
+  const activeSubmission = mockSubmissions.find((s) => s.subId === activeSubId)
+
+  // Starter-code preview for Col4 when no submission is selected yet — matches the student view exactly.
+  const starterTabs = activeAssignment?.kind === 'code' ? starterFileTabs(activeAssignment.starterFiles) : []
+  const starterCode =
+    activeAssignment?.kind === 'code'
+      ? activeAssignment.starterFiles?.[activeFileIndex]?.content ?? activeAssignment.starter ?? defaultStarter
+      : activeAssignment?.kind === 'predict'
+        ? activeAssignment.snippet
+        : ''
+  const predictExpectedOutput = activeAssignment?.kind === 'predict' ? activeAssignment.expectedOutput : undefined
+  const projectBrief = activeAssignment?.kind === 'project' ? activeAssignment.brief : undefined
+  // Namespaces the Monaco model path (see TeacherCodeViewer.types.ts) so switching between
+  // assignments/submissions that share a file name (every multi-file assignment has a
+  // `Main.java`) never shows another context's stale, cached model content.
+  const editorKey = activeSubmission ? `sub-${activeSubmission.subId}` : `assignment-${selectedAssignmentId ?? 'none'}`
+
+  function handleSelectAssignmentAndResetFile(id: number) {
+    setActiveFileIndex(0)
+    setActiveSubId(null)
+    handleSelectAssignment(id)
+  }
 
   return (
     <div className={TEACHER_LAYOUT_CLASS}>
-      <header className={TEACHER_HEADER_CLASS}>
-        <span className={TEACHER_BRAND_CLASS}>BootIT — Teacher</span>
-        {sessionCode && (
-          <>
-            <span className={TEACHER_ROOM_CODE_CLASS}>
-              Room: <strong>{sessionCode}</strong>
-            </span>
-            <Button variant="ghost" onClick={handleEndSession} isLoading={isEndingSession}>
-              End session
-            </Button>
-          </>
-        )}
-        <Button variant="ghost" onClick={handleLogout}>
-          Sign out
-        </Button>
-      </header>
+      <div className={TEACHER_GRID_CLASS} />
+      <div className={TEACHER_GLOW_CLASS} />
 
       {isRestoringSession ? (
         <div className={TEACHER_RESTORING_CLASS}>
           <Spinner />
         </div>
       ) : !sessionCode ? (
-        // ── Browse: pick an assignment set and read through its assignments (read-only) ──────
-        <div className={TEACHER_BROWSE_CLASS}>
-          <div className={TEACHER_BROWSE_HEAD_CLASS}>
-            <h1 className={TEACHER_BROWSE_TITLE_CLASS}>Start a session</h1>
-            <p className={TEACHER_BROWSE_SUBTITLE_CLASS}>
-              Pick an assignment set and preview its assignments. Create a session when you're ready to open the
-              room to students.
-            </p>
-          </div>
-
-          <div className={TEACHER_BROWSE_ACTIONS_CLASS}>
-            <div className={TEACHER_ASSIGNMENT_SET_ROW_CLASS}>
-              <label className={TEACHER_ASSIGNMENT_SET_LABEL_CLASS} htmlFor="teacher-assignmentSet-select">
-                Assignment set
-              </label>
-              <select
-                id="teacher-assignmentSet-select"
-                className={TEACHER_ASSIGNMENT_SET_SELECT_CLASS}
-                value={selectedAssignmentSetId}
-                onChange={(event) => onAssignmentSetChange(event.target.value)}
-              >
-                {assignmentSets.length === 0 && <option value="">Loading assignment sets…</option>}
-                {assignmentSets.map((assignmentSet) => (
-                  <option key={assignmentSet.assignmentSetId} value={assignmentSet.assignmentSetId}>
-                    {assignmentSet.displayTitle}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <Button
-              onClick={handleCreateSession}
-              isLoading={isCreatingSession}
-              isDisabled={!selectedAssignmentSetId}
-            >
-              {createLabel}
+        // ── Browse Screen (Create Session & Sign Out in header) ────────────────
+        <div className="relative z-10 flex flex-1 flex-col overflow-hidden">
+          <header className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-card/60 px-6 backdrop-blur-md">
+            <span className="text-sm font-bold text-foreground">BootIT Teacher Portal</span>
+            <Button variant="ghost" onClick={handleLogout}>
+              Sign out
             </Button>
-          </div>
-          {sessionError && <p className={TEACHER_ERROR_CLASS}>{sessionError}</p>}
+          </header>
 
-          <AssignmentSetPreview title={previewTitle} groups={previewGroups} />
+          <div className={TEACHER_BROWSE_CLASS}>
+            <div className={TEACHER_BROWSE_HEAD_CLASS}>
+              <h1 className={TEACHER_BROWSE_TITLE_CLASS}>Start a session</h1>
+              <p className={TEACHER_BROWSE_SUBTITLE_CLASS}>
+                Select an assignment set below to preview tasks, then create a session room for your students.
+              </p>
+            </div>
+
+            <div className={TEACHER_BROWSE_ACTIONS_CLASS}>
+              <div className={TEACHER_ASSIGNMENT_SET_ROW_CLASS}>
+                <label className={TEACHER_ASSIGNMENT_SET_LABEL_CLASS} htmlFor="teacher-assignmentSet-select">
+                  Assignment set
+                </label>
+                <select
+                  id="teacher-assignmentSet-select"
+                  className={TEACHER_ASSIGNMENT_SET_SELECT_CLASS}
+                  value={selectedAssignmentSetId}
+                  onChange={(event) => onAssignmentSetChange(event.target.value)}
+                >
+                  {assignmentSets.length === 0 && <option value="">Loading assignment sets…</option>}
+                  {assignmentSets.map((assignmentSet) => (
+                    <option key={assignmentSet.assignmentSetId} value={assignmentSet.assignmentSetId}>
+                      {assignmentSet.displayTitle}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <Button
+                onClick={handleCreateSession}
+                isLoading={isCreatingSession}
+                isDisabled={!selectedAssignmentSetId}
+              >
+                {createLabel}
+              </Button>
+            </div>
+            {sessionError && <p className={TEACHER_ERROR_CLASS}>{sessionError}</p>}
+          </div>
         </div>
       ) : (
-        // ── Active session: code + timer + assignment set (left), student status (right) ─
+        // ── Active Session 4-Column IDE View ──────────────────────────────────
         <div className={TEACHER_BODY_CLASS}>
-          <aside className={TEACHER_SESSION_ASIDE_CLASS}>
-            <section className={TEACHER_SECTION_CLASS}>
-              <span className={TEACHER_CODE_CAPTION_CLASS}>Room code</span>
-              <div className={TEACHER_CODE_DISPLAY_CLASS}>{sessionCode}</div>
-            </section>
+          {/* Col 1: Teacher Rail (Assignments List + Room Code + Timer) */}
+          <TeacherProblemsList
+            sessionCode={sessionCode}
+            items={problemItems}
+            activeId={selectedAssignmentId}
+            onSelect={handleSelectAssignmentAndResetFile}
+            teacherFocusId={focusedAssignmentId}
+            isOpen={isRailOpen}
+            onToggleOpen={() => setIsRailOpen(!isRailOpen)}
+            minutes={minutes}
+            isStartingTimer={isStartingTimer}
+            timerEndsAt={timerEndsAt}
+            timerError={timerError}
+            onMinutesChange={handleMinutesChange}
+            onStartTimer={handleStartTimer}
+            onEndSession={handleEndSession}
+            isEndingSession={isEndingSession}
+          />
 
-            <section className={TEACHER_SECTION_CLASS}>
-              <h2 className={TEACHER_SECTION_TITLE_CLASS}>Timer</h2>
-              <div className={TEACHER_TIMER_ROW_CLASS}>
-                <TextField
-                  type="number"
-                  value={minutes}
-                  onChange={handleMinutesChange}
-                  min={1}
-                  max={120}
-                  isDisabled={isStartingTimer}
-                  className={TEACHER_MINUTES_INPUT_CLASS}
-                />
-                <span className={TEACHER_MINUTES_LABEL_CLASS}>min</span>
-                <Button onClick={handleStartTimer} isLoading={isStartingTimer}>
-                  {startLabel}
-                </Button>
-              </div>
-              {timerEndsAt && (
-                <p className={TEACHER_TIMER_STATUS_CLASS}>
-                  Timer running — ends at {formatTimerEnds(timerEndsAt)}
-                </p>
-              )}
-              {timerError && <p className={TEACHER_ERROR_CLASS}>{timerError}</p>}
-            </section>
+          {/* Col 2: Attendance List */}
+          <AttendanceList
+            students={attendanceStudents}
+            activeStudentId={selectedStudentId}
+            onSelectStudent={handleSelectStudent}
+            selectedAssignmentTitle={activeAssignmentItem?.title}
+          />
 
-            <section className={TEACHER_SECTION_CLASS}>
-              <h2 className={TEACHER_SECTION_TITLE_CLASS}>Assignment set</h2>
-              <AssignmentSetPreview
-                groups={previewGroups}
-                onFocusAssignment={handleFocusAssignment}
-                focusedAssignmentId={focusedAssignmentId}
-              />
-            </section>
-          </aside>
+          {/* Col 3: Teacher Assignment Panel (Description & Submissions with Filters) */}
+          <div className="flex flex-[4] min-w-0 flex-col overflow-hidden">
+            <TeacherAssignmentPanel
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              title={activeAssignment?.title || activeAssignmentItem?.title || previewTitle || 'Assignments'}
+              lesson={activeAssignment?.lesson}
+              description={activeAssignment?.description ?? ''}
+              hint={activeAssignment?.hint}
+              onFocusClick={() => selectedAssignmentId != null && handleFocusAssignment(selectedAssignmentId)}
+              isFocused={selectedAssignmentId != null && selectedAssignmentId === focusedAssignmentId}
+              selectedStudentName={activeStudent?.displayName}
+              onClearStudentFilter={handleClearStudentFilter}
+              submissions={mockSubmissions}
+              activeSubId={activeSubId}
+              onSelectSubmission={setActiveSubId}
+              onSelectStudentFilter={(studentId) => handleSelectStudent(studentId)}
+            />
+          </div>
 
-          <main className={TEACHER_STUDENTS_CLASS}>
-            <h2 className={TEACHER_SECTION_TITLE_CLASS}>Students ({students.length})</h2>
-            {students.length === 0 ? (
-              <p className={TEACHER_HINT_CLASS}>
-                No students connected yet. Share the room code "{sessionCode}" with your class.
-              </p>
-            ) : (
-              <StudentRoster students={students} />
-            )}
-          </main>
+          {/* Col 4: Starter-code preview (matches student view) until a submission is picked, then that submission's code + output */}
+          <TeacherCodeViewer
+            assignmentKind={activeAssignment?.kind ?? 'code'}
+            editorKey={editorKey}
+            hasSubmission={Boolean(activeSubmission)}
+            code={activeSubmission?.code ?? starterCode}
+            fileTabs={starterTabs}
+            activeFileIndex={activeFileIndex}
+            onSelectFile={setActiveFileIndex}
+            studentName={activeSubmission?.studentName}
+            assignmentTitle={activeSubmission?.assignmentTitle}
+            submittedAt={activeSubmission?.submittedAt}
+            passed={activeSubmission?.passed}
+            result={activeSubmission?.result}
+            predictExpectedOutput={predictExpectedOutput}
+            projectBrief={projectBrief}
+          />
         </div>
       )}
     </div>

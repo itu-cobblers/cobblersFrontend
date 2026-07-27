@@ -32,6 +32,6 @@ describe('TeacherGate', () => {
       target: { value: 'secret' },
     })
     fireEvent.click(screen.getByText('Enter'))
-    expect(screen.getByText('BootIT — Teacher')).toBeInTheDocument()
+    expect(screen.getByText('BootIT Teacher Portal')).toBeInTheDocument()
   })
 })
