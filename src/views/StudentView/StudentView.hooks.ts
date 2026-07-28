@@ -14,12 +14,20 @@ import type {
   AssignmentPanelTab,
   CodeFileTab,
 } from '@components'
+import type { Timer } from '@lib/sessionHub'
 import { useExecutor } from '@hooks/useExecutor'
 import { useAssignments } from '@hooks/useAssignments'
 import { useSubmission } from '@hooks/useSubmission'
+import { useCountdown, formatCountdown } from '@hooks/useCountdown'
 import { defaultStarter } from '@lib/defaultStarter'
 import { submitAssignment } from '@lib/submissionApi'
+import { getAssignmentSolution } from '@lib/solutionApi'
 import { ACTIVE_THEME } from '@themes'
+
+// The countdown badge only turns "urgent" once this many seconds remain —
+// purely cosmetic, no longer tied to answer reveal (see CONTRACT.md's
+// Solution section: reveal is submission-based for every mode now).
+const COUNTDOWN_URGENT_THRESHOLD_SECONDS = 180
 
 const noop = () => {
   /* read-only editor: changes are ignored */
@@ -137,6 +145,10 @@ export interface UseStudentWorkspaceOptions {
   submissionHistory?: SubmissionHistoryItem[]
   /** The assignment id the teacher is currently focused on; `null` outside a room. */
   teacherFocusedAssignmentId?: number | null
+  /** `true` once the student has joined a room (as opposed to solo practice) — drives per-kind answer-reveal rules. */
+  isInRoom?: boolean
+  /** The room's active per-assignment countdown; `null` outside a room or once none is running. */
+  activeTimer?: Timer | null
   /** The full cross-day catalog — backs the rail's History tab; may include assignments outside this session. */
   catalog?: Assignment[]
   /** True while `submissionHistory`/`catalog` are (re)loading. */
@@ -163,6 +175,8 @@ export function useStudentWorkspace({
   sessionCode,
   submissionHistory = [],
   teacherFocusedAssignmentId = null,
+  isInRoom = false,
+  activeTimer = null,
   catalog = [],
   isHistoryLoading = false,
   onSubmissionMade,
@@ -200,6 +214,48 @@ export function useStudentWorkspace({
   const active = allAssignments[assignmentProgress.activeAssignment]
   // Reviewing history never tags the room, even mid-session.
   const effectiveSessionCode = selectionSource === 'history' ? undefined : sessionCode
+
+  // ── answer reveal (see CONTRACT.md's Solution section for the full rules) ──
+  // The room timer only counts down for the assignment it's currently scoped
+  // to — it's a pure pacing display now and has no bearing on reveal.
+  const timerEndsAtForActiveAssignment =
+    activeTimer !== null && activeTimer.assignmentId === active.id ? activeTimer.endsAt : null
+  const isTimerForActiveAssignment = timerEndsAtForActiveAssignment !== null
+  const remainingSeconds = useCountdown(timerEndsAtForActiveAssignment)
+  const hasSubmittedActiveAssignment = submissionHistory.some((item) => item.assignmentId === active.id)
+
+  // Same rule in solo and in a room — nothing here is enforced server-side
+  // (the /solution endpoint is gate-free by design), so this is purely UI
+  // state, and it's derived entirely from `submissionHistory`, which the
+  // backend already persists — so unlike the old timer-derived rule, this
+  // never needs its own persistence to survive a refresh or the teacher
+  // moving on to another assignment.
+  let isAnswerAvailable = false
+  if (active.kind === 'code') {
+    isAnswerAvailable = hasSubmittedActiveAssignment
+  } else if (active.kind === 'project') {
+    // `project` has no `Submission` to gate on (VS-Code-only, no grading) —
+    // always available, same as solo.
+    isAnswerAvailable = true
+  }
+
+  const [solutionByAssignment, setSolutionByAssignment] = useState<Record<number, SourceFile[]>>({})
+  const [revealedAnswerIds, setRevealedAnswerIds] = useState<Set<number>>(new Set())
+  const [loadingSolutionId, setLoadingSolutionId] = useState<number | null>(null)
+
+  async function handleShowAnswer() {
+    const assignmentId = active.id
+    setLoadingSolutionId(assignmentId)
+    try {
+      const result = await getAssignmentSolution(assignmentId)
+      if (result.available) {
+        setSolutionByAssignment((prev) => ({ ...prev, [assignmentId]: result.files }))
+        setRevealedAnswerIds((prev) => new Set(prev).add(assignmentId))
+      }
+    } finally {
+      setLoadingSolutionId((current) => (current === assignmentId ? null : current))
+    }
+  }
 
   const submission = useSubmission({
     // Only fires for `code` assignments (Submit is disabled otherwise), so
@@ -389,6 +445,17 @@ export function useStudentWorkspace({
     return index === -1 ? 0 : index
   }
 
+  /**
+   * Shared by the `code`/`project` branches — "Show answer" lives next to
+   * Submit/Run now (see OutputPanel/ProjectPanel), never in AssignmentPanel.
+   * Omitted (no button at all) once unavailable or already revealed —
+   * mirrors PredictPanel only showing its own Show-answer button once eligible.
+   */
+  function buildShowAnswer() {
+    if (!isAnswerAvailable || revealedAnswerIds.has(active.id)) return undefined
+    return { onClick: handleShowAnswer, isLoading: loadingSolutionId === active.id }
+  }
+
   function buildActivePanel(): ActivePanel {
     if (active.kind === 'predict') {
       return {
@@ -424,6 +491,7 @@ export function useStudentWorkspace({
           isRunning: executor.isRunning,
           onFilesChange: handleProjectFilesChange,
           onRun: handleProjectRun,
+          showAnswer: buildShowAnswer(),
         },
       }
     }
@@ -446,9 +514,7 @@ export function useStudentWorkspace({
           onSubmit: handleSubmitCode,
           lastResultPassed: submitFlash && submitFlash.assignmentId === active.id ? submitFlash.passed : null,
         },
-        // TODO: wire this once the teacher's reveal-answer signal is added to
-        // sessionHub.ts (CONTRACT.md) — code assignments should only offer
-        // "Show answer" after that broadcast, unlike Predict.
+        showAnswer: buildShowAnswer(),
       },
     }
   }
@@ -525,6 +591,20 @@ export function useStudentWorkspace({
       body: active.kind === 'project' ? active.brief : undefined,
       hint: active.hint,
       feedback: feedback ?? undefined,
+      countdown:
+        active.kind === 'code' && isInRoom && isTimerForActiveAssignment && remainingSeconds !== null
+          ? {
+              remainingLabel: formatCountdown(remainingSeconds),
+              isUrgent: remainingSeconds <= COUNTDOWN_URGENT_THRESHOLD_SECONDS,
+            }
+          : undefined,
+      answer:
+        active.kind === 'code' || active.kind === 'project'
+          ? {
+              isRevealed: revealedAnswerIds.has(active.id),
+              files: solutionByAssignment[active.id] ?? [],
+            }
+          : undefined,
     },
     scene: {
       Scene: ACTIVE_THEME.Scene,

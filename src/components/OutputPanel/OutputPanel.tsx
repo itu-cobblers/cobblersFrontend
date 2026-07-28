@@ -41,8 +41,13 @@ export default function OutputPanel({ output, status, submit, showAnswer }: Outp
       </pre>
       {(submit || showAnswer) && (
         <div className={OUTPUT_FOOTER_CLASS}>
-          {/* Code's "Show answer" waits on a future SignalR reveal-answer signal — see OutputPanel.types.ts. */}
-          {showAnswer && <ShowAnswerButton onClick={showAnswer.onClick} isDisabled={showAnswer.isDisabled} />}
+          {showAnswer && (
+            <ShowAnswerButton
+              onClick={showAnswer.onClick}
+              isDisabled={showAnswer.isDisabled || showAnswer.isLoading}
+              label={showAnswer.isLoading ? 'Loading answer…' : 'Show answer'}
+            />
+          )}
           {submit && (
             <SubmitButton
               status={getSubmitButtonStatus(submit)}

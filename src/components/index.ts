@@ -47,7 +47,7 @@ export { FeedbackBanner } from './FeedbackBanner'
 export type { FeedbackBannerProps, FeedbackTone } from './FeedbackBanner'
 
 export { AssignmentPanel } from './AssignmentPanel'
-export type { AssignmentPanelProps, AssignmentPanelTab } from './AssignmentPanel'
+export type { AssignmentPanelProps, AssignmentPanelTab, CountdownBadgeProps, AnswerRevealProps } from './AssignmentPanel'
 
 export { ProblemsList, formatAttemptTime, describeSource } from './ProblemsList'
 export type { ProblemsListProps, ProblemListItem, ProblemStatus, ProblemsListTab } from './ProblemsList'

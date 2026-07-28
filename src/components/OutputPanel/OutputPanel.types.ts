@@ -15,6 +15,8 @@ export interface OutputPanelSubmit {
 export interface OutputPanelShowAnswer {
   onClick: () => void
   isDisabled?: boolean
+  /** True while the solution is being fetched — shows "Loading answer…" in place of the default label. */
+  isLoading?: boolean
 }
 
 export interface OutputPanelProps {
@@ -23,10 +25,10 @@ export interface OutputPanelProps {
   /** Renders the shared Submit button in the terminal footer when given; omit to hide it. */
   submit?: OutputPanelSubmit
   /**
-   * Renders the shared "Show answer" button when given. For code assignments
-   * this should only be passed once the teacher's reveal-answer signal comes
-   * over SignalR (not wired yet — see `sessionHub.ts`), unlike Predict, which
-   * can show it right after a single submit.
+   * Renders the shared "Show answer" button in the footer, to the left of
+   * Submit, when given — mirrors PredictPanel's layout. The caller decides
+   * eligibility/visibility (see StudentView.hooks.ts's `buildShowAnswer`);
+   * omit once the answer is already revealed.
    */
   showAnswer?: OutputPanelShowAnswer
 }

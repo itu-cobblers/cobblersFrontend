@@ -1,3 +1,4 @@
+import type { ClipboardEvent, MouseEvent } from 'react'
 import classNames from 'classnames'
 import { AssignmentStepper } from '@components/AssignmentStepper'
 import { FeedbackBanner } from '@components/FeedbackBanner'
@@ -8,7 +9,14 @@ import { useHintDisclosure } from './AssignmentPanel.hooks'
 import {
   PANEL_CLASS,
   PANEL_SCROLL_CLASS,
+  PANEL_TITLE_ROW_CLASS,
   PANEL_TITLE_CLASS,
+  PANEL_COUNTDOWN_CLASS,
+  PANEL_COUNTDOWN_URGENT_CLASS,
+  PANEL_ANSWER_SECTION_CLASS,
+  PANEL_ANSWER_LABEL_CLASS,
+  PANEL_ANSWER_FILE_NAME_CLASS,
+  PANEL_ANSWER_CODE_CLASS,
   PANEL_LESSON_TEXT_CLASS,
   PANEL_LESSON_CODE_CLASS,
   PANEL_TASK_LABEL_CLASS,
@@ -34,6 +42,11 @@ import {
   PANEL_SUBMISSION_TITLE_CLASS,
   PANEL_SUBMISSION_META_CLASS,
 } from './AssignmentPanel.constants'
+
+/** Blocks the remaining ways to lift the answer's text once `select-none` already stops click-drag selection. */
+function handleBlockCopy(event: ClipboardEvent | MouseEvent) {
+  event.preventDefault()
+}
 
 const TABS: AssignmentPanelTab[] = ['description', 'submissions']
 
@@ -61,6 +74,8 @@ export default function AssignmentPanel({
   body,
   hint,
   feedback,
+  countdown,
+  answer,
 }: AssignmentPanelProps) {
   const [isHintExpanded, handleHintToggle] = useHintDisclosure(hint)
 
@@ -89,7 +104,14 @@ export default function AssignmentPanel({
 
       {activeTab === 'description' ? (
         <div className={PANEL_SCROLL_CLASS}>
-          <h2 className={PANEL_TITLE_CLASS}>{title}</h2>
+          <div className={PANEL_TITLE_ROW_CLASS}>
+            <h2 className={PANEL_TITLE_CLASS}>{title}</h2>
+            {countdown && (
+              <span className={classNames(PANEL_COUNTDOWN_CLASS, { [PANEL_COUNTDOWN_URGENT_CLASS]: countdown.isUrgent })}>
+                ⏱ {countdown.remainingLabel}
+              </span>
+            )}
+          </div>
           {lesson?.map((block, index) =>
             block.kind === 'code' ? (
               <pre key={index} className={PANEL_LESSON_CODE_CLASS}>
@@ -119,6 +141,25 @@ export default function AssignmentPanel({
                   <code className={PANEL_HINT_CODE_CLASS}>{hint}</code>
                 </div>
               )}
+            </div>
+          )}
+          {answer?.isRevealed && (
+            <div className={PANEL_ANSWER_SECTION_CLASS}>
+              <h3 className={PANEL_ANSWER_LABEL_CLASS}>Reference answer</h3>
+              {answer.files.map((file) => (
+                <div key={file.name}>
+                  {answer.files.length > 1 && <div className={PANEL_ANSWER_FILE_NAME_CLASS}>{file.name}</div>}
+                  <pre
+                    className={PANEL_ANSWER_CODE_CLASS}
+                    onCopy={handleBlockCopy}
+                    onCut={handleBlockCopy}
+                    onContextMenu={handleBlockCopy}
+                    onDragStart={handleBlockCopy}
+                  >
+                    {file.content}
+                  </pre>
+                </div>
+              ))}
             </div>
           )}
         </div>

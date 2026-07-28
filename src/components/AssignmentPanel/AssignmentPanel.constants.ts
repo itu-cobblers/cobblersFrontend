@@ -3,7 +3,26 @@ export const PANEL_CLASS = 'flex min-w-0 flex-[4] flex-col overflow-hidden borde
 
 export const PANEL_SCROLL_CLASS = 'flex-1 overflow-y-auto px-5 py-4'
 
-export const PANEL_TITLE_CLASS = 'mb-3 text-[19px] font-semibold tracking-tight text-foreground'
+export const PANEL_TITLE_ROW_CLASS = 'mb-3 flex items-start justify-between gap-3'
+
+export const PANEL_TITLE_CLASS = 'text-[19px] font-semibold tracking-tight text-foreground'
+
+export const PANEL_COUNTDOWN_CLASS =
+  'shrink-0 whitespace-nowrap rounded-full border border-border bg-muted px-2.5 py-1 font-mono text-[12px] font-medium text-muted-foreground'
+
+export const PANEL_COUNTDOWN_URGENT_CLASS = 'border-accent/40 bg-accent/10 text-accent'
+
+export const PANEL_ANSWER_SECTION_CLASS = 'mt-4 border-t border-border pt-4'
+
+export const PANEL_ANSWER_LABEL_CLASS = 'mb-2 text-[13px] font-semibold uppercase tracking-[0.8px] text-accent'
+
+export const PANEL_ANSWER_FILE_NAME_CLASS = 'mb-1 font-mono text-[11px] text-muted-foreground'
+
+// select-none blocks click-drag selection; the copy/cut/context-menu handlers
+// on the element (see AssignmentPanel.tsx) block the remaining ways to lift
+// the text (keyboard copy of a selection, right-click "Copy").
+export const PANEL_ANSWER_CODE_CLASS =
+  'mb-3 select-none overflow-x-auto rounded-md bg-black/30 px-3.5 py-3 font-mono text-[12px] leading-relaxed whitespace-pre text-foreground/90'
 
 export const PANEL_LESSON_TEXT_CLASS = 'mb-3 whitespace-pre-wrap text-[15px] leading-relaxed text-muted-foreground'
 

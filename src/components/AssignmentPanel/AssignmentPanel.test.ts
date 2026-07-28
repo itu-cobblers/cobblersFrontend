@@ -74,4 +74,56 @@ describe('AssignmentPanel', () => {
     )
     expect(screen.getByText('Accepted')).toBeInTheDocument()
   })
+
+  it('shows a countdown badge next to the title when provided', () => {
+    render(
+      createElement(AssignmentPanel, {
+        ...baseProps,
+        countdown: { remainingLabel: '2:59', isUrgent: true },
+      }),
+    )
+    expect(screen.getByText('⏱ 2:59')).toBeInTheDocument()
+  })
+
+  it('renders no countdown badge when not provided', () => {
+    render(createElement(AssignmentPanel, baseProps))
+    expect(screen.queryByText(/⏱/)).not.toBeInTheDocument()
+  })
+
+  it('renders no answer section while unrevealed — the "Show answer" trigger lives in OutputPanel/ProjectPanel instead', () => {
+    render(createElement(AssignmentPanel, { ...baseProps, answer: { isRevealed: false, files: [] } }))
+    expect(screen.queryByText('Reference answer')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Show answer' })).not.toBeInTheDocument()
+  })
+
+  it('renders the revealed answer as a non-selectable code block', () => {
+    render(
+      createElement(AssignmentPanel, {
+        ...baseProps,
+        answer: {
+          isRevealed: true,
+          files: [{ name: 'Main.java', content: 'public class Main {}' }],
+        },
+      }),
+    )
+    const code = screen.getByText('public class Main {}')
+    expect(code.className).toContain('select-none')
+  })
+
+  it('labels each file when the revealed answer has multiple files', () => {
+    render(
+      createElement(AssignmentPanel, {
+        ...baseProps,
+        answer: {
+          isRevealed: true,
+          files: [
+            { name: 'Main.java', content: 'class Main {}' },
+            { name: 'Person.java', content: 'class Person {}' },
+          ],
+        },
+      }),
+    )
+    expect(screen.getByText('Main.java')).toBeInTheDocument()
+    expect(screen.getByText('Person.java')).toBeInTheDocument()
+  })
 })

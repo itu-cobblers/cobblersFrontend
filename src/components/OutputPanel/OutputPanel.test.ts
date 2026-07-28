@@ -59,10 +59,33 @@ describe('OutputPanel', () => {
     expect(screen.getByRole('button', { name: 'Well Done' })).toBeInTheDocument()
   })
 
-  it('hides Show answer when omitted, shows and fires it when given', () => {
+  it('hides Show answer when omitted', () => {
+    render(createElement(OutputPanel, { output: '', status: null }))
+    expect(screen.queryByRole('button', { name: 'Show answer' })).not.toBeInTheDocument()
+  })
+
+  it('shows and fires Show answer when given, to the left of Submit', () => {
     const onClick = vi.fn()
-    render(createElement(OutputPanel, { output: '', status: null, showAnswer: { onClick } }))
+    const { container } = render(
+      createElement(OutputPanel, {
+        output: '',
+        status: null,
+        showAnswer: { onClick },
+        submit: { isSubmitting: false, onSubmit: vi.fn() },
+      }),
+    )
     fireEvent.click(screen.getByText('Show answer'))
     expect(onClick).toHaveBeenCalledOnce()
+    const buttons = container.querySelectorAll('button')
+    const labels = Array.from(buttons).map((button) => button.textContent)
+    expect(labels.findIndex((label) => label?.includes('Show answer'))).toBeLessThan(
+      labels.findIndex((label) => label?.includes('Submit')),
+    )
+  })
+
+  it('shows "Loading answer…" and disables the button while isLoading', () => {
+    render(createElement(OutputPanel, { output: '', status: null, showAnswer: { onClick: vi.fn(), isLoading: true } }))
+    const button = screen.getByRole('button', { name: 'Loading answer…' })
+    expect(button).toBeDisabled()
   })
 })

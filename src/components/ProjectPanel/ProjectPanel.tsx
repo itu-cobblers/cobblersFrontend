@@ -21,6 +21,7 @@ export default function ProjectPanel({
   isRunning,
   onFilesChange,
   onRun,
+  showAnswer,
 }: ProjectPanelProps) {
   return (
     <div className={PROJECT_PANEL_CLASS}>
@@ -33,7 +34,7 @@ export default function ProjectPanel({
           Upload your .java files (including a Main), then Run. Full test-case grading is coming soon.
         </span>
       </div>
-      <OutputPanel output={output} status={status} />
+      <OutputPanel output={output} status={status} showAnswer={showAnswer} />
     </div>
   )
 }
