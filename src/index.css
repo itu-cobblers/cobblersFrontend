@@ -268,25 +268,33 @@
 }
 .bootit-caret {
   display: inline-block;
-  width: 4px;
-  height: 1.8em;
+  width: 2px;
+  height: 1.5em;
   background: color-mix(in oklab, var(--accent) 70%, white);
-  margin-left: 0px;
-  vertical-align: -0.12em;
   border-radius: 1px;
   animation: bootit-caret 1s step-end infinite;
-  box-shadow:
-          0 0 14px color-mix(in oklab, var(--accent) 85%, transparent),
-          0 0 4px color-mix(in oklab, var(--accent) 60%, white);
+  transition: width 150ms ease-out, height 150ms ease-out, box-shadow 150ms ease-out, transform 100ms ease-out;
+  box-shadow: 0 0 4px color-mix(in oklab, var(--accent) 70%, transparent);
 }
+/* Solid (no blink) while the student is actively typing or moving the
+   cursor — only resumes blinking once idle, like a real editor caret. */
 .bootit-caret.is-typing {
   animation: none;
   opacity: 1;
 }
+/* No text yet — the bold glowing "boot" block invites the first keystroke.
+   Once real text exists it slims down into a real text-caret (see above). */
+.bootit-caret.is-empty {
+  width: 4px;
+  height: 1.8em;
+  box-shadow:
+          0 0 14px color-mix(in oklab, var(--accent) 85%, transparent),
+          0 0 4px color-mix(in oklab, var(--accent) 60%, white);
+}
 
-/* Entry-screen name prompt: a fixed-width (monospace) input with the native
-   caret hidden, so `.bootit-caret` can be positioned in `ch` units right
-   after the typed text — see EntryPortal.tsx. */
+/* Entry-screen name prompt: the input's native caret is hidden so
+   `.bootit-caret` (absolutely positioned via `useNameCaret`'s measured
+   offset) can render in its place — see EntryPortal.tsx. */
 .bootit-name-input {
   caret-color: transparent;
 }

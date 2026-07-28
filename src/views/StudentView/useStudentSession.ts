@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { AssignmentSet, SubmissionHistoryItem } from '@types'
 import type { JoinMode } from '@components'
 import type { ToastTone } from '@components'
-import { getStudentId, getDisplayName, setDisplayName } from '@lib/identity'
+import { getStudentId, getDisplayName, setDisplayName, sanitizeDisplayName } from '@lib/identity'
 import { upsertStudent } from '@lib/studentApi'
 import { getSession, fetchTodayLatestSession, type SessionInfo } from '@lib/sessionApi'
 import { joinSession } from '@lib/sessionHub'
@@ -78,6 +78,11 @@ export function useStudentSession() {
       if (sessionEndedRefetchTimer.current !== null) clearTimeout(sessionEndedRefetchTimer.current)
     }
   }, [])
+
+  /** Sanitizes on every keystroke — see `sanitizeDisplayName` for why. */
+  function handleNameChange(value: string) {
+    setName(sanitizeDisplayName(value))
+  }
 
   /** Re-checks today-latest on demand — the entry screen's refresh button. */
   function handleRefreshTodayLatestSession() {
@@ -258,7 +263,7 @@ export function useStudentSession() {
       todayLatestSessionCode: todayLatestSession?.code ?? (todayLatestSession === undefined ? undefined : null),
       isJoining,
       isStartingSolo,
-      onNameChange: setName,
+      onNameChange: handleNameChange,
       onJoinToday: handleJoinToday,
       onStartSolo: handleStartSolo,
       onRefreshTodayLatestSession: handleRefreshTodayLatestSession,
