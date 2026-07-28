@@ -15,6 +15,7 @@ export type IconName =
   | 'alert'
   | 'spinner'
   | 'refresh'
+  | 'upload'
 
 export interface IconProps {
   name: IconName

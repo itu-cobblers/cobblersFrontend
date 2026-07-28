@@ -17,8 +17,9 @@ import type {
 import { useExecutor } from '@hooks/useExecutor'
 import { useAssignments } from '@hooks/useAssignments'
 import { useSubmission } from '@hooks/useSubmission'
-import { defaultStarter } from '@lib/defaultStarter'
-import { submitAssignment } from '@lib/submissionApi'
+import { defaultStarter, projectUploadStarter } from '@lib/defaultStarter'
+import { submitAssignment, fetchAssignmentSolution } from '@lib/submissionApi'
+import { getProjectIdentity } from '@lib/projectIdentity'
 import { ACTIVE_THEME } from '@themes'
 
 const noop = () => {
@@ -42,7 +43,7 @@ interface SubmitFlash {
 export type ActivePanel =
   | { kind: 'code'; editor: CodeEditorProps; output: OutputPanelProps }
   | { kind: 'predict'; editor: CodeEditorProps; predict: PredictPanelProps }
-  | { kind: 'project'; project: ProjectPanelProps }
+  | { kind: 'project'; editor: CodeEditorProps; project: ProjectPanelProps }
 
 /** Seed editor content for every single-file code assignment from its starter. */
 function initialCode(assignmentList: Assignment[]): Record<number, string> {
@@ -180,6 +181,15 @@ export function useStudentWorkspace({
   // and never flashes the (now different) active assignment's Submit button.
   const submitGenerationRef = useRef(0)
   const [filesByAssignment, setFilesByAssignment] = useState<Record<number, SourceFile[]>>({})
+  // Local record of "submitted this project at least once this session" —
+  // ORed with `submissionHistory` in `hasSubmittedProject` below so a reload
+  // (once GET /api/students/{id}/submissions is live) picks it up too.
+  const [projectSubmittedByAssignment, setProjectSubmittedByAssignment] = useState<Record<number, boolean>>({})
+  const [solutionByAssignment, setSolutionByAssignment] = useState<Record<number, SourceFile[]>>({})
+  // Which assignment's solution fetch is in flight, if any — not a plain
+  // boolean, so switching away mid-fetch doesn't show a spinner on whatever
+  // assignment the student is looking at now.
+  const [loadingSolutionAssignmentId, setLoadingSolutionAssignmentId] = useState<number | null>(null)
   const [multiFilesByAssignment, setMultiFilesByAssignment] = useState<Record<number, SourceFile[]>>(() =>
     initialMultiFiles(allAssignments),
   )
@@ -241,6 +251,20 @@ export function useStudentWorkspace({
   }
 
   function handleEditorChange(value: string) {
+    if (active.kind === 'project') {
+      const files = filesByAssignment[active.id]
+      const activeFileName = activeFileByAssignment[active.id]
+      // No-op before any files are uploaded — the editor is just showing the
+      // read-only "upload your files" placeholder then.
+      if (!files || !activeFileName) return
+      setFilesByAssignment((previous) => ({
+        ...previous,
+        [active.id]: (previous[active.id] ?? files).map((file) =>
+          file.name === activeFileName ? { ...file, content: value } : file,
+        ),
+      }))
+      return
+    }
     const activeFiles = active.kind === 'code' ? multiFilesByAssignment[active.id] : undefined
     const activeFileName = active.kind === 'code' ? activeFileByAssignment[active.id] : undefined
     if (activeFiles && activeFileName) {
@@ -256,6 +280,12 @@ export function useStudentWorkspace({
   }
 
   function handleSelectFile(index: number) {
+    if (active.kind === 'project') {
+      const file = filesByAssignment[active.id]?.[index]
+      if (!file) return
+      setActiveFileByAssignment((previous) => ({ ...previous, [active.id]: file.name }))
+      return
+    }
     if (active.kind !== 'code') return
     const file = multiFilesByAssignment[active.id]?.[index]
     if (!file) return
@@ -363,15 +393,48 @@ export function useStudentWorkspace({
   }
 
   function handleProjectFilesChange(files: SourceFile[]) {
+    // Every drop/pick overwrites the cache wholesale (not an append) and
+    // selects the first uploaded file's tab.
     setFilesByAssignment((prev) => ({ ...prev, [active.id]: files }))
+    setActiveFileByAssignment((prev) => ({ ...prev, [active.id]: files[0]?.name ?? '' }))
   }
 
-  async function handleProjectRun() {
+  function hasSubmittedProject(assignmentId: number): boolean {
+    return Boolean(projectSubmittedByAssignment[assignmentId]) || submissionHistory.some((item) => item.assignmentId === assignmentId)
+  }
+
+  async function handleProjectSubmit() {
     if (active.kind !== 'project') return
-    const files = filesByAssignment[active.id] ?? []
+    const assignmentId = active.id
+    const files = filesByAssignment[assignmentId] ?? []
     if (files.length === 0) return
-    const data = await executor.run({ files, entryClass: active.entryClass ?? 'Main' })
-    if (data?.status === 'success') assignmentProgress.complete(active.id)
+    const generation = submitGenerationRef.current
+    // Projects aren't auto-graded yet (CONTRACT.md) — `result` is always null
+    // here, so `useSubmission`'s shared `onResult` (built for `code`) bails
+    // out early and never calls `onSubmissionMade`; do both ourselves.
+    const result = await submission.confirm(files, assignmentId, effectiveSessionCode)
+    if (submitGenerationRef.current === generation) setSubmitFlash({ assignmentId, passed: result?.passed === true })
+    if (result) {
+      setProjectSubmittedByAssignment((prev) => ({ ...prev, [assignmentId]: true }))
+      // Projects aren't auto-graded (there's no Run step anymore) — a
+      // successful Submit is what marks the stepper/rail checkmark done.
+      assignmentProgress.complete(assignmentId)
+      onSubmissionMade?.()
+    }
+  }
+
+  async function handleRevealSolution() {
+    if (active.kind !== 'project') return
+    const assignmentId = active.id
+    setLoadingSolutionAssignmentId(assignmentId)
+    try {
+      const result = await fetchAssignmentSolution(assignmentId)
+      if (Array.isArray(result.solution)) {
+        setSolutionByAssignment((prev) => ({ ...prev, [assignmentId]: result.solution as SourceFile[] }))
+      }
+    } finally {
+      setLoadingSolutionAssignmentId((current) => (current === assignmentId ? null : current))
+    }
   }
 
   // ── display-ready props ─────────────────────────────────────────────────────
@@ -386,6 +449,20 @@ export function useStudentWorkspace({
     const files = multiFilesByAssignment[assignmentId]
     const activeFileName = activeFileByAssignment[assignmentId]
     const index = files?.findIndex((file) => file.name === activeFileName) ?? 0
+    return index === -1 ? 0 : index
+  }
+
+  /** The file tabs for a project assignment's editor — a single placeholder "Main.java" tab before anything is uploaded. */
+  function projectFileTabs(assignmentId: number): CodeFileTab[] {
+    const files = filesByAssignment[assignmentId]
+    return files && files.length > 0 ? files.map((file) => ({ name: file.name })) : [{ name: 'Main.java' }]
+  }
+
+  function activeProjectFileIndex(assignmentId: number): number {
+    const files = filesByAssignment[assignmentId]
+    if (!files || files.length === 0) return 0
+    const activeFileName = activeFileByAssignment[assignmentId]
+    const index = files.findIndex((file) => file.name === activeFileName)
     return index === -1 ? 0 : index
   }
 
@@ -415,15 +492,28 @@ export function useStudentWorkspace({
       }
     }
     if (active.kind === 'project') {
+      const files = filesByAssignment[active.id] ?? []
+      const activeFileName = activeFileByAssignment[active.id] ?? files[0]?.name
+      const activeFile = files.find((file) => file.name === activeFileName)
       return {
         kind: 'project',
+        editor:
+          files.length > 0
+            ? { value: activeFile?.content ?? '', onChange: handleEditorChange, path: activeFileName }
+            : { value: projectUploadStarter, onChange: noop, isReadOnly: true },
         project: {
-          files: filesByAssignment[active.id] ?? [],
-          output: executor.output,
-          status: executor.status,
-          isRunning: executor.isRunning,
+          files,
           onFilesChange: handleProjectFilesChange,
-          onRun: handleProjectRun,
+          hasSubmitted: hasSubmittedProject(active.id),
+          isSubmitting: submission.isSubmitting,
+          lastSubmitPassed: submitFlash && submitFlash.assignmentId === active.id ? submitFlash.passed : null,
+          // Same known false positive as `handlePredictSubmit` above — the ref
+          // is only ever read inside the async body, after the click.
+          // eslint-disable-next-line react-hooks/refs
+          onSubmit: handleProjectSubmit,
+          isLoadingSolution: loadingSolutionAssignmentId === active.id,
+          solution: solutionByAssignment[active.id] ?? null,
+          onRevealSolution: handleRevealSolution,
         },
       }
     }
@@ -462,16 +552,14 @@ export function useStudentWorkspace({
   }))
 
   // The History tab — every assignment this student has ever seen, across
-  // every day/room. `project` assignments are excluded: they never produce a
-  // `Submission` (VS-Code-only), so there's no history to show for them.
-  const historyProblems: ProblemListItem[] = allAssignments
-    .filter((assignment) => assignment.kind !== 'project')
-    .map((assignment) => ({
-      id: assignment.id,
-      title: assignment.title,
-      kind: assignment.kind,
-      status: problemStatus(assignment.id, assignmentProgress.completedAssignments, submissionHistory),
-    }))
+  // every day/room. `project` now Submits too (see `handleProjectSubmit`),
+  // so it's no longer excluded here.
+  const historyProblems: ProblemListItem[] = allAssignments.map((assignment) => ({
+    id: assignment.id,
+    title: assignment.title,
+    kind: assignment.kind,
+    status: problemStatus(assignment.id, assignmentProgress.completedAssignments, submissionHistory),
+  }))
 
   const teacherFocusedAssignment =
     teacherFocusedAssignmentId != null ? assignments.find((assignment) => assignment.id === teacherFocusedAssignmentId) : undefined
@@ -509,7 +597,14 @@ export function useStudentWorkspace({
             isRunning: executor.isRunning,
             onRun: handleRunCode,
           }
-        : null,
+        : active.kind === 'project'
+          ? {
+              files: projectFileTabs(active.id),
+              activeIndex: activeProjectFileIndex(active.id),
+              onSelectFile: handleSelectFile,
+              isRunning: false,
+            }
+          : null,
     assignmentPanel: {
       steps,
       onSelectStep: handleSelectAssignment,
@@ -523,6 +618,7 @@ export function useStudentWorkspace({
       lesson: active.lesson,
       description: active.description,
       body: active.kind === 'project' ? active.brief : undefined,
+      projectIdentity: active.kind === 'project' ? getProjectIdentity(active.title) : undefined,
       hint: active.hint,
       feedback: feedback ?? undefined,
     },

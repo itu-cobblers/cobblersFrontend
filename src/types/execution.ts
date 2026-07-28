@@ -54,3 +54,15 @@ export interface SubmissionHistoryItem {
   passed: boolean | null
   submittedAt: string
 }
+
+/**
+ * `GET /api/assignments/{assignmentId}/solution` → response (CONTRACT.md
+ * "Solution"). `available` is true once the student has submitted this
+ * assignment at least once (pass or fail) — `solution` is only populated then.
+ * Shape mirrors `Assignment.SampleSolutionJson` for the assignment's kind:
+ * a single Java source string for `code`, a file list for `project`.
+ */
+export interface SolutionResult {
+  available: boolean
+  solution: string | SourceFile[] | null
+}

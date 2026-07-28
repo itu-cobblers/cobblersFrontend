@@ -14,6 +14,16 @@ import {
   PANEL_TASK_LABEL_CLASS,
   PANEL_TASK_CLASS,
   PANEL_BODY_CLASS,
+  PANEL_PROJECT_PDF_CLASS,
+  PANEL_PROJECT_PDF_HEADER_CLASS,
+  PANEL_PROJECT_PDF_LINK_CLASS,
+  PANEL_PROJECT_PDF_FRAME_CLASS,
+  PDF_VIEWER_FRAGMENT,
+  PANEL_SETUP_CLASS,
+  PANEL_SETUP_TOGGLE_CLASS,
+  PANEL_SETUP_BODY_CLASS,
+  PANEL_SETUP_H5_CLASS,
+  PANEL_SETUP_LIST_CLASS,
   PANEL_HINT_CLASS,
   PANEL_HINT_TOGGLE_CLASS,
   PANEL_HINT_ARROW_CLASS,
@@ -59,10 +69,12 @@ export default function AssignmentPanel({
   lesson,
   description,
   body,
+  projectIdentity,
   hint,
   feedback,
 }: AssignmentPanelProps) {
   const [isHintExpanded, handleHintToggle] = useHintDisclosure(hint)
+  const [isSetupExpanded, handleSetupToggle] = useHintDisclosure(title)
 
   return (
     <section className={PANEL_CLASS}>
@@ -101,9 +113,92 @@ export default function AssignmentPanel({
               </p>
             ),
           )}
-          <h3 className={PANEL_TASK_LABEL_CLASS}>Your task</h3>
-          <p className={PANEL_TASK_CLASS}>{description}</p>
-          {body && <p className={PANEL_BODY_CLASS}>{body}</p>}
+          {!projectIdentity && (
+            <>
+              <h3 className={PANEL_TASK_LABEL_CLASS}>Your task</h3>
+              <p className={PANEL_TASK_CLASS}>{description}</p>
+            </>
+          )}
+
+          {projectIdentity && (
+            <div className={PANEL_PROJECT_PDF_CLASS}>
+              <div className={PANEL_PROJECT_PDF_HEADER_CLASS}>
+                <a
+                  href={projectIdentity.pdfUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={PANEL_PROJECT_PDF_LINK_CLASS}
+                >
+                  Open in new tab ↗
+                </a>
+              </div>
+              <iframe
+                src={`${projectIdentity.pdfUrl}${PDF_VIEWER_FRAGMENT}`}
+                title={`${title} brief`}
+                className={PANEL_PROJECT_PDF_FRAME_CLASS}
+              />
+            </div>
+          )}
+
+          {projectIdentity && (
+            <div className={PANEL_SETUP_CLASS}>
+              <button type="button" onClick={handleSetupToggle} className={PANEL_SETUP_TOGGLE_CLASS}>
+                Set up your Java environment
+                <span
+                  className={classNames('inline-block text-[18px] transition-transform', {
+                    'rotate-90': isSetupExpanded,
+                  })}
+                >
+                  ▸
+                </span>
+              </button>
+              {isSetupExpanded && (
+                <div className={PANEL_SETUP_BODY_CLASS}>
+                  <p>Two ways to get ready — pick one.</p>
+                  <p>
+                    <span className={PANEL_SETUP_H5_CLASS}>Option 1 — Coding Pack for Java (recommended)</span>
+                    <br />
+                    One download installs the JDK, VS Code, and the extensions you need together. Easiest way to
+                    start.
+                  </p>
+                  <div>
+                    <span className={PANEL_SETUP_H5_CLASS}>Option 2 — Manual setup</span>
+                    <p>Install these three yourself:</p>
+                    <ul className={PANEL_SETUP_LIST_CLASS}>
+                      <li>
+                        <strong>JDK</strong> — compiles and runs your code. Add it to your system&rsquo;s Environment
+                        Variables so the <code>java</code> command works in a terminal.
+                      </li>
+                      <li>
+                        <strong>VS Code</strong> — the editor you&rsquo;ll write in.
+                      </li>
+                      <li>
+                        <strong>VS Code Java Extension Pack</strong> — from the VS Code marketplace. Lets VS Code
+                        talk to the JDK (autocomplete, error checking).
+                      </li>
+                    </ul>
+                  </div>
+                  <div>
+                    <span className={PANEL_SETUP_H5_CLASS}>Before you start</span>
+                    <ul className={PANEL_SETUP_LIST_CLASS}>
+                      <li>Open the whole project folder in VS Code — not a single file.</li>
+                      <li>
+                        File names are case-sensitive and must end in exactly <code>.java</code>.
+                      </li>
+                      <li>Avoid spaces or special characters in folder and file names.</li>
+                    </ul>
+                  </div>
+                  <p>
+                    When you&rsquo;re done, upload your <code>.java</code> files below and press Submit to save your
+                    attempt — submitting once unlocks the reference solution.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {!projectIdentity && body && <p className={PANEL_BODY_CLASS}>{body}</p>}
+
           {hint && (
             <div className={PANEL_HINT_CLASS}>
               <button type="button" onClick={handleHintToggle} className={PANEL_HINT_TOGGLE_CLASS}>

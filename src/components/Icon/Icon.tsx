@@ -109,6 +109,13 @@ const ICONS: Record<IconName, ReactElement> = {
       <path d="M11.8 2v3h-3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   ),
+  upload: (
+    <svg width="18" height="18" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true">
+      <path d="M7 9.5V2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4 4.5 7 1.5l3 3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M2 9.5v1.8c0 .66.54 1.2 1.2 1.2h7.6c.66 0 1.2-.54 1.2-1.2V9.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
 }
 
 export default function Icon({ name }: IconProps) {

@@ -8,5 +8,6 @@ export interface CodeFileTabsProps {
   onSelectFile: (index: number) => void
   isRunning: boolean
   isRunDisabled?: boolean
-  onRun: () => void
+  /** Omit to hide the Run button entirely (e.g. project assignments, which upload instead of running). */
+  onRun?: () => void
 }

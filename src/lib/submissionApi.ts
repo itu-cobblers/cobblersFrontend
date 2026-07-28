@@ -1,4 +1,4 @@
-import type { SourceFile, SubmissionResult, SubmissionHistoryItem } from '@types'
+import type { SourceFile, SubmissionResult, SubmissionHistoryItem, SolutionResult } from '@types'
 import { getStudentId } from './identity'
 
 /**
@@ -55,5 +55,25 @@ export async function fetchSubmissionHistory(studentId: string): Promise<Submiss
     return (await res.json()) as SubmissionHistoryItem[]
   } catch {
     return []
+  }
+}
+
+/**
+ * `GET /api/assignments/{assignmentId}/solution` (CONTRACT.md "Solution") —
+ * reveals a project/code assignment's reference solution once the student
+ * has submitted it at least once. Not built on the backend yet (owned by a
+ * teammate) — degrades to "unavailable" on any failure (network error, 404,
+ * ...) exactly like `fetchSubmissionHistory`, so the reveal button just stays
+ * unavailable instead of breaking. Starts working the moment the endpoint
+ * ships, with no frontend changes needed.
+ */
+export async function fetchAssignmentSolution(assignmentId: number): Promise<SolutionResult> {
+  try {
+    const studentId = encodeURIComponent(getStudentId())
+    const res = await fetch(`/api/assignments/${assignmentId}/solution?studentId=${studentId}`)
+    if (!res.ok) return { available: false, solution: null }
+    return (await res.json()) as SolutionResult
+  } catch {
+    return { available: false, solution: null }
   }
 }

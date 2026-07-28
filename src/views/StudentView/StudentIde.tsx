@@ -79,19 +79,15 @@ export default function StudentIde({
           {followBanner && <TeacherFollowBanner {...followBanner} />}
           <div className={STUDENT_WORKSPACE_CLASS}>
             <AssignmentPanel {...assignmentPanel} />
-            {activePanel.kind === 'project' ? (
-              <ProjectPanel {...activePanel.project} />
-            ) : (
-              <div className={STUDENT_EDITOR_COLUMN_CLASS}>
-                {activePanel.kind === 'code' && codeFileTabs && <CodeFileTabs {...codeFileTabs} />}
-                <CodeEditor {...activePanel.editor} />
-                {activePanel.kind === 'code' ? (
-                  <OutputPanel {...activePanel.output} />
-                ) : (
-                  <PredictPanel {...activePanel.predict} />
-                )}
-              </div>
-            )}
+            <div className={STUDENT_EDITOR_COLUMN_CLASS}>
+              {(activePanel.kind === 'code' || activePanel.kind === 'project') && codeFileTabs && (
+                <CodeFileTabs {...codeFileTabs} />
+              )}
+              <CodeEditor {...activePanel.editor} />
+              {activePanel.kind === 'code' && <OutputPanel {...activePanel.output} />}
+              {activePanel.kind === 'predict' && <PredictPanel {...activePanel.predict} />}
+              {activePanel.kind === 'project' && <ProjectPanel {...activePanel.project} />}
+            </div>
           </div>
         </div>
       </div>

@@ -14,8 +14,10 @@ import {
 
 /**
  * The strip above the Monaco editor: one tab per file (the student's own
- * file plus any read-only harness/grader files) and the Run button. A single
- * file still gets one tab, matching the multi-file layout.
+ * file plus any read-only harness/grader files) and, when `onRun` is given,
+ * the Run button. A single file still gets one tab, matching the multi-file
+ * layout. Project assignments reuse this same strip for their uploaded file
+ * tabs but omit `onRun` — there's nothing to run, only upload.
  */
 export default function CodeFileTabs({ files, activeIndex, onSelectFile, isRunning, isRunDisabled, onRun }: CodeFileTabsProps) {
   return (
@@ -34,10 +36,12 @@ export default function CodeFileTabs({ files, activeIndex, onSelectFile, isRunni
           </button>
         ))}
       </div>
-      <button type="button" onClick={onRun} disabled={isRunning || isRunDisabled} className={RUN_BUTTON_CLASS}>
-        {isRunning ? <Spinner variant="action" /> : <Icon name="play" />}
-        Run
-      </button>
+      {onRun && (
+        <button type="button" onClick={onRun} disabled={isRunning || isRunDisabled} className={RUN_BUTTON_CLASS}>
+          {isRunning ? <Spinner variant="action" /> : <Icon name="play" />}
+          Run
+        </button>
+      )}
     </div>
   )
 }

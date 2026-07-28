@@ -4,6 +4,7 @@ export type {
   ExecuteResult,
   SubmissionResult,
   SubmissionHistoryItem,
+  SolutionResult,
 } from './execution'
 export type {
   AssignmentKind,

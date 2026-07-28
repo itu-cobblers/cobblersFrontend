@@ -1,6 +1,7 @@
 import type { LessonBlock, SubmissionHistoryItem } from '@types'
 import type { StepperStep } from '@components/AssignmentStepper'
 import type { FeedbackBannerProps } from '@components/FeedbackBanner'
+import type { ProjectIdentity } from '@lib/projectIdentity'
 
 export type AssignmentPanelTab = 'description' | 'submissions'
 
@@ -21,6 +22,14 @@ export interface AssignmentPanelProps {
   description: string
   /** Extra long-form text under the task (a project's brief). */
   body?: string
+  /**
+   * Present only for `project` assignments — resolved by the view via
+   * `getProjectIdentity(title)` (@lib/projectIdentity). Its presence is what
+   * switches the panel from rendering `body` as a flat paragraph to
+   * embedding the project's original PDF brief, plus the "Set up your Java
+   * environment" disclosure.
+   */
+  projectIdentity?: ProjectIdentity
   hint?: string
   /** Check feedback pinned at the bottom; omitted ⇒ no banner. */
   feedback?: FeedbackBannerProps
