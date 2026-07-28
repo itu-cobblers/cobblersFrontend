@@ -224,6 +224,19 @@ export function useStudentWorkspace({
   const remainingSeconds = useCountdown(timerEndsAtForActiveAssignment)
   const hasSubmittedActiveAssignment = submissionHistory.some((item) => item.assignmentId === active.id)
 
+  // ⚠️ TEMPORARY BRIDGE — remove this whole block (and the `||` below) once
+  // `GET /api/students/{studentId}/submissions` is live on the backend.
+  // `submissionHistory` comes from that endpoint, which isn't built yet — it
+  // degrades to `[]` on any failure (see submissionApi.ts), so
+  // `hasSubmittedActiveAssignment` is always `false` for now, and "Show
+  // answer" would never unlock even right after a real, successful submit.
+  // This local, session-only set fills the gap: it's set from the actual
+  // submit response (not the history endpoint), so it survives exactly as
+  // long as this page session does — good enough as a bridge, since once the
+  // endpoint ships this becomes redundant (both will agree) and can be
+  // deleted outright, no other code here needs to change.
+  const [submittedThisSessionIds, setSubmittedThisSessionIds] = useState<Set<number>>(new Set())
+
   // Same rule in solo and in a room — nothing here is enforced server-side
   // (the /solution endpoint is gate-free by design), so this is purely UI
   // state, and it's derived entirely from `submissionHistory`, which the
@@ -232,7 +245,7 @@ export function useStudentWorkspace({
   // moving on to another assignment.
   let isAnswerAvailable = false
   if (active.kind === 'code') {
-    isAnswerAvailable = hasSubmittedActiveAssignment
+    isAnswerAvailable = hasSubmittedActiveAssignment || submittedThisSessionIds.has(active.id) // ⚠️ see bridge above
   } else if (active.kind === 'project') {
     // `project` has no `Submission` to gate on (VS-Code-only, no grading) —
     // always available, same as solo.
@@ -350,6 +363,11 @@ export function useStudentWorkspace({
     const generation = submitGenerationRef.current
     const content = multiFilesByAssignment[active.id] ?? codeByAssignment[active.id] ?? ''
     const result = await submission.confirm(content, assignmentId, effectiveSessionCode)
+    // ⚠️ TEMPORARY BRIDGE — see the `submittedThisSessionIds` comment above;
+    // remove this once the submission-history endpoint is live. `result`
+    // non-null means the POST genuinely succeeded (pass or fail — either way
+    // it counts as "submitted"), same semantics as `hasSubmittedActiveAssignment`.
+    if (result !== null) setSubmittedThisSessionIds((prev) => new Set(prev).add(assignmentId))
     // Only flash the Submit button if the student is still looking at the
     // assignment this result belongs to — a response that lands after they've
     // already moved on must not animate whatever button they're on now.
