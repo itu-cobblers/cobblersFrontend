@@ -35,6 +35,12 @@ export const ENTRY_PORTAL_NAME_MEASURE_CLASS = 'relative inline-flex items-cente
 export const ENTRY_PORTAL_NAME_INPUT_CLASS =
   'bootit-name-input [field-sizing:content] min-w-[1ch] max-w-full border-none bg-transparent text-center text-3xl font-light tracking-[0.02em] text-foreground outline-none sm:text-4xl'
 
+/** Invisible mirror of the typed-so-far text, used only to measure where the fake caret belongs — see `useNameCaret`. */
+export const ENTRY_PORTAL_NAME_MIRROR_CLASS =
+  'invisible absolute left-0 top-0 whitespace-pre text-3xl font-light tracking-[0.02em] sm:text-4xl'
+
+export const ENTRY_PORTAL_CARET_CLASS = 'bootit-caret absolute left-0 top-1/2'
+
 export const ENTRY_PORTAL_CTA_ROW_CLASS = 'mt-12 flex flex-col-reverse items-center gap-4 sm:flex-row'
 
 export const ENTRY_PORTAL_SOLO_BTN_CLASS =
