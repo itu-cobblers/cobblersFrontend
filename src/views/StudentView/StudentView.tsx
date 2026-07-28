@@ -36,6 +36,8 @@ export default function StudentView() {
         sessionCode={session.code}
         displayName={session.displayName}
         teacherFocusedAssignmentId={session.teacherFocusedAssignmentId}
+        isInRoom={session.isInRoom}
+        activeTimer={session.activeTimer}
         submissionHistory={progress.history}
         catalog={progress.catalog}
         isHistoryLoading={progress.isLoading}

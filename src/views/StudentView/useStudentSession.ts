@@ -5,7 +5,7 @@ import type { ToastTone } from '@components'
 import { getStudentId, getDisplayName, setDisplayName } from '@lib/identity'
 import { upsertStudent } from '@lib/studentApi'
 import { getSession, fetchTodayLatestSession, type SessionInfo } from '@lib/sessionApi'
-import { joinSession } from '@lib/sessionHub'
+import { joinSession, type Timer } from '@lib/sessionHub'
 import { fetchStudentAssignmentSet, fetchAssignmentSet } from '@lib/assignmentSetApi'
 import { fetchSubmissionHistory } from '@lib/submissionApi'
 import {
@@ -69,6 +69,9 @@ export function useStudentSession() {
   // The assignment the teacher is currently focused on, broadcast over the
   // hub (best-effort — join-mode only, `null` in solo practice or offline).
   const [teacherFocusedAssignmentId, setTeacherFocusedAssignmentId] = useState<number | null>(null)
+  // The room's active per-assignment countdown (join-mode only, `null` in
+  // solo practice, offline, or once none is running). See @lib/sessionHub.
+  const [activeTimer, setActiveTimer] = useState<Timer | null>(null)
   // Tracks the delayed re-fetch scheduled after a session-ended bounce, so it
   // can be cancelled if the view unmounts before it fires.
   const sessionEndedRefetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -96,6 +99,7 @@ export function useStudentSession() {
     joinSession(
       { code: roomCode, studentId, displayName },
       {
+        onTimerStarted: setActiveTimer,
         onAssignmentFocused: setTeacherFocusedAssignmentId,
         onSessionEnded: handleSessionEnded,
       },
@@ -224,6 +228,7 @@ export function useStudentSession() {
     setAssignmentSet(null)
     setCode('')
     setTeacherFocusedAssignmentId(null)
+    setActiveTimer(null)
   }
 
   // Refetches this student's full submission history — called after every
@@ -248,8 +253,12 @@ export function useStudentSession() {
       /** Raw join code, only meaningful in 'join' mode — for tagging submissions. */
       code: mode === 'join' ? code : undefined,
       displayName: getDisplayName(),
+      /** `true` once the student has joined a room (as opposed to solo practice) — drives per-kind answer-reveal rules. */
+      isInRoom: mode === 'join',
       /** The assignment id the teacher is currently focused on; `null` outside a room. */
       teacherFocusedAssignmentId: mode === 'join' ? teacherFocusedAssignmentId : null,
+      /** The room's active per-assignment countdown; `null` outside a room or once none is running. */
+      activeTimer: mode === 'join' ? activeTimer : null,
     },
     entry: {
       name,

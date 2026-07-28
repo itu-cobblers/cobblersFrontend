@@ -14,8 +14,10 @@ export interface SessionInfo {
   assignmentSetId: string | null
 }
 
+/** A countdown scoped to one assignment — see CONTRACT.md's Timer section. */
 export interface Timer {
   endsAt: string
+  assignmentId: number
 }
 
 /** POST /api/sessions → create a new room bound to an assignment set, return its join code. */
@@ -36,12 +38,17 @@ export async function getSession(code: string): Promise<SessionInfo> {
   return res.json()
 }
 
-/** POST /api/sessions/:code/timer → start a countdown for the room. */
-export async function startTimer(sessionCode: string, durationMinutes: number): Promise<Timer> {
+/**
+ * POST /api/sessions/:code/timer → start a countdown scoped to one
+ * assignment. Purely a pacing display for the room — see CONTRACT.md's
+ * Timer section; it has no effect on answer reveal (submission-based end to
+ * end, see the Solution section).
+ */
+export async function startTimer(sessionCode: string, assignmentId: number, durationMinutes: number): Promise<Timer> {
   const res = await fetch(`/api/sessions/${sessionCode}/timer`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ durationMinutes }),
+    body: JSON.stringify({ durationMinutes, assignmentId }),
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.json()

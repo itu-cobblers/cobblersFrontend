@@ -38,7 +38,9 @@ describe('TeacherDashboard', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create session' }))
 
     expect(await screen.findByRole('button', { name: 'End session' })).toBeInTheDocument()
-    expect(localStorage.getItem('bootit.teacherSession')).toEqual(JSON.stringify({ code: 'ABCD1234', timerEndsAt: null }))
+    expect(localStorage.getItem('bootit.teacherSession')).toEqual(
+      JSON.stringify({ code: 'ABCD1234', timerEndsAt: null, timerAssignmentId: null }),
+    )
   })
 
   it('resumes a persisted session on mount', async () => {

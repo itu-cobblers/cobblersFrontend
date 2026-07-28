@@ -1,4 +1,5 @@
 import type { Assignment, AssignmentSet, SubmissionHistoryItem } from '@types'
+import type { Timer } from '@lib/sessionHub'
 import {
   ProblemsList,
   TeacherFollowBanner,
@@ -30,6 +31,10 @@ interface StudentIdeProps {
   displayName: string
   /** The assignment id the teacher is currently focused on (join-mode only, via the hub); `null` otherwise. */
   teacherFocusedAssignmentId: number | null
+  /** `true` once the student has joined a room (as opposed to solo practice) — drives per-kind answer-reveal rules. */
+  isInRoom: boolean
+  /** The room's active per-assignment countdown; `null` outside a room or once none is running. */
+  activeTimer: Timer | null
   /** This student's full history, across all days — seeds "already passed" and backs the rail's History tab. */
   submissionHistory: SubmissionHistoryItem[]
   /** The full cross-day catalog — backs the rail's History tab alongside `submissionHistory`. */
@@ -48,6 +53,8 @@ export default function StudentIde({
   sessionCode,
   displayName,
   teacherFocusedAssignmentId,
+  isInRoom,
+  activeTimer,
   submissionHistory,
   catalog,
   isHistoryLoading,
@@ -59,6 +66,8 @@ export default function StudentIde({
       sessionCode,
       submissionHistory,
       teacherFocusedAssignmentId,
+      isInRoom,
+      activeTimer,
       catalog,
       isHistoryLoading,
       onSubmissionMade,

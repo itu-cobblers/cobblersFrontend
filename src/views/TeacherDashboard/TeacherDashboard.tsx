@@ -52,6 +52,7 @@ export default function TeacherDashboard() {
     minutes,
     isStartingTimer,
     timerEndsAt,
+    timerAssignmentId,
     timerError,
     isRestoringSession,
     focusedAssignmentId,
@@ -205,6 +206,7 @@ export default function TeacherDashboard() {
             minutes={minutes}
             isStartingTimer={isStartingTimer}
             timerEndsAt={timerEndsAt}
+            timerAssignmentId={timerAssignmentId}
             timerError={timerError}
             onMinutesChange={handleMinutesChange}
             onStartTimer={handleStartTimer}

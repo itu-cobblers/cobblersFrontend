@@ -34,6 +34,7 @@ export function useTeacherSession() {
   const [minutes, setMinutes] = useState(10)
   const [isStartingTimer, setIsStartingTimer] = useState(false)
   const [timerEndsAt, setTimerEndsAt] = useState<string | null>(null)
+  const [timerAssignmentId, setTimerAssignmentId] = useState<number | null>(null)
   const [timerError, setTimerError] = useState<string | null>(null)
 
   // Read once on mount; drives the lazy initial state below and the rehydrate effect.
@@ -63,6 +64,7 @@ export function useTeacherSession() {
         setSelectedAssignmentSetId(info.assignmentSetId ?? '')
         if (persistedSession.timerEndsAt && new Date(persistedSession.timerEndsAt) > new Date()) {
           setTimerEndsAt(persistedSession.timerEndsAt)
+          setTimerAssignmentId(persistedSession.timerAssignmentId)
         }
         observe(persistedSession.code)
       })
@@ -145,7 +147,7 @@ export function useTeacherSession() {
     try {
       const { code } = await createSession(selectedAssignmentSetId)
       setSessionCode(code)
-      setPersistedTeacherSession({ code, timerEndsAt: null })
+      setPersistedTeacherSession({ code, timerEndsAt: null, timerAssignmentId: null })
       observe(code)
     } catch (err) {
       setSessionError(err instanceof Error ? err.message : String(err))
@@ -154,19 +156,26 @@ export function useTeacherSession() {
     }
   }
 
-  async function handleStartTimer() {
+  /** Starts (or replaces) the room's single active timer, scoped to `assignmentId`. */
+  async function startTimerFor(assignmentId: number, durationMinutes: number) {
     if (!sessionCode) return
     setIsStartingTimer(true)
     setTimerError(null)
     try {
-      const { endsAt } = await startTimer(sessionCode, minutes)
+      const { endsAt } = await startTimer(sessionCode, assignmentId, durationMinutes)
       setTimerEndsAt(endsAt)
-      setPersistedTeacherSession({ code: sessionCode, timerEndsAt: endsAt })
+      setTimerAssignmentId(assignmentId)
+      setPersistedTeacherSession({ code: sessionCode, timerEndsAt: endsAt, timerAssignmentId: assignmentId })
     } catch (err) {
       setTimerError(err instanceof Error ? err.message : String(err))
     } finally {
       setIsStartingTimer(false)
     }
+  }
+
+  function handleStartTimer() {
+    if (selectedAssignmentId === null) return
+    void startTimerFor(selectedAssignmentId, minutes)
   }
 
   function handleMinutesChange(value: number) {
@@ -223,6 +232,7 @@ export function useTeacherSession() {
     setSessionCode(null)
     setStudents([])
     setTimerEndsAt(null)
+    setTimerAssignmentId(null)
     setSessionError(null)
     setTimerError(null)
     setFocusedAssignmentId(null)
@@ -258,6 +268,7 @@ export function useTeacherSession() {
     minutes,
     isStartingTimer,
     timerEndsAt,
+    timerAssignmentId,
     timerError,
     isRestoringSession,
     focusedAssignmentId,

@@ -13,8 +13,10 @@ export interface Student {
   displayName: string
 }
 
+/** A countdown scoped to one assignment — see CONTRACT.md's Timer section. */
 export interface Timer {
   endsAt: string
+  assignmentId: number
 }
 
 /** State the hub replies with on join (so late joiners sync). */

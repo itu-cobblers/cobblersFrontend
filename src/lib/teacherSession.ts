@@ -9,6 +9,8 @@ const KEY = 'bootit.teacherSession'
 export interface PersistedTeacherSession {
   code: string
   timerEndsAt: string | null
+  /** The assignment the persisted timer is scoped to; `null` alongside a `null` `timerEndsAt`. */
+  timerAssignmentId: number | null
 }
 
 export function getPersistedTeacherSession(): PersistedTeacherSession | null {
@@ -20,7 +22,9 @@ export function getPersistedTeacherSession(): PersistedTeacherSession | null {
       return null
     }
     const timerEndsAt = 'timerEndsAt' in parsed && typeof parsed.timerEndsAt === 'string' ? parsed.timerEndsAt : null
-    return { code: parsed.code, timerEndsAt }
+    const timerAssignmentId =
+      'timerAssignmentId' in parsed && typeof parsed.timerAssignmentId === 'number' ? parsed.timerAssignmentId : null
+    return { code: parsed.code, timerEndsAt, timerAssignmentId }
   } catch {
     return null
   }

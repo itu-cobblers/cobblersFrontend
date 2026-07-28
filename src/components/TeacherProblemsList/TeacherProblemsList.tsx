@@ -4,6 +4,7 @@ import { Icon } from '@components/Icon'
 import type { IconName } from '@components/Icon'
 import type { ProblemStatus } from '@components/ProblemsList/ProblemsList.types'
 import { TextField, Button } from '@components'
+import { useCountdown, formatCountdown } from '@hooks/useCountdown'
 import type { TeacherProblemsListProps, TeacherProblemItem } from './TeacherProblemsList.types'
 import {
   LIST_CLASS_BASE,
@@ -60,15 +61,6 @@ function StatusDot({ status }: { status: ProblemStatus }) {
   )
 }
 
-function formatTimerEnds(endsAt: string): string {
-  try {
-    const end = new Date(endsAt)
-    return end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  } catch {
-    return endsAt
-  }
-}
-
 export default function TeacherProblemsList({
   sessionCode,
   items,
@@ -80,6 +72,7 @@ export default function TeacherProblemsList({
   minutes,
   isStartingTimer,
   timerEndsAt,
+  timerAssignmentId,
   timerError,
   onMinutesChange,
   onStartTimer,
@@ -87,6 +80,9 @@ export default function TeacherProblemsList({
   isEndingSession,
 }: TeacherProblemsListProps) {
   const [isTimerExpanded, setIsTimerExpanded] = useState(false)
+  const timerAssignmentTitle = timerEndsAt ? items.find((item) => item.id === timerAssignmentId)?.title : undefined
+  // Same live "mm:ss" countdown as the student view's AssignmentPanel badge (@hooks/useCountdown).
+  const remainingSeconds = useCountdown(timerEndsAt)
 
   return (
     <aside className={classNames(LIST_CLASS_BASE, isOpen ? LIST_CLASS_OPEN : LIST_CLASS_CLOSED)}>
@@ -120,7 +116,12 @@ export default function TeacherProblemsList({
             <button type="button" onClick={() => setIsTimerExpanded(!isTimerExpanded)} className={TIMER_TOGGLE_CLASS}>
               <span className={TIMER_TOGGLE_LABEL_CLASS}>
                 <Icon name="check" /> Timer
-                {timerEndsAt && <span className={TIMER_ENDS_BADGE_CLASS}>ends {formatTimerEnds(timerEndsAt)}</span>}
+                {timerEndsAt && remainingSeconds !== null && (
+                  <span className={TIMER_ENDS_BADGE_CLASS}>
+                    ⏱ {formatCountdown(remainingSeconds)}
+                    {timerAssignmentTitle && ` · ${timerAssignmentTitle}`}
+                  </span>
+                )}
               </span>
               <Icon name={isTimerExpanded ? 'chevronsLeft' : 'chevronsRight'} />
             </button>
@@ -138,7 +139,7 @@ export default function TeacherProblemsList({
                     className={TIMER_INPUT_CLASS}
                   />
                   <span className={TIMER_UNIT_LABEL_CLASS}>min</span>
-                  <Button onClick={onStartTimer} isLoading={isStartingTimer}>
+                  <Button onClick={onStartTimer} isLoading={isStartingTimer} isDisabled={activeId === null}>
                     Start
                   </Button>
                 </div>

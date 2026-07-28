@@ -15,8 +15,11 @@ export const TIMER_TOGGLE_CLASS =
 
 export const TIMER_TOGGLE_LABEL_CLASS = 'flex items-center gap-1.5'
 
+// Same gray "pill" look as the student view's countdown badge (AssignmentPanel.constants.ts's
+// PANEL_COUNTDOWN_CLASS) — deliberately not the old green "ends at" badge, so the teacher sees
+// the identical clock-icon countdown their students see.
 export const TIMER_ENDS_BADGE_CLASS =
-  'ml-1 inline-flex items-center rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-medium text-emerald-400'
+  'ml-1 inline-flex items-center gap-1 whitespace-nowrap rounded-full border border-border bg-muted px-2 py-0.5 font-mono text-[10px] font-medium text-muted-foreground'
 
 export const TIMER_BODY_CLASS = 'flex flex-col gap-2.5 px-4 pb-3 pt-1'
 
