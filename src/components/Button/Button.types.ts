@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-export type ButtonVariant = 'primary' | 'ghost'
+export type ButtonVariant = 'primary' | 'ghost' | 'solid'
 
 export interface ButtonProps {
   variant?: ButtonVariant
@@ -10,5 +10,6 @@ export interface ButtonProps {
   isDisabled?: boolean
   onClick?: () => void
   title?: string
+  className?: string
   children: ReactNode
 }

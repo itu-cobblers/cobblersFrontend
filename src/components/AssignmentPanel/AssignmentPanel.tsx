@@ -103,7 +103,7 @@ export default function AssignmentPanel({
               </p>
             ),
           )}
-          {!projectIdentity && (
+          { (
             <>
               <h3 className={PANEL_TASK_LABEL_CLASS}>Your task</h3>
               <p className={PANEL_TASK_CLASS}>{description}</p>
