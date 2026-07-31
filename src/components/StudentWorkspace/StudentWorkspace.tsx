@@ -105,6 +105,8 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     onSelectFile={mode.handleSelectFile}
                                     isRunning={submit.isRunning}
                                     onRun={submit.handleRunCode}
+                                    viewStatusLabel={mode.viewStatusLabel}
+                                    onExitView={mode.onExitView}
                                 />
                             )}
                             <CodeEditor

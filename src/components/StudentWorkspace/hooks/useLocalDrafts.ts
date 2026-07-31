@@ -50,14 +50,14 @@ export function useLocalDrafts(allAssignments: Assignment[]) {
         setDrafts((prev) => ({ ...prev, code: { ...prev.code, [id]: value } }))
     }
 
-    const updateMultiFile = (id: number, activeFileName: string, value: string) => {
+    const updateMultiFile = (id: number, fileIndex: number, value: string) => {
         setDrafts((prev) => {
             const currentFiles = prev.multiFiles[id] || []
             return {
                 ...prev,
                 multiFiles: {
                     ...prev.multiFiles,
-                    [id]: currentFiles.map(f => f.name === activeFileName ? { ...f, content: value } : f)
+                    [id]: currentFiles.map((f, i) => i === fileIndex ? { ...f, content: value } : f)
                 }
             }
         })
@@ -71,14 +71,14 @@ export function useLocalDrafts(allAssignments: Assignment[]) {
         setDrafts((prev) => ({ ...prev, project: { ...prev.project, [id]: files } }))
     }
 
-    const updateProjectFile = (id: number, activeFileName: string, value: string) => {
+    const updateProjectFile = (id: number, fileIndex: number, value: string) => {
         setDrafts((prev) => {
             const currentFiles = prev.project[id] || []
             return {
                 ...prev,
                 project: {
                     ...prev.project,
-                    [id]: currentFiles.map(f => f.name === activeFileName ? { ...f, content: value } : f)
+                    [id]: currentFiles.map((f, i) => i === fileIndex ? { ...f, content: value } : f)
                 }
             }
         })
