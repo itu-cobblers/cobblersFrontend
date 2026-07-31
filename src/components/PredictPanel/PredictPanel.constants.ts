@@ -29,5 +29,3 @@ export const PREDICT_CONTENT_CLASS =
     'flex-1 overflow-y-auto whitespace-pre-wrap break-all px-3.5 py-2.5 text-[13px] leading-relaxed text-terminal-ink'
 
 export const PREDICT_PLACEHOLDER_CLASS = 'italic text-terminal-muted'
-
-export const PREDICT_FOOTER_CLASS = 'flex shrink-0 items-center justify-end gap-2.5 border-t border-terminal-line px-3.5 py-2'
