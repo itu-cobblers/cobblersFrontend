@@ -1,7 +1,90 @@
 import { useEffect, useLayoutEffect, useRef, useState, type SyntheticEvent } from 'react'
+import { getDisplayName, setDisplayName, sanitizeDisplayName, getStudentId } from '@lib/identity'
+import { fetchTodayLatestSession, getSession, type SessionInfo } from '@lib/sessionApi'
+import { upsertStudent } from '@lib/studentApi'
+import { fetchSoloAssignmentSet, fetchAssignmentSet } from '@lib/assignmentSetApi'
+import type { AssignmentSet } from '@types'
 
-/** How long the caret stays solid after typing/moving before it resumes blinking — mirrors how OS/editor carets behave. */
-const CARET_IDLE_BEFORE_BLINK_MS = 500
+interface UseEntryPortalOptions {
+  onJoinSuccess: (roomCode: string, displayName: string, set: AssignmentSet) => void
+  onSoloSuccess: (set: AssignmentSet) => void
+  onError: (message: string) => void
+}
+
+export function useEntryPortal({ onJoinSuccess, onSoloSuccess, onError }: UseEntryPortalOptions) {
+  const [name, setName] = useState(getDisplayName)
+  const [isReturningStudent] = useState(() => Boolean(getDisplayName()))
+  const [isJoining, setIsJoining] = useState(false)
+  const [isStartingSolo, setIsStartingSolo] = useState(false)
+  const [todayLatestSession, setTodayLatestSession] = useState<SessionInfo | null | undefined>(undefined)
+
+  useEffect(() => {
+    fetchTodayLatestSession().then(setTodayLatestSession)
+  }, [])
+
+  function handleNameChange(value: string) {
+    setName(sanitizeDisplayName(value))
+  }
+
+  function handleRefreshTodayLatestSession() {
+    setTodayLatestSession(undefined)
+    fetchTodayLatestSession().then(setTodayLatestSession)
+  }
+
+  async function handleJoinToday() {
+    if (!todayLatestSession) return
+    const displayName = name.trim()
+    setDisplayName(displayName)
+    setIsJoining(true)
+
+    try {
+      const roomCode = todayLatestSession.code
+      const sessionInfo = await getSession(roomCode)
+      if (!sessionInfo.assignmentSetId) throw new Error('room has no assignment set')
+
+      await upsertStudent(displayName)
+      const set = await fetchAssignmentSet(sessionInfo.assignmentSetId)
+
+      onJoinSuccess(roomCode, displayName, set)
+    } catch {
+      onError('That session is no longer available — ask your teacher for a new code.')
+      setTodayLatestSession(null)
+    } finally {
+      setIsJoining(false)
+    }
+  }
+
+  async function handleStartSolo() {
+    const displayName = name.trim()
+    setDisplayName(displayName)
+    getStudentId() // Ensure persistent ID exists
+    setIsStartingSolo(true)
+
+    try {
+      await upsertStudent(displayName)
+      const set = await fetchSoloAssignmentSet()
+
+      onSoloSuccess(set)
+    } catch {
+      onError('Could not load the assignments — please try again in a moment.')
+    } finally {
+      setIsStartingSolo(false)
+    }
+  }
+
+  return {
+    name,
+    isReturningStudent,
+    todayLatestSessionCode: todayLatestSession?.code ?? (todayLatestSession === undefined ? undefined : null),
+    isJoining,
+    isStartingSolo,
+    onNameChange: handleNameChange,
+    onJoinToday: handleJoinToday,
+    onStartSolo: handleStartSolo,
+    onRefreshTodayLatestSession: handleRefreshTodayLatestSession,
+  }
+}
+
 
 /**
  * Tracks the real cursor position inside the name input so the fake
@@ -15,6 +98,10 @@ const CARET_IDLE_BEFORE_BLINK_MS = 500
  * moving the cursor, only resuming its blink once idle — a blinking bar
  * sitting mid-word while you're still editing reads as broken, not alive.
  */
+
+/** How long the caret stays solid after typing/moving before it resumes blinking — mirrors how OS/editor carets behave. */
+const CARET_IDLE_BEFORE_BLINK_MS = 500
+
 export function useNameCaret(name: string) {
   const inputRef = useRef<HTMLInputElement>(null)
   const mirrorRef = useRef<HTMLSpanElement>(null)
