@@ -60,20 +60,17 @@ export async function fetchSubmissionHistory(studentId: string): Promise<Submiss
 
 /**
  * `GET /api/assignments/{assignmentId}/solution` (CONTRACT.md "Solution") —
- * reveals a project/code assignment's reference solution once the student
- * has submitted it at least once. Not built on the backend yet (owned by a
- * teammate) — degrades to "unavailable" on any failure (network error, 404,
- * ...) exactly like `fetchSubmissionHistory`, so the reveal button just stays
- * unavailable instead of breaking. Starts working the moment the endpoint
- * ships, with no frontend changes needed.
+ * returns a code/project assignment's reference solution from
+ * `SampleSolutionJson`. Reveal gating (submit first) is enforced in the view
+ * layer, not here. Degrades to `{ solution: null }` on any failure so the
+ * reveal button simply shows nothing instead of breaking the app.
  */
 export async function fetchAssignmentSolution(assignmentId: number): Promise<SolutionResult> {
   try {
-    const studentId = encodeURIComponent(getStudentId())
-    const res = await fetch(`/api/assignments/${assignmentId}/solution?studentId=${studentId}`)
-    if (!res.ok) return { available: false, solution: null }
+    const res = await fetch(`/api/assignments/${assignmentId}/solution`)
+    if (!res.ok) return { solution: null }
     return (await res.json()) as SolutionResult
   } catch {
-    return { available: false, solution: null }
+    return { solution: null }
   }
 }

@@ -57,12 +57,11 @@ export interface SubmissionHistoryItem {
 
 /**
  * `GET /api/assignments/{assignmentId}/solution` → response (CONTRACT.md
- * "Solution"). `available` is true once the student has submitted this
- * assignment at least once (pass or fail) — `solution` is only populated then.
- * Shape mirrors `Assignment.SampleSolutionJson` for the assignment's kind:
- * a single Java source string for `code`, a file list for `project`.
+ * "Solution"). Shape mirrors `Assignment.SampleSolutionJson` for the
+ * assignment's kind: a single Java source string for `code`, a file list for
+ * `project`. The frontend gates when the reveal button is shown; the backend
+ * just returns the stored reference answer.
  */
 export interface SolutionResult {
-  available: boolean
   solution: string | SourceFile[] | null
 }
