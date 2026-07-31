@@ -26,8 +26,15 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions }: ModeOp
             if (activeAssignment.starterFiles) return drafts.state.multiFiles[assignmentId] ?? []
             return [{ name: 'Main.java', content: drafts.state.code[assignmentId] ?? defaultStarter }]
         }
+        if (activeAssignment.kind === 'predict') {
+            return [{ name: 'Snippet.java', content: activeAssignment.snippet ?? '' }]
+        }
         return []
     }, [activeAssignment, drafts.state, assignmentId])
+
+    const isReadOnly =
+        isVisible ||
+        activeAssignment.kind === 'predict'
 
     const rawStudentIndex = activeStudentIndexByAssignment[assignmentId] ?? 0
     const rawSolutionIndex = activeSolutionIndexByAssignment[assignmentId] ?? 0
@@ -52,7 +59,7 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions }: ModeOp
     }
 
     const handleEditorChange = (value: string) => {
-        if (isVisible) return // 唯讀模式不准修改
+        if (isVisible) return
         if (activeAssignment.kind === 'project') drafts.updateProjectFile(assignmentId, safeStudentIndex, value)
         else if (activeAssignment.kind === 'code' && activeAssignment.starterFiles) drafts.updateMultiFile(assignmentId, safeStudentIndex, value)
         else drafts.updateCode(assignmentId, value)
@@ -82,11 +89,10 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions }: ModeOp
         handleSelectFile,
         editorValue: activeContent,
         editorPath: `assignment-${assignmentId}-${modeString}-${currentIndex}-${currentFileName}`,
-        isReadOnly: isVisible || (activeAssignment.kind === 'project' && studentFiles.length === 0),
+        isReadOnly: isReadOnly,
         handleEditorChange,
         currentContent: activeContent,
         currentStudentFiles: studentFiles,
-
         viewStatusLabel,
         onExitView: () => solutions.hideSolution(assignmentId)
     }
