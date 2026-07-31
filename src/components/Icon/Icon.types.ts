@@ -17,6 +17,7 @@ export type IconName =
   | 'refresh'
   | 'upload'
   | 'externalLink'
+  | 'arrowBack'
 
 export interface IconProps {
   name: IconName

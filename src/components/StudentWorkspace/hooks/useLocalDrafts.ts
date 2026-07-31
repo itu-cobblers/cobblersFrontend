@@ -1,0 +1,95 @@
+import { useState, useEffect } from 'react'
+import type { Assignment, SourceFile } from '@types'
+import { defaultStarter } from '@lib/defaultStarter'
+
+const DRAFTS_STORAGE_KEY = 'bootit_student_drafts'
+
+type DraftState = {
+    code: Record<number, string>
+    multiFiles: Record<number, SourceFile[]>
+    predict: Record<number, string>
+    project: Record<number, SourceFile[]>
+}
+
+function initialCode(assignments: Assignment[]): Record<number, string> {
+    const map: Record<number, string> = {}
+    for (const a of assignments) {
+        if (a.kind === 'code' && !a.starterFiles) map[a.id] = a.starter ?? defaultStarter
+    }
+    return map
+}
+
+function initialMultiFiles(assignments: Assignment[]): Record<number, SourceFile[]> {
+    const map: Record<number, SourceFile[]> = {}
+    for (const a of assignments) {
+        if (a.kind === 'code' && a.starterFiles) map[a.id] = a.starterFiles
+    }
+    return map
+}
+
+export function useLocalDrafts(allAssignments: Assignment[]) {
+    const [drafts, setDrafts] = useState<DraftState>(() => {
+        try {
+            const saved = localStorage.getItem(DRAFTS_STORAGE_KEY)
+            if (saved) return JSON.parse(saved)
+        } catch { /* fallback */ }
+
+        return {
+            code: initialCode(allAssignments),
+            multiFiles: initialMultiFiles(allAssignments),
+            predict: {},
+            project: {}
+        }
+    })
+
+    useEffect(() => {
+        localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(drafts))
+    }, [drafts])
+
+    const updateCode = (id: number, value: string) => {
+        setDrafts((prev) => ({ ...prev, code: { ...prev.code, [id]: value } }))
+    }
+
+    const updateMultiFile = (id: number, fileIndex: number, value: string) => {
+        setDrafts((prev) => {
+            const currentFiles = prev.multiFiles[id] || []
+            return {
+                ...prev,
+                multiFiles: {
+                    ...prev.multiFiles,
+                    [id]: currentFiles.map((f, i) => i === fileIndex ? { ...f, content: value } : f)
+                }
+            }
+        })
+    }
+
+    const updatePredict = (id: number, value: string) => {
+        setDrafts((prev) => ({ ...prev, predict: { ...prev.predict, [id]: value } }))
+    }
+
+    const updateProject = (id: number, files: SourceFile[]) => {
+        setDrafts((prev) => ({ ...prev, project: { ...prev.project, [id]: files } }))
+    }
+
+    const updateProjectFile = (id: number, fileIndex: number, value: string) => {
+        setDrafts((prev) => {
+            const currentFiles = prev.project[id] || []
+            return {
+                ...prev,
+                project: {
+                    ...prev.project,
+                    [id]: currentFiles.map((f, i) => i === fileIndex ? { ...f, content: value } : f)
+                }
+            }
+        })
+    }
+
+    return {
+        state: drafts,
+        updateCode,
+        updateMultiFile,
+        updatePredict,
+        updateProject,
+        updateProjectFile
+    }
+}
