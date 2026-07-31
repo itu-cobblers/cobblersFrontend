@@ -16,37 +16,9 @@ export const PANEL_TASK_CLASS = 'whitespace-pre-wrap text-[15px] leading-relaxed
 
 export const PANEL_BODY_CLASS = 'mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-muted-foreground'
 
-// ── project brief (embedded PDF) ────────────────────────────────────────────
-// The brief's real styling only exists in the original PDF (each project has
-// its own colors/fonts) — embedding it directly reproduces that exactly,
-// instead of a re-typeset excerpt that can only ever half-match it.
-
-export const PANEL_PROJECT_PDF_CLASS = 'mb-4 flex flex-col gap-1.5'
-
-export const PANEL_PROJECT_PDF_HEADER_CLASS = 'flex items-center justify-end'
-
-export const PANEL_PROJECT_PDF_LINK_CLASS =
-  'inline-flex items-center gap-1 text-[12px] font-medium text-muted-foreground underline decoration-dotted hover:text-foreground'
-
-export const PANEL_PROJECT_PDF_FRAME_CLASS = 'h-[80vh] w-full rounded-md border border-border bg-white'
-
-// Best-effort PDF-viewer open-params (honored by Chromium's built-in PDF
-// viewer, ignored harmlessly elsewhere): hide the toolbar/title bar, collapse
-// the page-thumbnails sidebar, and default to 100% zoom.
-export const PDF_VIEWER_FRAGMENT = '#toolbar=0&navpanes=0&scrollbar=0&zoom=100'
-
-// ── project setup-guide disclosure ─────────────────────────────────────────
-
-export const PANEL_SETUP_CLASS = 'mb-4 rounded-md border border-border bg-muted/40 px-3.5 py-2.5'
-
-export const PANEL_SETUP_TOGGLE_CLASS =
-  'flex w-full items-center justify-between gap-2 text-left text-[13px] font-semibold text-foreground'
-
-export const PANEL_SETUP_BODY_CLASS = 'mt-2.5 space-y-2.5 text-[13px] leading-relaxed text-muted-foreground'
-
-export const PANEL_SETUP_H5_CLASS = 'text-[13px] font-semibold text-foreground'
-
-export const PANEL_SETUP_LIST_CLASS = 'list-disc space-y-1 pl-5'
+// Project briefs (embedded PDF + setup-guide popup) render via the shared
+// `ProjectBrief` component (@components/ProjectBrief) — used here and by
+// `TeacherAssignmentPanel` so both look identical.
 
 export const PANEL_HINT_CLASS =
   'mt-4 rounded border-l-[3px] border-accent bg-accent/10 px-2.5 py-2 text-[12px] leading-relaxed text-foreground'

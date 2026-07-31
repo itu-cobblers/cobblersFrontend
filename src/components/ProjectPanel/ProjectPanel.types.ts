@@ -9,13 +9,16 @@ export interface ProjectPanelProps {
   /** True once this attempt has been recorded via Submit — gates the solution reveal. */
   hasSubmitted: boolean
   isSubmitting: boolean
-  /** The last submit's verdict — always `null` here (projects aren't auto-graded yet); drives the shared Submit button's flash when it isn't. */
+  /**
+   * Whether *this exact* submit just landed — projects aren't graded (`passed`
+   * is always `null`), so a successful submit always flashes "Well Done".
+   */
   lastSubmitPassed?: boolean | null
   onSubmit: () => void
 
-  /** True while `onRevealSolution`'s request is in flight. */
+  /** True while `onToggleSolution`'s fetch is in flight (first reveal only). */
   isLoadingSolution: boolean
-  /** The revealed reference solution, once fetched — `null` before reveal or if unavailable. */
-  solution: SourceFile[] | null
-  onRevealSolution: () => void
+  /** Whether the fetched solution is currently shown in the IDE tabs above. */
+  isSolutionVisible: boolean
+  onToggleSolution: () => void
 }

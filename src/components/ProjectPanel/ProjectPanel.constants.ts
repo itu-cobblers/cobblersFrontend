@@ -18,15 +18,3 @@ export const PROJECT_HEADER_COUNT_CLASS = 'font-bold text-term-ok'
 export const PROJECT_BODY_CLASS = 'flex flex-1 flex-col gap-2.5 overflow-y-auto px-3.5 py-2.5'
 
 export const PROJECT_NOTE_CLASS = 'shrink-0 text-[11px] leading-relaxed text-terminal-muted'
-
-export const PROJECT_FOOTER_CLASS = 'flex shrink-0 items-center justify-end gap-2.5 border-t border-terminal-line px-3.5 py-2'
-
-export const PROJECT_SOLUTION_CLASS =
-  'flex shrink-0 flex-col gap-2.5 rounded-md border border-terminal-line bg-black/20 p-3'
-
-export const PROJECT_SOLUTION_LABEL_CLASS = 'text-[11px] font-semibold uppercase tracking-[0.8px] text-terminal-muted'
-
-export const PROJECT_SOLUTION_FILE_NAME_CLASS = 'mb-1 font-mono text-[11px] text-terminal-muted'
-
-export const PROJECT_SOLUTION_FILE_CONTENT_CLASS =
-  'mb-3 overflow-x-auto whitespace-pre rounded bg-black/30 px-3 py-2.5 font-mono text-[12px] leading-relaxed text-terminal-ink last:mb-0'

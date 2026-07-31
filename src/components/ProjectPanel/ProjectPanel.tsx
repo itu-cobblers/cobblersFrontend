@@ -1,7 +1,6 @@
 import { Icon } from '@components/Icon'
 import { FileUpload } from '@components/FileUpload'
-import { SubmitButton } from '@components/SubmitButton'
-import { ShowAnswerButton } from '@components/ShowAnswerButton'
+import { AssignmentFooter } from '@components/AssignmentFooter'
 import type { ProjectPanelProps } from './ProjectPanel.types'
 import { getProjectSubmitStatus } from './ProjectPanel.utils'
 import {
@@ -11,11 +10,6 @@ import {
   PROJECT_HEADER_COUNT_CLASS,
   PROJECT_BODY_CLASS,
   PROJECT_NOTE_CLASS,
-  PROJECT_FOOTER_CLASS,
-  PROJECT_SOLUTION_CLASS,
-  PROJECT_SOLUTION_LABEL_CLASS,
-  PROJECT_SOLUTION_FILE_NAME_CLASS,
-  PROJECT_SOLUTION_FILE_CONTENT_CLASS,
 } from './ProjectPanel.constants'
 
 /**
@@ -23,7 +17,7 @@ import {
  * CodeFileTabs + CodeEditor, replacing OutputPanel since there's no code to
  * run here. Lets the student drop/pick the .java files they built in VS Code
  * (editable afterwards in the tabs above), Submit to save the attempt, and
- * reveal the reference solution once submitted at least once.
+ * reveal the reference solution in those same IDE tabs once submitted.
  */
 export default function ProjectPanel({
   files,
@@ -33,8 +27,8 @@ export default function ProjectPanel({
   lastSubmitPassed,
   onSubmit,
   isLoadingSolution,
-  solution,
-  onRevealSolution,
+  isSolutionVisible,
+  onToggleSolution,
 }: ProjectPanelProps) {
   return (
     <div className={PROJECT_PANEL_CLASS}>
@@ -53,33 +47,19 @@ export default function ProjectPanel({
         <FileUpload files={files} onFilesChange={onFilesChange} />
         <span className={PROJECT_NOTE_CLASS}>
           {hasSubmitted
-            ? 'Submitted — you can reveal the reference solution whenever you like.'
-            : 'Upload your .java files (including a Main) — edit them in the tabs above if you need to. Submit to save your attempt and unlock the reference solution.'}
+            ? 'Submitted — you can reveal the reference answer in the editor tabs above whenever you like.'
+            : 'Upload your .java files (including a Main) — edit them in the tabs above if you need to. Submit to save your attempt and unlock the reference answer.'}
         </span>
-        {solution && (
-          <div className={PROJECT_SOLUTION_CLASS}>
-            <span className={PROJECT_SOLUTION_LABEL_CLASS}>Reference solution</span>
-            {solution.map((file) => (
-              <div key={file.name}>
-                <div className={PROJECT_SOLUTION_FILE_NAME_CLASS}>{file.name}</div>
-                <pre className={PROJECT_SOLUTION_FILE_CONTENT_CLASS}>{file.content}</pre>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
-      <div className={PROJECT_FOOTER_CLASS}>
-        <ShowAnswerButton
-          onClick={onRevealSolution}
-          isDisabled={!hasSubmitted || isLoadingSolution}
-          label={isLoadingSolution ? 'Loading…' : 'Show reference solution'}
-        />
-        <SubmitButton
-          status={getProjectSubmitStatus(isSubmitting, lastSubmitPassed)}
-          onClick={onSubmit}
-          isDisabled={files.length === 0}
-        />
-      </div>
+      <AssignmentFooter
+        submitStatus={getProjectSubmitStatus(isSubmitting, lastSubmitPassed)}
+        onSubmit={onSubmit}
+        isSubmitDisabled={files.length === 0}
+        canRevealAnswer={hasSubmitted}
+        isSolutionVisible={isSolutionVisible}
+        isLoadingSolution={isLoadingSolution}
+        onToggleSolution={onToggleSolution}
+      />
     </div>
   )
 }

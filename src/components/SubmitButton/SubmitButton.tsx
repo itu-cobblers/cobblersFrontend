@@ -38,39 +38,40 @@ const SPIN_TRANSITION = { repeat: Infinity, ease: 'linear', duration: 0.8 } as c
 export default function SubmitButton({ status, onClick, isDisabled = false, label }: SubmitButtonProps) {
   const displayStatus = useSubmitButtonDisplayStatus(status)
   const isWaiting = status === 'waiting'
+  const displayLabel = label ?? SUBMIT_BUTTON_LABEL[displayStatus]
 
   return (
-    <motion.button
-      type="button"
-      aria-label={label ?? SUBMIT_BUTTON_LABEL[displayStatus]}
-      onClick={onClick}
-      disabled={isDisabled || isWaiting}
-      initial="rest"
-      whileHover="hover"
-      className={classNames(SUBMIT_BUTTON_CLASS, SUBMIT_BUTTON_BG_CLASS[displayStatus], { [SUBMIT_BUTTON_WAITING_CLASS]: isWaiting })}
-    >
-      <AnimatePresence mode="wait" initial={false}>
-        <motion.span
-          key={displayStatus}
-          className="flex items-center gap-2"
-          variants={CONTENT_VARIANTS}
-          initial="initial"
-          animate="animate"
-          exit="exit"
-          transition={{ duration: 0.2, ease: 'easeOut' }}
-        >
-          <motion.span className={classNames(SUBMIT_BUTTON_ICON_WRAP_CLASS, SUBMIT_BUTTON_ICON_CLASS)} variants={HOVER_VARIANTS}>
-            <motion.span
-              className="flex"
-              animate={isWaiting ? { rotate: 360 } : { rotate: 0 }}
-              transition={isWaiting ? SPIN_TRANSITION : { duration: 0.15 }}
-            >
-              <Icon name={SUBMIT_BUTTON_ICON[displayStatus]} />
+      <motion.button
+          type="button"
+          aria-label={displayLabel}
+          onClick={onClick}
+          disabled={isDisabled || isWaiting}
+          initial="rest"
+          whileHover="hover"
+          className={classNames(SUBMIT_BUTTON_CLASS, SUBMIT_BUTTON_BG_CLASS[displayStatus], { [SUBMIT_BUTTON_WAITING_CLASS]: isWaiting })}
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.span
+              key={displayStatus}
+              className="flex items-center gap-2"
+              variants={CONTENT_VARIANTS}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+          >
+            <motion.span className={classNames(SUBMIT_BUTTON_ICON_WRAP_CLASS, SUBMIT_BUTTON_ICON_CLASS)} variants={HOVER_VARIANTS}>
+              <motion.span
+                  className="flex"
+                  animate={isWaiting ? { rotate: 360 } : { rotate: 0 }}
+                  transition={isWaiting ? SPIN_TRANSITION : { duration: 0.15 }}
+              >
+                <Icon name={SUBMIT_BUTTON_ICON[displayStatus]} />
+              </motion.span>
             </motion.span>
+            <span>{displayLabel}</span>
           </motion.span>
-          <span>{SUBMIT_BUTTON_LABEL[displayStatus]}</span>
-        </motion.span>
-      </AnimatePresence>
-    </motion.button>
+        </AnimatePresence>
+      </motion.button>
   )
 }
