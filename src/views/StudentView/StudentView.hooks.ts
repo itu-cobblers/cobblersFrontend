@@ -650,11 +650,11 @@ export function useStudentWorkspace({
                 value: activeSolutionFile.content,
                 onChange: noop,
                 isReadOnly: true,
-                path: `solution:${activeSolutionFile.name}`,
+                path: `solution-${active.id}-${activeSolutionFile.name}`,
               }
             : files.length > 0
-              ? { value: activeFile?.content ?? '', onChange: handleEditorChange, path: activeFileName }
-              : { value: projectUploadStarter, onChange: noop, isReadOnly: true },
+              ? { value: activeFile?.content ?? '', onChange: handleEditorChange, path: `assignment-${active.id}-${activeFileName}` }
+              : { value: projectUploadStarter, onChange: noop, isReadOnly: true, path: `assignment-${active.id}-Main.java` },
         project: {
           files,
           onFilesChange: handleProjectFilesChange,
@@ -686,11 +686,11 @@ export function useStudentWorkspace({
               value: activeSolutionFile.content,
               onChange: noop,
               isReadOnly: true,
-              path: `solution:${activeSolutionFile.name}`,
+              path: `solution-${active.id}-${activeSolutionFile.name}`,
             }
           : activeFiles
-            ? { value: activeFile?.content ?? '', onChange: handleEditorChange, path: activeFileName }
-            : { value: codeByAssignment[active.id] ?? defaultStarter, onChange: handleEditorChange },
+            ? { value: activeFile?.content ?? '', onChange: handleEditorChange, path: `assignment-${active.id}-${activeFileName}` }
+            : { value: codeByAssignment[active.id] ?? defaultStarter, onChange: handleEditorChange, path: `assignment-${active.id}-Main.java` },
       output: {
         output: executor.output,
         status: executor.status,
