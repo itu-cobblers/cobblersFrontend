@@ -109,12 +109,16 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     onExitView={mode.onExitView}
                                 />
                             )}
-                            <CodeEditor
-                                value={mode.editorValue}
-                                onChange={mode.handleEditorChange}
-                                isReadOnly={mode.isReadOnly}
-                                path={mode.editorPath}
-                            />
+                            {(activeAssignment.kind === 'code' ||
+                                activeAssignment.kind === 'project' ||
+                                activeAssignment.kind === 'predict') && (
+                                <CodeEditor
+                                    key={mode.editorRemountKey}
+                                    value={mode.editorValue}
+                                    onChange={mode.handleEditorChange}
+                                    isReadOnly={mode.isReadOnly}
+                                />
+                            )}
                             {activeAssignment.kind === 'code' && (
                                 <OutputPanel
                                     output={submit.outputState.output}
