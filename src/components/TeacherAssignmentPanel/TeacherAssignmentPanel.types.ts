@@ -1,5 +1,6 @@
 import type { LessonBlock, ExecuteResult } from '@types'
 import type { AssignmentPanelTab } from '@components/AssignmentPanel/AssignmentPanel.types'
+import type { ProjectIdentity } from '@lib/projectIdentity'
 
 export interface TeacherSubmissionItem {
   subId: string
@@ -21,6 +22,13 @@ export interface TeacherAssignmentPanelProps {
   lesson?: LessonBlock[]
   description: string
   body?: string
+  /**
+   * Present only for `project` assignments — resolved by the view via
+   * `getProjectIdentity(title)` (@lib/projectIdentity). Switches the panel
+   * from rendering `body` as a flat paragraph to the shared `ProjectBrief`
+   * (embedded PDF + setup-guide popup), matching the student view exactly.
+   */
+  projectIdentity?: ProjectIdentity
   hint?: string
   // Focus CTA — broadcasts the currently selected assignment to the room.
   // The left rail's selection is purely local until this is clicked.

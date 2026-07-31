@@ -1,6 +1,7 @@
 import classNames from 'classnames'
 import { CodeEditor } from '@components/CodeEditor'
 import { Icon } from '@components/Icon'
+import { ShowAnswerButton } from '@components/ShowAnswerButton'
 import type { TeacherCodeViewerProps } from './TeacherCodeViewer.types'
 import {
   VIEWER_CLASS,
@@ -18,9 +19,15 @@ import {
   TAB_IDLE_CLASS,
   TAB_UNDERLINE_CLASS,
   TABS_LABEL_CLASS,
-  BRIEF_WRAP_CLASS,
-  BRIEF_LABEL_CLASS,
-  BRIEF_TEXT_CLASS,
+  SOLUTION_WRAP_CLASS,
+  SOLUTION_BODY_CLASS,
+  SOLUTION_NOTE_CLASS,
+  SOLUTION_BLOCK_CLASS,
+  SOLUTION_LABEL_CLASS,
+  SOLUTION_FILE_NAME_CLASS,
+  SOLUTION_FILE_CONTENT_CLASS,
+  SOLUTION_FOOTER_CLASS,
+  ANSWER_FOOTER_CLASS,
   RESULT_PANEL_CLASS,
   RESULT_HEADER_CLASS,
   RESULT_STATUS_BASE_CLASS,
@@ -50,7 +57,12 @@ export default function TeacherCodeViewer({
   passed,
   result,
   predictExpectedOutput,
-  projectBrief,
+  isAnswerVisible = false,
+  onToggleAnswer,
+  solution,
+  isLoadingSolution = false,
+  isSolutionVisible = false,
+  onToggleSolution,
 }: TeacherCodeViewerProps) {
   const isCode = assignmentKind === 'code'
   const isPredict = assignmentKind === 'predict'
@@ -104,11 +116,36 @@ export default function TeacherCodeViewer({
         )
       )}
 
-      {/* Main area: readonly Monaco editor for code/predict, brief text for project (no single file to preview) */}
+      {/* Main area: readonly Monaco editor for code/predict; project's brief now
+          renders in TeacherAssignmentPanel (matching the student view) — this
+          column instead mirrors ProjectPanel's reference-solution reveal. */}
       {isProject ? (
-        <div className={BRIEF_WRAP_CLASS}>
-          <div className={BRIEF_LABEL_CLASS}>Project brief</div>
-          <p className={BRIEF_TEXT_CLASS}>{projectBrief || '(no brief provided)'}</p>
+        <div className={SOLUTION_WRAP_CLASS}>
+          <div className={SOLUTION_BODY_CLASS}>
+            <p className={SOLUTION_NOTE_CLASS}>
+              {isSolutionVisible
+                ? 'Reference solution — visible to you only.'
+                : 'Reveal the reference solution to preview what students unlock after submitting.'}
+            </p>
+            {isSolutionVisible && solution && (
+              <div className={SOLUTION_BLOCK_CLASS}>
+                <span className={SOLUTION_LABEL_CLASS}>Reference solution</span>
+                {solution.map((file) => (
+                  <div key={file.name}>
+                    <div className={SOLUTION_FILE_NAME_CLASS}>{file.name}</div>
+                    <pre className={SOLUTION_FILE_CONTENT_CLASS}>{file.content}</pre>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className={SOLUTION_FOOTER_CLASS}>
+            <ShowAnswerButton
+              onClick={onToggleSolution}
+              isDisabled={isLoadingSolution}
+              label={isLoadingSolution ? 'Loading…' : isSolutionVisible ? 'Hide reference solution' : 'Show reference solution'}
+            />
+          </div>
         </div>
       ) : (
         <CodeEditor
@@ -176,10 +213,16 @@ export default function TeacherCodeViewer({
             ) : (
               <p className={RESULT_PLACEHOLDER_CLASS}>Select a submission to see the student&rsquo;s prediction.</p>
             )}
-            <div className={PREDICT_SECTION_CLASS}>
-              <div className={PREDICT_LABEL_CLASS}>Expected output</div>
-              <pre className={PREDICT_ANSWER_CLASS}>{predictExpectedOutput || '(no expected output)'}</pre>
-            </div>
+            {isAnswerVisible && (
+              <div className={PREDICT_SECTION_CLASS}>
+                <div className={PREDICT_LABEL_CLASS}>Expected output</div>
+                <pre className={PREDICT_ANSWER_CLASS}>{predictExpectedOutput || '(no expected output)'}</pre>
+              </div>
+            )}
+          </div>
+
+          <div className={ANSWER_FOOTER_CLASS}>
+            <ShowAnswerButton onClick={onToggleAnswer} label={isAnswerVisible ? 'Hide answer' : 'Show answer'} />
           </div>
         </div>
       )}

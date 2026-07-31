@@ -12,6 +12,7 @@ import {
   type CodeFileTab,
 } from '@components'
 import { defaultStarter } from '@lib/defaultStarter'
+import { getProjectIdentity } from '@lib/projectIdentity'
 import { useTeacherSession } from './TeacherDashboard.hooks'
 import {
   TEACHER_LAYOUT_CLASS,
@@ -67,6 +68,13 @@ export default function TeacherDashboard() {
     handleSelectAssignment,
     handleSelectStudent,
     handleClearStudentFilter,
+    // Project reference solution & predict expected-output reveal
+    solutionByAssignment,
+    loadingSolutionAssignmentId,
+    isSolutionVisibleByAssignment,
+    isAnswerVisibleByAssignment,
+    handleToggleSolution,
+    handleToggleAnswer,
   } = useTeacherSession()
 
   const [isRailOpen, setIsRailOpen] = useState(true)
@@ -121,7 +129,7 @@ export default function TeacherDashboard() {
         ? activeAssignment.snippet
         : ''
   const predictExpectedOutput = activeAssignment?.kind === 'predict' ? activeAssignment.expectedOutput : undefined
-  const projectBrief = activeAssignment?.kind === 'project' ? activeAssignment.brief : undefined
+  const projectIdentity = activeAssignment?.kind === 'project' ? getProjectIdentity(activeAssignment.title) : undefined
   // Namespaces the Monaco model path (see TeacherCodeViewer.types.ts) so switching between
   // assignments/submissions that share a file name (every multi-file assignment has a
   // `Main.java`) never shows another context's stale, cached model content.
@@ -228,6 +236,7 @@ export default function TeacherDashboard() {
               title={activeAssignment?.title || activeAssignmentItem?.title || previewTitle || 'Assignments'}
               lesson={activeAssignment?.lesson}
               description={activeAssignment?.description ?? ''}
+              projectIdentity={projectIdentity}
               hint={activeAssignment?.hint}
               onFocusClick={() => selectedAssignmentId != null && handleFocusAssignment(selectedAssignmentId)}
               isFocused={selectedAssignmentId != null && selectedAssignmentId === focusedAssignmentId}
@@ -255,7 +264,16 @@ export default function TeacherDashboard() {
             passed={activeSubmission?.passed}
             result={activeSubmission?.result}
             predictExpectedOutput={predictExpectedOutput}
-            projectBrief={projectBrief}
+            isAnswerVisible={selectedAssignmentId != null ? (isAnswerVisibleByAssignment[selectedAssignmentId] ?? false) : false}
+            onToggleAnswer={() => {
+              if (selectedAssignmentId != null) handleToggleAnswer(selectedAssignmentId)
+            }}
+            solution={selectedAssignmentId != null ? solutionByAssignment[selectedAssignmentId] ?? null : null}
+            isLoadingSolution={loadingSolutionAssignmentId === selectedAssignmentId}
+            isSolutionVisible={selectedAssignmentId != null ? (isSolutionVisibleByAssignment[selectedAssignmentId] ?? false) : false}
+            onToggleSolution={() => {
+              if (selectedAssignmentId != null) handleToggleSolution(selectedAssignmentId)
+            }}
           />
         </div>
       )}

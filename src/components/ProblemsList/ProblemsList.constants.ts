@@ -83,9 +83,9 @@ export const LIST_TAB_IDLE_CLASS = 'text-muted-foreground hover:bg-white/5'
 export const LIST_TAB_LABEL_CLASS = 'truncate'
 
 export const LIST_STATUS_DOT_CLASS: Record<string, string> = {
-  passed: 'mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-status-success text-status-success',
-  tried: 'mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-status-warning text-status-warning',
-  untried: 'mt-0.5 inline-flex h-4 w-4 items-center justify-center text-foreground/25',
+  passed: 'mt-0.5 inline-flex h-2 w-2 items-center justify-center rounded-full bg-status-success text-status-success',
+  tried: 'mt-0.5 inline-flex h-2 w-2 items-center justify-center rounded-full bg-status-warning text-status-warning',
+  untried: 'mt-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full text-foreground/25',
 }
 
 export const LIST_LEGEND_DOT_CLASS: Record<string, string> = {
