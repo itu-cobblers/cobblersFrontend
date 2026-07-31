@@ -45,4 +45,20 @@ describe('CodeFileTabs', () => {
     rerender(createElement(CodeFileTabs, { ...baseProps, onRun, isRunning: true }))
     expect(screen.getByText('Run').closest('button')).toBeDisabled()
   })
+
+  it('styles solution tabs distinctly from student tabs', () => {
+    render(
+      createElement(CodeFileTabs, {
+        ...baseProps,
+        files: [
+          { name: 'Main.java' },
+          { name: 'Main.java', variant: 'solution' },
+        ],
+        activeIndex: 1,
+      }),
+    )
+    const tabs = screen.getAllByText('Main.java')
+    expect(tabs).toHaveLength(2)
+    expect(tabs[1].closest('button')).toHaveClass('text-accent')
+  })
 })

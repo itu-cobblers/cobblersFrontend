@@ -137,6 +137,12 @@
 }
 
 .dark {
+  /* Tells the browser to render native UI (scrollbars, form controls, and —
+     inherited into same-origin iframes — the built-in PDF viewer's own
+     chrome) with its dark palette instead of the light default, so plain
+     `overflow-y-auto` regions and the embedded project-brief PDF match the
+     app's always-dark theme instead of showing a jarring light scrollbar. */
+  color-scheme: dark;
   --background: oklch(0.17 0.008 260);
   --foreground: oklch(0.9 0.005 260);
   --card: oklch(0.21 0.01 260);

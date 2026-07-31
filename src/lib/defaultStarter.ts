@@ -6,3 +6,11 @@ export const defaultStarter = `public class Main {
     }
 }
 `
+
+/** Placeholder shown in a project assignment's editor before any files are uploaded. */
+export const projectUploadStarter = `public class Main {
+    public static void main(String[] args) {
+        // Code and execute in VS Code, then upload your files here.
+    }
+}
+`

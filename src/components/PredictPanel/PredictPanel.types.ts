@@ -1,21 +1,17 @@
 /**
  * idle     — awaiting a first answer
  * tried    — at least one wrong answer submitted; the input stays open for
- *            another attempt and "Show answer" appears alongside Submit
- * revealed — "Show answer" was pressed; the correct output is shown and the
- *            same button now reads "Marked as done"
- * correct  — an answer matched — completed
- * done     — "Marked as done" was pressed (and recorded) after revealing — completed
+ *            another attempt and "Show reference answer" appears alongside Submit
+ * correct  — an answer matched — completed (reveal button hidden)
+ * done     — "Marked as done" was pressed after revealing — completed
  */
-export type PredictStatus = 'idle' | 'tried' | 'revealed' | 'correct' | 'done'
+export type PredictStatus = 'idle' | 'tried' | 'correct' | 'done'
 
 export interface PredictPanelProps {
   answer: string
   status: PredictStatus
   /** True while the submitted answer is being graded — drives the Submit button's waiting animation. */
   isSubmitting?: boolean
-  /** True while "Marked as done" is recording the completing submission. */
-  isMarkingDone?: boolean
   /**
    * Whether *this exact* submit attempt was correct, once known — drives only
    * the shared Submit button's "well done"/"not quite" flash. `null`/omitted
@@ -25,12 +21,18 @@ export interface PredictPanelProps {
    * replay/hold the button's animation on revisit.
    */
   lastAnswerCorrect?: boolean | null
-  /** Revealed once the answer is submitted (tried, revealed, correct, or done). */
+  /** The canonical expected output — shown in the answer area while the reference answer is open. */
   expectedOutput: string
+
+  /** True once the student has submitted at least once and has not yet completed. */
+  canRevealAnswer: boolean
+  isSolutionVisible: boolean
+  onToggleSolution: () => void
+  /** True while the reference answer is open and the assignment is not yet completed. */
+  canMarkAsDone: boolean
+  isMarkingDone?: boolean
+  onMarkAsDone: () => void
+
   onAnswerChange: (value: string) => void
   onSubmit: () => void
-  /** "Show answer" — reveals the correct output after a tried (wrong) attempt. */
-  onShowAnswer: () => void
-  /** "Marked as done" — records a completing submission with the correct answer. */
-  onMarkAsDone: () => void
 }

@@ -13,6 +13,8 @@ const rootElement = document.getElementById('root')
 
 if (rootElement) {
   createRoot(rootElement).render(
-    <StrictMode>{isTeacherPath ? <TeacherGate /> : <StudentView />}</StrictMode>,
+    <StrictMode>
+      {isTeacherPath ? <TeacherGate /> : <StudentView />}
+    </StrictMode>,
   )
 }

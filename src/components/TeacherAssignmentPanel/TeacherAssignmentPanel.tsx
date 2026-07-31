@@ -1,5 +1,6 @@
 import classNames from 'classnames'
 import { Icon } from '@components/Icon'
+import { ProjectBrief } from '@components/ProjectBrief'
 import { formatAttemptTime } from '@components/ProblemsList'
 import type { AssignmentPanelTab } from '@components/AssignmentPanel/AssignmentPanel.types'
 import type { TeacherAssignmentPanelProps, TeacherSubmissionItem } from './TeacherAssignmentPanel.types'
@@ -63,6 +64,7 @@ export default function TeacherAssignmentPanel({
   lesson,
   description,
   body,
+  projectIdentity,
   hint,
   onFocusClick,
   isFocused,
@@ -149,9 +151,16 @@ export default function TeacherAssignmentPanel({
               </p>
             ),
           )}
-          <h3 className={PANEL_TASK_LABEL_CLASS}>Task Description</h3>
-          <p className={PANEL_TASK_CLASS}>{description}</p>
-          {body && <p className={PANEL_BODY_CLASS}>{body}</p>}
+          {!projectIdentity && (
+            <>
+              <h3 className={PANEL_TASK_LABEL_CLASS}>Task Description</h3>
+              <p className={PANEL_TASK_CLASS}>{description}</p>
+            </>
+          )}
+
+          {projectIdentity && <ProjectBrief title={title} projectIdentity={projectIdentity} />}
+
+          {!projectIdentity && body && <p className={PANEL_BODY_CLASS}>{body}</p>}
           {hint && (
             <div className={PANEL_HINT_CLASS}>
               <button type="button" onClick={handleHintToggle} className={PANEL_HINT_TOGGLE_CLASS}>

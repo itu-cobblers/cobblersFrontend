@@ -109,8 +109,25 @@ const ICONS: Record<IconName, ReactElement> = {
       <path d="M11.8 2v3h-3" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   ),
+  upload: (
+    <svg width="18" height="18" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true">
+      <path d="M7 9.5V2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M4 4.5 7 1.5l3 3" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M2 9.5v1.8c0 .66.54 1.2 1.2 1.2h7.6c.66 0 1.2-.54 1.2-1.2V9.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+  externalLink: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+         className="icon icon-tabler icons-tabler-outline icon-tabler-external-link">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6"/>
+        <path d="M11 13l9 -9"/>
+        <path d="M15 4h5v5"/>
+    </svg>
+  ),
 }
 
-export default function Icon({ name }: IconProps) {
-  return ICONS[name]
+export default function Icon({name}: IconProps) {
+    return ICONS[name]
 }

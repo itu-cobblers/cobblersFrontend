@@ -10,13 +10,14 @@ export default function Button({
   isDisabled = false,
   onClick,
   title,
+  className,
   children,
 }: ButtonProps) {
   return (
     <button
       type={type}
       title={title}
-      className={classNames(BUTTON_BASE_CLASS, BUTTON_VARIANT_CLASS[variant])}
+      className={classNames(BUTTON_BASE_CLASS, BUTTON_VARIANT_CLASS[variant], className)}
       disabled={isDisabled || isLoading}
       onClick={onClick}
     >

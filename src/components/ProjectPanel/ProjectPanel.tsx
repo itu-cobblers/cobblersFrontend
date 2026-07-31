@@ -1,39 +1,65 @@
-import { Button } from '@components/Button'
+import { Icon } from '@components/Icon'
 import { FileUpload } from '@components/FileUpload'
-import { OutputPanel } from '@components/OutputPanel'
+import { AssignmentFooter } from '@components/AssignmentFooter'
 import type { ProjectPanelProps } from './ProjectPanel.types'
+import { getProjectSubmitStatus } from './ProjectPanel.utils'
 import {
   PROJECT_PANEL_CLASS,
-  PROJECT_CONTROLS_CLASS,
+  PROJECT_HEADER_CLASS,
+  PROJECT_HEADER_LEFT_CLASS,
+  PROJECT_HEADER_COUNT_CLASS,
+  PROJECT_BODY_CLASS,
   PROJECT_NOTE_CLASS,
 } from './ProjectPanel.constants'
 
 /**
- * Mini-project panel: lets the student upload the .java files they built in
- * VS Code, runs them via the executor, and shows stdout. The project brief is
- * rendered by the assignment panel. Per-test grading is scaffolded for later —
- * running successfully is enough for now.
+ * The bottom strip for `project` assignments — sits below the shared
+ * CodeFileTabs + CodeEditor, replacing OutputPanel since there's no code to
+ * run here. Lets the student drop/pick the .java files they built in VS Code
+ * (editable afterwards in the tabs above), Submit to save the attempt, and
+ * reveal the reference solution in those same IDE tabs once submitted.
  */
 export default function ProjectPanel({
   files,
-  output,
-  status,
-  isRunning,
   onFilesChange,
-  onRun,
+  hasSubmitted,
+  isSubmitting,
+  lastSubmitPassed,
+  onSubmit,
+  isLoadingSolution,
+  isSolutionVisible,
+  onToggleSolution,
 }: ProjectPanelProps) {
   return (
     <div className={PROJECT_PANEL_CLASS}>
-      <div className={PROJECT_CONTROLS_CLASS}>
+      <div className={PROJECT_HEADER_CLASS}>
+        <span className={PROJECT_HEADER_LEFT_CLASS}>
+          <Icon name="upload" />
+          Upload files
+        </span>
+        {files.length > 0 && (
+          <span className={PROJECT_HEADER_COUNT_CLASS}>
+            {files.length} file{files.length > 1 ? 's' : ''} loaded
+          </span>
+        )}
+      </div>
+      <div className={PROJECT_BODY_CLASS}>
         <FileUpload files={files} onFilesChange={onFilesChange} />
-        <Button onClick={onRun} isLoading={isRunning} isDisabled={files.length === 0}>
-          Run uploaded files
-        </Button>
         <span className={PROJECT_NOTE_CLASS}>
-          Upload your .java files (including a Main), then Run. Full test-case grading is coming soon.
+          {hasSubmitted
+            ? 'Submitted — you can reveal the reference answer in the editor tabs above whenever you like.'
+            : 'Upload your .java files (including a Main) — edit them in the tabs above if you need to. Submit to save your attempt and unlock the reference answer.'}
         </span>
       </div>
-      <OutputPanel output={output} status={status} />
+      <AssignmentFooter
+        submitStatus={getProjectSubmitStatus(isSubmitting, lastSubmitPassed)}
+        onSubmit={onSubmit}
+        isSubmitDisabled={files.length === 0}
+        canRevealAnswer={hasSubmitted}
+        isSolutionVisible={isSolutionVisible}
+        isLoadingSolution={isLoadingSolution}
+        onToggleSolution={onToggleSolution}
+      />
     </div>
   )
 }

@@ -18,9 +18,27 @@ export const TAB_IDLE_CLASS = 'text-muted-foreground hover:text-foreground'
 export const TAB_UNDERLINE_CLASS = 'absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-accent'
 export const TABS_LABEL_CLASS = 'ml-auto shrink-0 text-[10px] uppercase tracking-wider text-muted-foreground/60'
 
-export const BRIEF_WRAP_CLASS = 'flex-1 min-h-0 overflow-y-auto bg-terminal p-6 scrollbar-hide'
-export const BRIEF_LABEL_CLASS = 'mb-2 text-[11px] font-bold uppercase tracking-wider text-terminal-muted'
-export const BRIEF_TEXT_CLASS = 'whitespace-pre-wrap text-sm leading-relaxed text-terminal-ink'
+// ── project reference solution (mirrors ProjectPanel's reveal area/footer) ──
+
+export const SOLUTION_WRAP_CLASS = 'flex flex-1 min-h-0 flex-col overflow-hidden bg-terminal'
+
+export const SOLUTION_BODY_CLASS = 'flex-1 overflow-y-auto p-4 scrollbar-hide'
+
+export const SOLUTION_NOTE_CLASS = 'text-[12px] leading-relaxed text-terminal-muted'
+
+export const SOLUTION_BLOCK_CLASS = 'mt-3 flex flex-col gap-2.5 rounded-md border border-border bg-black/20 p-3'
+
+export const SOLUTION_LABEL_CLASS = 'text-[11px] font-semibold uppercase tracking-[0.8px] text-terminal-muted'
+
+export const SOLUTION_FILE_NAME_CLASS = 'mb-1 font-mono text-[11px] text-terminal-muted'
+
+export const SOLUTION_FILE_CONTENT_CLASS =
+  'mb-3 overflow-x-auto whitespace-pre rounded bg-black/30 px-3 py-2.5 font-mono text-[12px] leading-relaxed text-terminal-ink last:mb-0'
+
+export const SOLUTION_FOOTER_CLASS =
+  'flex shrink-0 items-center justify-end gap-2.5 border-t border-border px-4 py-2'
+
+export const ANSWER_FOOTER_CLASS = 'flex shrink-0 items-center justify-end gap-2.5 border-t border-border px-4 py-2'
 
 export const RESULT_PANEL_CLASS =
   'flex h-[35%] shrink-0 flex-col overflow-hidden border-t border-border bg-terminal font-mono text-xs text-term-ink'
