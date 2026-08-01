@@ -24,6 +24,7 @@ export function useWorkspaceProgress({
 
     const [historySelectedId, setHistorySelectedId] = useState<number | null>(null)
 
+    const latestHistoryAssignmentId = submissionHistory[0]?.assignmentId
     const { attemptedIds, passedIds } = useMemo(() => {
         const attempted = new Set<number>()
         const passed = new Set<number>()
@@ -39,16 +40,38 @@ export function useWorkspaceProgress({
     }, [submissionHistory, getAssignment])
 
     const assignmentProgress = useAssignments(assignmentSet.assignments, Array.from(passedIds))
-
     const defaultSessionAssignment = assignmentSet.assignments[0]
 
     const activeAssignment = useMemo(() => {
-        if (selectionSource === 'history' && historySelectedId !== null) {
-            const historyItem = getAssignment(historySelectedId)
-            return historyItem ?? defaultSessionAssignment
+        if (selectionSource === 'history') {
+            const targetId = historySelectedId ?? latestHistoryAssignmentId
+            if (targetId != null) {
+                const historyItem = getAssignment(targetId)
+                if (historyItem) return historyItem
+            }
+            return defaultSessionAssignment
         }
+
         return assignmentSet.assignments[assignmentProgress.activeAssignment] ?? defaultSessionAssignment
-    }, [selectionSource, historySelectedId, getAssignment, assignmentSet.assignments, assignmentProgress.activeAssignment, defaultSessionAssignment])
+    }, [
+        selectionSource,
+        historySelectedId,
+        latestHistoryAssignmentId,
+        getAssignment,
+        assignmentSet.assignments,
+        assignmentProgress.activeAssignment,
+        defaultSessionAssignment
+    ])
+
+    const handleRailTabChange = (newTab: ProblemsListTab) => {
+        setRailTab(newTab)
+        setSelectionSource(newTab)
+        setPanelTab('description')
+
+        if (newTab === 'history') {
+            setHistorySelectedId(prev => prev ?? latestHistoryAssignmentId ?? null)
+        }
+    }
 
     const handleSelectAssignment = (id: number, source: ProblemsListTab = 'session') => {
         setPanelTab('description')
@@ -57,7 +80,6 @@ export function useWorkspaceProgress({
             const index = assignmentSet.assignments.findIndex((a) => a.id === id)
             if (index !== -1) {
                 assignmentProgress.setActiveAssignment(index)
-                setHistorySelectedId(null)
             }
         } else {
             setHistorySelectedId(id)
@@ -105,7 +127,7 @@ export function useWorkspaceProgress({
 
         problemsListProps: {
             activeTab: railTab,
-            onTabChange: setRailTab,
+            onTabChange: handleRailTabChange,
             sessionItems: sessionProblems,
             historyItems: historyProblems,
             activeId: activeAssignment?.id,
