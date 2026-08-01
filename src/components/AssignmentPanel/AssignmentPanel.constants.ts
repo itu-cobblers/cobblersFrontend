@@ -51,14 +51,4 @@ export const PANEL_SUBMISSIONS_EMPTY_CLASS =
 
 export const PANEL_SUBMISSIONS_LIST_CLASS = 'divide-y divide-border rounded-md border border-border'
 
-export const PANEL_SUBMISSION_ROW_CLASS = 'flex items-center justify-between gap-3 px-4 py-3 text-left text-sm'
 
-export const PANEL_SUBMISSION_BADGE_PASSED_CLASS =
-  'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-500'
-
-export const PANEL_SUBMISSION_BADGE_FAILED_CLASS =
-  'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500/15 text-red-500'
-
-export const PANEL_SUBMISSION_TITLE_CLASS = 'text-sm font-medium text-foreground'
-
-export const PANEL_SUBMISSION_META_CLASS = 'text-[11px] text-muted-foreground'

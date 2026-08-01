@@ -1,6 +1,5 @@
 import classNames from 'classnames'
 import { FeedbackBanner } from '@components/FeedbackBanner'
-import { formatAttemptTime, describeSource } from '@components/ProblemsList'
 import { Icon } from '@components/Icon'
 import { ProjectBrief } from '@components/ProjectBrief'
 import type { AssignmentPanelProps, AssignmentPanelTab } from './AssignmentPanel.types'
@@ -28,12 +27,9 @@ import {
   PANEL_TAB_COUNT_CLASS,
   PANEL_SUBMISSIONS_EMPTY_CLASS,
   PANEL_SUBMISSIONS_LIST_CLASS,
-  PANEL_SUBMISSION_ROW_CLASS,
-  PANEL_SUBMISSION_BADGE_PASSED_CLASS,
-  PANEL_SUBMISSION_BADGE_FAILED_CLASS,
-  PANEL_SUBMISSION_TITLE_CLASS,
-  PANEL_SUBMISSION_META_CLASS,
 } from './AssignmentPanel.constants'
+import {describeSource, formatAttemptTime} from "@/components";
+import {SubmissionRow} from "@components/SubmissionRow";
 
 const TABS: AssignmentPanelTab[] = ['description', 'submissions']
 
@@ -134,31 +130,13 @@ export default function AssignmentPanel({
           ) : (
             <ul className={PANEL_SUBMISSIONS_LIST_CLASS}>
               {submissions.map((submission) => {
-                // `passed === null` (ungraded projects) and `true` both read as Accepted;
-                // only an explicit `false` is Not accepted.
-                const isFailed = submission.passed === false
                 return (
-                <li key={submission.subId} className={PANEL_SUBMISSION_ROW_CLASS}>
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={
-                        isFailed
-                          ? PANEL_SUBMISSION_BADGE_FAILED_CLASS
-                          : PANEL_SUBMISSION_BADGE_PASSED_CLASS
-                      }
-                    >
-                      <Icon name={isFailed ? 'x' : 'check'} />
-                    </span>
-                    <div>
-                      <div className={PANEL_SUBMISSION_TITLE_CLASS}>
-                        {isFailed ? 'Not accepted' : 'Accepted'}
-                      </div>
-                      <div className={PANEL_SUBMISSION_META_CLASS}>
-                        {formatAttemptTime(submission.submittedAt)} · {describeSource(submission.sessionId)}
-                      </div>
-                    </div>
-                  </div>
-                </li>
+                    <SubmissionRow
+                        key={submission.subId}
+                        submission={submission}
+                        title={submission.passed === false ? 'Tried' : 'Accepted'}
+                        meta={`${formatAttemptTime(submission.submittedAt)} · ${describeSource(submission.sessionId)}`}
+                    />
                 )
               })}
             </ul>

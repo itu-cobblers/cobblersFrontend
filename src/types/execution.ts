@@ -50,7 +50,18 @@ export interface SubmissionResult {
 export interface SubmissionHistoryItem {
   subId: string
   assignmentId: number
+  sessionId?: string | null
+  passed: boolean | null
+  submittedAt: string
+}
+
+export interface SubmissionDetails {
+  subId: string
+  studentId: string
+  assignmentId: number
   sessionId: string | null
+  content: string
+  result: ExecuteResult | null
   passed: boolean | null
   submittedAt: string
 }
