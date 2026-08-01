@@ -18,8 +18,9 @@ export type IconName =
   | 'upload'
   | 'externalLink'
   | 'arrowBack'
-| 'pencilOff'
-| 'code'
+  | 'pencil'
+  | 'pencilOff'
+  | 'code'
 
 export interface IconProps {
   name: IconName

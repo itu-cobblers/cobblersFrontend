@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import { Icon } from '@components/Icon'
 import type { IconName } from '@components/Icon'
-import type { ProblemListItem, ProblemsListProps, ProblemsListTab, ProblemStatus } from './ProblemsList.types'
+import type { ProblemListItem, ProblemsListProps, ProblemsListTab } from './ProblemsList.types'
 import {
   LIST_CLASS_BASE,
   LIST_CLASS_OPEN,
@@ -30,8 +30,6 @@ import {
   LIST_ITEM_KIND_BADGE_CLASS,
   LIST_ITEM_TITLE_CLASS,
   LIST_FOOTER_CLASS,
-  LIST_STATUS_DOT_CLASS,
-  LIST_LEGEND_DOT_CLASS,
   LIST_ITEM_LIVE_CLASS,
   LIST_TABS_CLASS,
   LIST_TAB_BASE_CLASS,
@@ -39,12 +37,7 @@ import {
   LIST_TAB_LABEL_CLASS,
   KIND_LABEL,
 } from './ProblemsList.constants'
-
-const STATUS_ICON: Record<ProblemStatus, IconName> = {
-  passed: 'check',
-  failed: 'x',
-  untried: 'circle',
-}
+import {StatusBadge} from "@components/StatusBadge";
 
 const RAIL_TAB_ICON: Record<ProblemsListTab, IconName> = {
   session: 'book',
@@ -57,14 +50,6 @@ const RAIL_TAB_LABEL: Record<ProblemsListTab, string> = {
 }
 
 const RAIL_TABS: ProblemsListTab[] = ['session', 'history']
-
-function StatusDot({ status }: { status: ProblemStatus }) {
-  return (
-    <span className={LIST_STATUS_DOT_CLASS[status]}>
-      <Icon name={STATUS_ICON[status]} />
-    </span>
-  )
-}
 
 /**
  * The single left-hand rail: fold/unfold toggle, session identity ("Room: XXXX" /
@@ -163,7 +148,7 @@ export default function ProblemsList({
                   )}
                 >
                   {isActive && <span className={LIST_ITEM_ACCENT_BAR_CLASS} />}
-                  <StatusDot status={item.status} />
+                  <StatusBadge status={item.status} size="s" />
                   {isOpen && (
                     <div className="min-w-0 flex-1">
                       <div className={LIST_ITEM_META_CLASS}>
@@ -183,9 +168,8 @@ export default function ProblemsList({
 
       {isOpen && (
         <div className={LIST_FOOTER_CLASS}>
-          <span className={LIST_LEGEND_DOT_CLASS.untried} /> untried
-          <span className={LIST_LEGEND_DOT_CLASS.tried} /> tried
-          <span className={LIST_LEGEND_DOT_CLASS.passed} /> passed
+          <StatusBadge status={'tried'} size="s" label='Tried' className="mr-2" />
+          <StatusBadge status={'passed'} size="s" label='Passed' className="mr-2"/>
         </div>
       )}
 

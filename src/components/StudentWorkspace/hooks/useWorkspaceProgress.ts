@@ -91,7 +91,7 @@ export function useWorkspaceProgress({
             return 'passed'
         }
         if (attemptedIds.has(id)) {
-            return 'failed'
+            return 'tried'
         }
         return 'untried'
     }

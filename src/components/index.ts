@@ -4,8 +4,8 @@ export type { SpinnerProps, SpinnerVariant } from './Spinner'
 export { Icon } from './Icon'
 export type { IconName, IconProps } from './Icon'
 
-export { Badge } from './Badge'
-export type { BadgeProps, BadgeTone } from './Badge'
+export { StatusBadge } from './StatusBadge'
+export type { StatusBadgeProps, ProblemStatus } from './StatusBadge'
 
 export { ProgressBar, getProgressPercent } from './ProgressBar'
 export type { ProgressBarProps } from './ProgressBar'
@@ -47,7 +47,7 @@ export { ProjectBrief } from './ProjectBrief'
 export type { ProjectBriefProps } from './ProjectBrief'
 
 export { ProblemsList, formatAttemptTime, describeSource } from './ProblemsList'
-export type { ProblemsListProps, ProblemListItem, ProblemStatus, ProblemsListTab } from './ProblemsList'
+export type { ProblemsListProps, ProblemListItem, ProblemsListTab } from './ProblemsList'
 
 export { TeacherFollowBanner } from './TeacherFollowBanner'
 export type { TeacherFollowBannerProps } from './TeacherFollowBanner'

@@ -1,13 +1,11 @@
-import { Icon } from '@components/Icon'
 import {
     SUBMISSION_ROW_ACTIVE_CLASS,
     SUBMISSION_ROW_IDLE_CLASS,
     SUBMISSION_TITLE_CLASS,
     SUBMISSION_META_CLASS,
-    SUBMISSION_BADGE_PASSED_CLASS,
-    SUBMISSION_BADGE_FAILED_CLASS,
 } from './SubmissionRow.constants'
 import type {SubmissionRowProps} from "@components/SubmissionRow/SubmissionRow.types.ts";
+import {StatusBadge} from "@components/StatusBadge";
 
 export default function SubmissionRow({
     submission,
@@ -25,15 +23,10 @@ export default function SubmissionRow({
         >
             <div className="flex items-start justify-between gap-2 w-full">
                 <div className="flex items-center gap-3">
-                    <span
-                        className={
-                            isPassed
-                                ? SUBMISSION_BADGE_PASSED_CLASS
-                                : SUBMISSION_BADGE_FAILED_CLASS
-                        }
-                    >
-                        <Icon name={isPassed ? 'check' : 'x'} />
-                    </span>
+                    <StatusBadge
+                        status={isPassed ? 'passed' : 'tried'}
+                        size="m"
+                    />
                     <div>
                         <div className={SUBMISSION_TITLE_CLASS}>{title}</div>
                         <div className={SUBMISSION_META_CLASS}>{meta}</div>

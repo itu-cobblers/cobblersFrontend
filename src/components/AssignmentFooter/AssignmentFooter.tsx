@@ -3,10 +3,11 @@ import { Icon } from '@components/Icon'
 import { SubmitButton } from '@components/SubmitButton'
 import type { AssignmentFooterProps } from './AssignmentFooter.types'
 import {
-    ASSIGNMENT_FOOTER_CLASS, ASSIGNMENT_FOOTER_PASSED_LABEL_CLASS,
-    ASSIGNMENT_FOOTER_RIGHT_CLASS, ASSIGNMENT_FOOTER_TRIED_LABEL_CLASS,
+    ASSIGNMENT_FOOTER_CLASS,
+    ASSIGNMENT_FOOTER_RIGHT_CLASS,
 } from './AssignmentFooter.constants'
 import {Button, ShowAnswerButton} from "@/components";
+import {StatusBadge} from "@components/StatusBadge";
 
 export default function AssignmentFooter({
     submitStatus,
@@ -37,10 +38,12 @@ export default function AssignmentFooter({
             </div>
             <div className={ASSIGNMENT_FOOTER_RIGHT_CLASS}>
                 {isHistoryView && (
-                    <div className={isPassed? ASSIGNMENT_FOOTER_PASSED_LABEL_CLASS : ASSIGNMENT_FOOTER_TRIED_LABEL_CLASS}>
-                        <Icon name={isPassed? 'check' : 'alert'}/>
-                        {isPassed ? 'Well done' : 'Not quite, try again'}
-                    </div>
+                    <StatusBadge
+                        status={isPassed ? 'passed' : 'tried'}
+                        size="m"
+                        label={isPassed ? 'Well done' : 'Not quite, try again'}
+                        className="mr-2"
+                    />
                 )}
                 {canRevealAnswer && onToggleSolution && !isSolutionVisible && (
                     <ShowAnswerButton
