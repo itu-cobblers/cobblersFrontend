@@ -167,6 +167,16 @@ leftover mock behaviour: `fetchSubmissionHistory` resolves to an empty result an
 
 ## Style — the design system
 
+> **In flux (branch `design-ITU-style`).** The app is being restyled from the dark
+> purple/violet look to a reduced, technical, ITU-like light one. Already done: the whole
+> app runs light (the hardcoded `dark` class is gone from every view root), `--foreground`
+> / `--border` / `--input` / `--ring` / `--primary` are black, `--terminal` is white, all
+> shadows and `backdrop-blur` are removed, every `bg-card/NN` translucency is flat
+> `bg-card`, and all the `bootit-*` decorative layers (grid, glow, scanline, title
+> gradient, fake caret, teacher pulse) are deleted from the TSX. Still to do: fold the raw
+> `bg-black/NN` values into semantic tokens, decide on `--radius`, and restyle whatever
+> arrives from upstream unstyled.
+
 **`src/index.css` (334 lines) is the entire design system.** Nothing else defines a colour.
 It was rebuilt in #21/#22 into a shadcn-style token set; the old `canvas`/`surface`/`panel`/
 `line`/`ink`/`accent-strong` names and the ITU crimson `#b01116` are **gone**.
@@ -190,15 +200,18 @@ So: *to restyle anything, find its component folder and open the `.constants.ts`
 `terminal`/`terminal-line`/`terminal-ink`/`terminal-muted`/`term-ok`/`term-err`, and
 `status-{success,error,warning}` each with `-bg`/`-text` variants.
 
-### The dark-mode switch is hardcoded, and there is no toggle
+### There is no dark-mode toggle — and the `.dark` block is currently unreachable
 
-`@custom-variant dark (&:is(.dark *))`, and **the literal class `dark` is baked into all four
-view root class strings** — `EntryPortal`, `StudentView` (twice), `TeacherDashboard`,
-`TeacherGate`, each as `'dark relative flex h-screen … bg-background text-foreground'`. That
-one word is what puts the `.dark` block in scope, so the app renders dark even though `:root`
-is pure white and no `.dark` class exists on `<html>` or `<body>`.
+`@custom-variant dark (&:is(.dark *))` means the dark values apply to anything inside an
+element carrying the literal class `dark`. There is no toggle: that word used to be baked
+into all four view root class strings (`EntryPortal`, `StudentView` ×2, `TeacherDashboard`,
+`TeacherGate`), which is the only reason the app rendered dark while `:root` was pure white.
 
-**Deleting that word from the four `.constants.ts` files flips the whole app to light.**
+**Those have been removed on `design-ITU-style`, so the whole `.dark` block (~35 lines) is
+now dead code.** It's deliberately left in place rather than deleted: `upstream/main` still
+ships those `dark` classes, so it will come back in the next merge and has to be resolved
+per-file. Decide its fate *after* that merge — either delete it, or keep it as the seed for
+a real theme toggle.
 
 ### Things the tokens do NOT control
 

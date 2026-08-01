@@ -3,10 +3,6 @@ import { TeacherDashboard } from '@views/TeacherDashboard'
 import { useTeacherAuth } from './TeacherGate.hooks'
 import {
   GATE_SCREEN_CLASS,
-  GATE_GRID_CLASS,
-  GATE_GLOW_CLASS,
-  GATE_SCANLINE_CLASS,
-  GATE_VIGNETTE_CLASS,
   GATE_CARD_CLASS,
   GATE_HEADER_CLASS,
   GATE_TITLE_CLASS,
@@ -21,11 +17,7 @@ export default function TeacherGate() {
 
   return (
     <div className={GATE_SCREEN_CLASS}>
-      <div className={GATE_GRID_CLASS} />
-      <div className={GATE_GLOW_CLASS} />
-      <div className={GATE_SCANLINE_CLASS} />
-      <div className={GATE_VIGNETTE_CLASS} />
-
+      
       <form className={GATE_CARD_CLASS} onSubmit={handleSubmit}>
         <div className={GATE_HEADER_CLASS}>
           <h1 className={GATE_TITLE_CLASS}>BootIT</h1>

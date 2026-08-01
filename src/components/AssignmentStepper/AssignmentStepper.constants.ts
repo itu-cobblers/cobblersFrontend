@@ -1,4 +1,4 @@
-export const STEPPER_CLASS = 'flex shrink-0 flex-wrap items-center gap-1.5 border-b border-border bg-card/40 px-4 py-3'
+export const STEPPER_CLASS = 'flex shrink-0 flex-wrap items-center gap-1.5 border-b border-border bg-card px-4 py-3'
 
 export const STEPPER_STEP_WRAP_CLASS = 'flex items-center'
 

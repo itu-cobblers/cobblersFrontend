@@ -6,7 +6,7 @@ import Spinner from './Spinner'
 describe('Spinner', () => {
   it('defaults to the solid variant', () => {
     const { container } = render(createElement(Spinner))
-    expect(container.firstChild).toHaveClass('border-t-white')
+    expect(container.firstChild).toHaveClass('border-t-black')
   })
 
   it('applies the accent variant classes', () => {
@@ -17,7 +17,7 @@ describe('Spinner', () => {
 
   it('applies the action variant classes', () => {
     const { container } = render(createElement(Spinner, { variant: 'action' }))
-    expect(container.firstChild).toHaveClass('border-t-action')
+    expect(container.firstChild).toHaveClass('border-t-primary')
     expect(container.firstChild).toHaveClass('animate-spin')
   })
 })

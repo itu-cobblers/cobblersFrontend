@@ -1,15 +1,9 @@
-import { type ChangeEvent, type SyntheticEvent } from 'react'
-import classNames from 'classnames'
+import { type ChangeEvent } from 'react'
 import { DISPLAY_NAME_MAX_LENGTH } from '@lib/identity'
 import { Icon } from '@components/Icon'
 import type { EntryPortalProps } from './EntryPortal.types.ts'
-import { useNameCaret } from './EntryPortal.hooks.ts'
 import {
   ENTRY_PORTAL_SCREEN_CLASS,
-  ENTRY_PORTAL_GRID_CLASS,
-  ENTRY_PORTAL_GLOW_CLASS,
-  ENTRY_PORTAL_SCANLINE_CLASS,
-  ENTRY_PORTAL_VIGNETTE_CLASS,
   ENTRY_PORTAL_HEADER_CLASS,
   ENTRY_PORTAL_BRAND_CLASS,
   ENTRY_PORTAL_DOT_CLASS,
@@ -18,10 +12,7 @@ import {
   ENTRY_PORTAL_SUBTITLE_CLASS,
   ENTRY_PORTAL_NAME_LABEL_CLASS,
   ENTRY_PORTAL_NAME_ROW_CLASS,
-  ENTRY_PORTAL_NAME_MEASURE_CLASS,
   ENTRY_PORTAL_NAME_INPUT_CLASS,
-  ENTRY_PORTAL_NAME_MIRROR_CLASS,
-  ENTRY_PORTAL_CARET_CLASS,
   ENTRY_PORTAL_CTA_ROW_CLASS,
   ENTRY_PORTAL_SOLO_BTN_CLASS,
   ENTRY_PORTAL_JOIN_BTN_CLASS,
@@ -53,24 +44,12 @@ export default function EntryPortal({
   const hasName = Boolean(name.trim())
   const isCheckingSession = todayLatestSessionCode === undefined
   const canJoinToday = hasName && !isCheckingSession && todayLatestSessionCode !== null && !isJoining
-  const { inputRef, mirrorRef, caretLeft, isActive, handleCaretSync } = useNameCaret(name)
-
   function handleNameInputChange(event: ChangeEvent<HTMLInputElement>) {
     onNameChange(event.target.value)
-    handleCaretSync(event)
-  }
-
-  function handleNameInputCaretEvent(event: SyntheticEvent<HTMLInputElement>) {
-    handleCaretSync(event)
   }
 
   return (
     <main className={ENTRY_PORTAL_SCREEN_CLASS}>
-      <div className={ENTRY_PORTAL_GRID_CLASS} />
-      <div className={ENTRY_PORTAL_GLOW_CLASS} />
-      <div className={ENTRY_PORTAL_SCANLINE_CLASS} />
-      <div className={ENTRY_PORTAL_VIGNETTE_CLASS} />
-
       <header className={ENTRY_PORTAL_HEADER_CLASS}>
         <div className={ENTRY_PORTAL_BRAND_CLASS}>
           <span className={ENTRY_PORTAL_DOT_CLASS} />
@@ -86,28 +65,15 @@ export default function EntryPortal({
 
         <p className={ENTRY_PORTAL_NAME_LABEL_CLASS}>Please type anything you'd like to be called</p>
         <div className={ENTRY_PORTAL_NAME_ROW_CLASS}>
-          <span className={ENTRY_PORTAL_NAME_MEASURE_CLASS}>
-            <input
-              ref={inputRef}
-              type="text"
-              value={name}
-              onChange={handleNameInputChange}
-              onSelect={handleNameInputCaretEvent}
-              onClick={handleNameInputCaretEvent}
-              onKeyUp={handleNameInputCaretEvent}
-              onFocus={handleNameInputCaretEvent}
-              aria-label="Your name"
-              maxLength={DISPLAY_NAME_MAX_LENGTH}
-              autoFocus
-              className={ENTRY_PORTAL_NAME_INPUT_CLASS}
-            />
-            <span ref={mirrorRef} className={ENTRY_PORTAL_NAME_MIRROR_CLASS} aria-hidden="true" />
-            <span
-              className={classNames(ENTRY_PORTAL_CARET_CLASS, { 'is-typing': isActive, 'is-empty': !hasName })}
-              style={{ transform: `translate(${caretLeft}px, -50%)` }}
-              aria-hidden="true"
-            />
-          </span>
+          <input
+            type="text"
+            value={name}
+            onChange={handleNameInputChange}
+            aria-label="Your name"
+            maxLength={DISPLAY_NAME_MAX_LENGTH}
+            autoFocus
+            className={ENTRY_PORTAL_NAME_INPUT_CLASS}
+          />
         </div>
 
         <div className={ENTRY_PORTAL_CTA_ROW_CLASS}>

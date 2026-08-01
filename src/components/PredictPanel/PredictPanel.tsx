@@ -78,7 +78,7 @@ export default function PredictPanel({
               className={PREDICT_TEXTAREA_CLASS}
               value={answer}
               onChange={handleChange}
-              placeholder="Read the code and type what you think it prints, line by line."
+              placeholder="Type what you think it prints, line by line."
               spellCheck={false}
             />
           </>

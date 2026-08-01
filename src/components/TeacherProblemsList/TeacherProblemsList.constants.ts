@@ -2,16 +2,16 @@
 // (LIST_CLASS_BASE, LIST_HEADER_CLASS, LIST_ITEM_*, KIND_LABEL, …) still
 // comes from @components/ProblemsList/ProblemsList.constants.
 
-export const ROOM_CODE_SECTION_CLASS = 'flex flex-col gap-1 border-b border-border p-4 bg-card/40'
+export const ROOM_CODE_SECTION_CLASS = 'flex flex-col gap-1 border-b border-border p-4 bg-card'
 
 export const ROOM_CODE_LABEL_CLASS = 'text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground'
 
-export const ROOM_CODE_VALUE_CLASS = 'font-mono text-3xl font-extrabold tracking-widest text-accent drop-shadow'
+export const ROOM_CODE_VALUE_CLASS = 'font-mono text-3xl font-extrabold tracking-widest text-accent'
 
-export const TIMER_SECTION_CLASS = 'flex flex-col border-b border-border bg-card/20'
+export const TIMER_SECTION_CLASS = 'flex flex-col border-b border-border bg-card'
 
 export const TIMER_TOGGLE_CLASS =
-  'flex items-center justify-between px-4 py-2.5 text-xs font-semibold text-foreground/80 hover:bg-white/5'
+  'flex items-center justify-between px-4 py-2.5 text-xs font-semibold text-foreground/80 hover:bg-black/5'
 
 export const TIMER_TOGGLE_LABEL_CLASS = 'flex items-center gap-1.5'
 

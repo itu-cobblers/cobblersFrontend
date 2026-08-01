@@ -1,6 +1,6 @@
 export const VIEWER_CLASS = 'flex h-full min-w-0 flex-[6] flex-col overflow-hidden border-l border-border bg-background'
 
-export const HEADER_CLASS = 'flex h-10 shrink-0 items-center justify-between border-b border-border bg-card/60 px-4 text-xs'
+export const HEADER_CLASS = 'flex h-10 shrink-0 items-center justify-between border-b border-border bg-card px-4 text-xs'
 export const HEADER_LEFT_CLASS = 'flex items-center gap-2 truncate font-mono text-muted-foreground'
 export const HEADER_STUDENT_NAME_CLASS = 'font-semibold text-foreground'
 export const HEADER_SUBMITTED_AT_CLASS = 'text-[11px] text-muted-foreground/70'
@@ -10,7 +10,7 @@ export const HEADER_BADGE_PASSED_CLASS =
   'bg-status-success/20 text-status-success border border-status-success/30'
 export const HEADER_BADGE_FAILED_CLASS = 'bg-status-error/20 text-status-error border border-status-error/30'
 
-export const TABS_CLASS = 'flex h-10 shrink-0 items-center gap-2 border-b border-border bg-card/60 px-2'
+export const TABS_CLASS = 'flex h-10 shrink-0 items-center gap-2 border-b border-border bg-card px-2'
 export const TABS_LIST_CLASS = 'flex h-full items-center gap-0 overflow-hidden'
 export const TAB_BASE_CLASS = 'relative flex h-full items-center gap-1.5 px-3 font-mono text-[11px] transition-colors'
 export const TAB_ACTIVE_CLASS = 'text-foreground'

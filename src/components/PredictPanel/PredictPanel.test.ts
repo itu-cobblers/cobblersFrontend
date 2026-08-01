@@ -46,7 +46,7 @@ describe('PredictPanel', () => {
     const onSubmit = vi.fn()
     render(createElement(PredictPanel, { ...base, status: 'tried', answer: 'nope', onShowAnswer, onSubmit }))
     // the input stays open for another attempt
-    expect(screen.getByPlaceholderText(/type what you think it prints/)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText(/type what you think it prints/i)).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
     expect(onSubmit).toHaveBeenCalledOnce()
     fireEvent.click(screen.getByText('Show answer'))

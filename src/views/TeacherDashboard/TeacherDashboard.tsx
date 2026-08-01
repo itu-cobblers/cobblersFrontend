@@ -15,8 +15,6 @@ import { defaultStarter } from '@lib/defaultStarter'
 import { useTeacherSession } from './TeacherDashboard.hooks'
 import {
   TEACHER_LAYOUT_CLASS,
-  TEACHER_GRID_CLASS,
-  TEACHER_GLOW_CLASS,
   TEACHER_RESTORING_CLASS,
   TEACHER_BODY_CLASS,
   TEACHER_ERROR_CLASS,
@@ -135,8 +133,6 @@ export default function TeacherDashboard() {
 
   return (
     <div className={TEACHER_LAYOUT_CLASS}>
-      <div className={TEACHER_GRID_CLASS} />
-      <div className={TEACHER_GLOW_CLASS} />
 
       {isRestoringSession ? (
         <div className={TEACHER_RESTORING_CLASS}>
@@ -145,7 +141,7 @@ export default function TeacherDashboard() {
       ) : !sessionCode ? (
         // ── Browse Screen (Create Session & Sign Out in header) ────────────────
         <div className="relative z-10 flex flex-1 flex-col overflow-hidden">
-          <header className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-card/60 px-6 backdrop-blur-md">
+          <header className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-card px-6">
             <span className="text-sm font-bold text-foreground">BootIT Teacher Portal</span>
             <Button variant="ghost" onClick={handleLogout}>
               Sign out

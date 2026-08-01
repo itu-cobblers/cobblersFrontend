@@ -159,7 +159,7 @@ export default function ProblemsList({
                   className={classNames(
                     LIST_ITEM_BASE_CLASS,
                     isActive ? LIST_ITEM_ACTIVE_CLASS : LIST_ITEM_IDLE_CLASS,
-                    { 'bootit-teacher-glow': isTeacherFocus },
+                    { '--foreground/60': isTeacherFocus },
                   )}
                 >
                   {isActive && <span className={LIST_ITEM_ACCENT_BAR_CLASS} />}

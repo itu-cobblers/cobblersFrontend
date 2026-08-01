@@ -26,7 +26,7 @@ export default function AttendanceList({
   selectedAssignmentTitle,
 }: AttendanceListProps) {
   return (
-    <aside className="flex h-full w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-card/40 backdrop-blur">
+    <aside className="flex h-full w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-card">
       {/* Header */}
       <div className="flex h-10 shrink-0 items-center justify-between border-b border-border px-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
         <span className="flex items-center gap-1.5 font-bold">
@@ -60,7 +60,7 @@ export default function AttendanceList({
                   onClick={() => onSelectStudent(isActive ? null : student.studentId)}
                   className={classNames(
                     'group relative flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm transition-colors',
-                    isActive ? 'bg-white/[0.08] text-foreground' : 'text-muted-foreground hover:bg-white/[0.04] hover:text-foreground',
+                    isActive ? 'bg-black/[0.08] text-foreground' : 'text-muted-foreground hover:bg-black/[0.04] hover:text-foreground',
                   )}
                 >
                   {isActive && <span className="absolute inset-y-1 left-0 w-0.5 rounded-r bg-accent" />}

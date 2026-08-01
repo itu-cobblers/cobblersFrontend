@@ -107,7 +107,7 @@ export default function AssignmentPanel({
           {hint && (
             <div className={PANEL_HINT_CLASS}>
               <button type="button" onClick={handleHintToggle} className={PANEL_HINT_TOGGLE_CLASS}>
-                💡 Hint
+                Hint
                 <span
                   className={classNames(PANEL_HINT_ARROW_CLASS, { [PANEL_HINT_ARROW_EXPANDED_CLASS]: isHintExpanded })}
                 >

@@ -12,8 +12,6 @@ import {
 import { useStudentWorkspace } from './StudentView.hooks'
 import {
   STUDENT_LAYOUT_CLASS,
-  STUDENT_GRID_CLASS,
-  STUDENT_GLOW_CLASS,
   STUDENT_MAIN_CLASS,
   STUDENT_WORKSPACE_CLASS,
   STUDENT_CONTENT_COLUMN_CLASS,
@@ -65,8 +63,6 @@ export default function StudentIde({
     })
   return (
     <div className={STUDENT_LAYOUT_CLASS}>
-      <div className={STUDENT_GRID_CLASS} />
-      <div className={STUDENT_GLOW_CLASS} />
       <div className={STUDENT_MAIN_CLASS}>
         <ProblemsList
           {...problemsList}

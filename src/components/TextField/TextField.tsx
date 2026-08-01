@@ -31,7 +31,7 @@ export default function TextField({
       onChange={handleChange}
       className={classNames(
         TEXT_FIELD_BASE_CLASS,
-        { 'border-error': hasError, 'border-line': !hasError },
+        { 'border-status-error': hasError, 'border-border': !hasError },
         className,
       )}
     />

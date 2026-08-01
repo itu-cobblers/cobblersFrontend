@@ -66,7 +66,7 @@ export default function AssignmentSetPreview({
                     </summary>
                     <div className={PREVIEW_DETAIL_CLASS}>
                       <p className={PREVIEW_DESC_CLASS}>{item.description}</p>
-                      {item.hint && <p className={PREVIEW_HINT_CLASS}>💡 {item.hint}</p>}
+                      {item.hint && <p className={PREVIEW_HINT_CLASS}>{item.hint}</p>}
                     </div>
                   </details>
                 </li>
