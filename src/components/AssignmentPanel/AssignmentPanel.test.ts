@@ -5,8 +5,6 @@ import AssignmentPanel from './AssignmentPanel'
 import type { AssignmentPanelProps } from './AssignmentPanel.types'
 
 const baseProps: AssignmentPanelProps = {
-  steps: [{ id: 0, title: 'Hello ITU', isDone: false, isActive: true }],
-  onSelectStep: vi.fn(),
   activeTab: 'description',
   onTabChange: vi.fn(),
   submissions: [],

@@ -1,5 +1,4 @@
 import classNames from 'classnames'
-import { AssignmentStepper } from '@components/AssignmentStepper'
 import { FeedbackBanner } from '@components/FeedbackBanner'
 import { formatAttemptTime, describeSource } from '@components/ProblemsList'
 import { Icon } from '@components/Icon'
@@ -50,9 +49,6 @@ const TAB_LABEL: Record<AssignmentPanelTab, string> = {
  * bottom, outside the scroll region.
  */
 export default function AssignmentPanel({
-  steps,
-  onSelectStep,
-  isStepperVisible = true,
   activeTab,
   onTabChange,
   submissions,
@@ -68,10 +64,6 @@ export default function AssignmentPanel({
 
   return (
     <section className={PANEL_CLASS}>
-      <div className={classNames({ 'sr-only': !isStepperVisible })}>
-        <AssignmentStepper steps={steps} onSelect={onSelectStep} />
-      </div>
-
       <div className={PANEL_TABS_CLASS}>
         {TABS.map((tab) => (
           <button

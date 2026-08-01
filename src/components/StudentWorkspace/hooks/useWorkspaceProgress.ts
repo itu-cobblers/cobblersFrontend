@@ -84,14 +84,6 @@ export function useWorkspaceProgress({ assignmentSet, submissionHistory, teacher
         },
 
         assignmentPanelProps: {
-            steps: assignmentSet.assignments.map((a) => ({
-                id: a.id,
-                title: a.title,
-                isActive: a.id === activeAssignment?.id,
-                isDone: passedIds.has(a.id) || assignmentProgress.completedAssignments.has(a.id),
-            })),
-            onSelectStep: handleSelectAssignment,
-            isStepperVisible: false,
             activeTab: panelTab,
             onTabChange: setPanelTab,
             submissions: submissionHistory
