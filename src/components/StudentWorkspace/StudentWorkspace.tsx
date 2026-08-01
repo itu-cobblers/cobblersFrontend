@@ -79,7 +79,9 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
 
     const actualContent = activeAssignment.kind === 'predict'
         ? drafts.state.predict[activeAssignment.id] ?? ''
-        : mode.currentContent
+        : (activeAssignment.kind === 'project' || (activeAssignment.kind === 'code' && activeAssignment.starterFiles))
+            ? mode.currentStudentFiles
+            : mode.currentContent
 
     const submit = useWorkspaceSubmit({
         activeAssignment,
@@ -125,7 +127,10 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                 passed: submitResult.passed,
                 result: submitResult.result,
                 content: activeAssignment.kind === 'predict'
-                    ? drafts.state.predict[activeAssignment.id] ?? '' : mode.currentContent,
+                    ? drafts.state.predict[activeAssignment.id] ?? ''
+                    : (activeAssignment.kind === 'project' || (activeAssignment.kind === 'code' && activeAssignment.starterFiles))
+                        ? JSON.stringify(mode.currentStudentFiles)
+                        : mode.currentContent,
                 submittedAt: submitResult.submittedAt
         });
         }

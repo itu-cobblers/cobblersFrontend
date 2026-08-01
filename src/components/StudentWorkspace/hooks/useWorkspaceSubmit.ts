@@ -60,9 +60,8 @@ export function useWorkspaceSubmit({
 
     const handleSubmitCode = async () => {
         const generation = ++submitGenerationRef.current
-        const codeContent = typeof currentContent === 'string' ? currentContent : ''
+        const result = await submission.confirm(currentContent, assignmentId, sessionCode)
 
-        const result = await submission.confirm(codeContent, assignmentId, sessionCode)
         if (submitGenerationRef.current === generation) setSubmitFlash({ id: assignmentId, passed: result?.passed === true })
         if (result?.passed === true) solutions.hideSolution(assignmentId)
         return result;
@@ -70,11 +69,8 @@ export function useWorkspaceSubmit({
 
     const handleProjectSubmit = async () => {
         const generation = ++submitGenerationRef.current
-        const projectContent = typeof currentContent === 'string'
-            ? currentContent
-            : JSON.stringify(currentContent)
+        const result = await submission.confirm(currentContent, assignmentId, sessionCode)
 
-        const result = await submission.confirm(projectContent, assignmentId, sessionCode)
         if (submitGenerationRef.current === generation) setSubmitFlash({ id: assignmentId, passed: result?.passed === true })
         if (result?.passed === true) solutions.hideSolution(assignmentId)
         return result;
