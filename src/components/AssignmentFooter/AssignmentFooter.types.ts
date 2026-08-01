@@ -24,4 +24,6 @@ export interface AssignmentFooterProps {
   canMarkAsDone?: boolean
   isMarkingDone?: boolean
   onMarkAsDone?: () => void
+
+  historyStatus?: 'success' | 'error' | null;
 }

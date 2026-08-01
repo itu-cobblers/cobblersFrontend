@@ -14,17 +14,18 @@ import {
  * the mark-as-done action and keeps its usual waiting/result animation.
  */
 export default function AssignmentFooter({
-                                           submitStatus,
-                                           onSubmit,
-                                           isSubmitDisabled = false,
-                                           canRevealAnswer = false,
-                                           isSolutionVisible = false,
-                                           isLoadingSolution = false,
-                                           onToggleSolution,
-                                           canMarkAsDone = false,
-                                           isMarkingDone = false,
-                                           onMarkAsDone,
-                                         }: AssignmentFooterProps) {
+    submitStatus,
+    onSubmit,
+    isSubmitDisabled = false,
+    canRevealAnswer = false,
+    isSolutionVisible = false,
+    isLoadingSolution = false,
+    onToggleSolution,
+    canMarkAsDone = false,
+    isMarkingDone = false,
+    onMarkAsDone,
+    historyStatus = null,
+}: AssignmentFooterProps) {
   const revealLabel = isLoadingSolution
       ? ASSIGNMENT_FOOTER_REVEAL_LABEL.loading
       : isSolutionVisible
@@ -38,17 +39,33 @@ export default function AssignmentFooter({
   const isButtonDisabled = isMarkDoneAction ? isMarkingDone : isSubmitDisabled
 
   return (
-      <div className={classNames(ASSIGNMENT_FOOTER_CLASS, 'justify-end')}>
-        <div className={ASSIGNMENT_FOOTER_RIGHT_CLASS}>
-          {canRevealAnswer && onToggleSolution && (
-              <ShowAnswerButton
-                  onClick={onToggleSolution}
-                  isDisabled={isLoadingSolution}
-                  label={revealLabel}
-              />
-          )}
-          <SubmitButton status={buttonStatus} onClick={handleButtonClick} isDisabled={isButtonDisabled} label={buttonLabel} />
-        </div>
+      <div className={classNames(ASSIGNMENT_FOOTER_CLASS, 'justify-between items-center')}>
+          <div></div>
+
+          <div className={ASSIGNMENT_FOOTER_RIGHT_CLASS}>
+              {canRevealAnswer && onToggleSolution && (
+                  <ShowAnswerButton
+                      onClick={onToggleSolution}
+                      isDisabled={isLoadingSolution}
+                      label={revealLabel}
+                  />
+              )}
+              {historyStatus ? (
+                  <span className={classNames('text-sm font-medium', {
+                      'text-green-400': historyStatus === 'success',
+                      'text-red-400': historyStatus === 'error'
+                  })}>
+                        {historyStatus === 'success' ? '✓ Well done' : '✕ Not quite, try again'}
+                    </span>
+              ) : (
+                  <SubmitButton
+                      status={buttonStatus}
+                      onClick={handleButtonClick}
+                      isDisabled={isButtonDisabled}
+                      label={buttonLabel}
+                  />
+              )}
+          </div>
       </div>
   )
 }

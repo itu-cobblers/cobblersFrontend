@@ -1,5 +1,4 @@
 import classNames from 'classnames'
-import { FeedbackBanner } from '@components/FeedbackBanner'
 import { Icon } from '@components/Icon'
 import { ProjectBrief } from '@components/ProjectBrief'
 import type { AssignmentPanelProps, AssignmentPanelTab } from './AssignmentPanel.types'
@@ -53,7 +52,6 @@ export default function AssignmentPanel({
   body,
   projectIdentity,
   hint,
-  feedback,
   onViewSubmission,
   viewingSubmissionId
 }: AssignmentPanelProps) {
@@ -146,8 +144,6 @@ export default function AssignmentPanel({
           )}
         </div>
       )}
-
-      {feedback && <FeedbackBanner {...feedback} />}
     </section>
   )
 }

@@ -60,6 +60,7 @@ export function useWorkspaceSubmit({
         const result = await submission.confirm(currentContent, assignmentId, sessionCode)
         if (submitGenerationRef.current === generation) setSubmitFlash({ id: assignmentId, passed: result?.passed === true })
         if (result?.passed === true) solutions.hideSolution(assignmentId)
+        return result;
     }
 
     const handlePredictSubmit = async () => {
@@ -77,9 +78,10 @@ export function useWorkspaceSubmit({
                 solutions.hideSolution(assignmentId)
             }
             if (submitGenerationRef.current === generation) setSubmitFlash({ id: assignmentId, passed: correct })
-            onSubmissionMade()
+            return result;
         } catch (err) {
             setFeedback({ tone: 'hint', message: `Could not submit your answer. err: ` + err })
+            return null
         } finally {
             setIsSubmittingPredict(false)
         }
@@ -88,13 +90,14 @@ export function useWorkspaceSubmit({
     const handleMarkAsDone = async () => {
         setIsMarkingDone(true)
         try {
-            await submitAssignment({ assignmentId, content: currentContent, sessionCode })
+            const result = await submitAssignment({ assignmentId, content: currentContent, sessionCode })
             assignmentProgress.complete(assignmentId)
             solutions.hideSolution(assignmentId)
             setSubmitFlash({ id: assignmentId, passed: true })
-            onSubmissionMade()
+            return result;
         } catch (err) {
             setFeedback({ tone: 'hint', message: `Could not save your progress. err: ` + err })
+            return null
         } finally {
             setIsMarkingDone(false)
         }

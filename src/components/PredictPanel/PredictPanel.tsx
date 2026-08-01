@@ -1,7 +1,5 @@
 import { type ChangeEvent } from 'react'
 import { Icon } from '@/components'
-import { AssignmentFooter } from '@components/AssignmentFooter'
-import type { SubmitButtonStatus } from '@components/SubmitButton'
 import type { PredictPanelProps } from '@/components'
 import {
   PREDICT_PANEL_CLASS,
@@ -25,17 +23,9 @@ import {
 export default function PredictPanel({
   answer,
   status,
-  isSubmitting = false,
-  isMarkingDone = false,
-  lastAnswerCorrect = null,
   expectedOutput,
-  canRevealAnswer,
   isSolutionVisible,
-  onToggleSolution,
-  canMarkAsDone,
-  onMarkAsDone,
   onAnswerChange,
-  onSubmit,
 }: PredictPanelProps) {
   function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
     onAnswerChange(event.target.value)
@@ -45,21 +35,7 @@ export default function PredictPanel({
   const isCorrect = status === 'correct'
   const isDone = status === 'done'
   const isCompleted = isCorrect || isDone
-  // The input stays open until the student completes — revealing the reference
-  // answer temporarily replaces it; hiding restores this view.
   const showInput = !isCompleted && !isSolutionVisible
-
-  // The Submit button's own well-done/not-quite flash is driven only by
-  // `lastAnswerCorrect` — the *this-exact-submit's* outcome — never by
-  // `status`, which is the persisted, de-facto record (used for the header
-  // badge, the reveal, …) and stays true across assignment switches.
-  const buttonStatus: SubmitButtonStatus = isSubmitting
-    ? 'waiting'
-    : lastAnswerCorrect === true
-      ? 'success'
-      : lastAnswerCorrect === false
-        ? 'error'
-        : 'idle'
 
   return (
     <div className={PREDICT_PANEL_CLASS}>
@@ -97,18 +73,6 @@ export default function PredictPanel({
           </>
         )}
       </div>
-
-      <AssignmentFooter
-        submitStatus={buttonStatus}
-        onSubmit={onSubmit}
-        isSubmitDisabled={isCompleted || !answer.trim()}
-        canRevealAnswer={canRevealAnswer}
-        isSolutionVisible={isSolutionVisible}
-        onToggleSolution={onToggleSolution}
-        canMarkAsDone={canMarkAsDone}
-        isMarkingDone={isMarkingDone}
-        onMarkAsDone={onMarkAsDone}
-      />
     </div>
   )
 }
