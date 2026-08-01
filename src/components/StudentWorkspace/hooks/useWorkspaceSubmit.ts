@@ -1,10 +1,10 @@
-import { useState, useRef } from 'react'
+import {useState, useRef, useEffect} from 'react'
 import type { Assignment, SourceFile } from '@types'
 import { useExecutor } from '@hooks/useExecutor'
 import { useSubmission } from '@hooks/useSubmission'
 import { useAssignments } from '@hooks/useAssignments'
 import { submitAssignment } from '@lib/submissionApi'
-import type { FeedbackBannerProps, PredictStatus } from '@components'
+import type { PredictStatus } from '@components'
 
 interface SubmitOptions {
     activeAssignment: Assignment
@@ -13,26 +13,30 @@ interface SubmitOptions {
     assignmentProgress: ReturnType<typeof useAssignments>
     onSubmissionMade: () => void
     solutions: ReturnType<typeof import('./useAssignmentData.ts').useAssignmentData>
+    viewingSubmissionId?: number | string | null
 }
 
 export function useWorkspaceSubmit({
-                                       activeAssignment,
-                                       sessionCode,
-                                       currentContent,
-                                       assignmentProgress,
-                                       onSubmissionMade,
-                                       solutions
-                                   }: SubmitOptions) {
+    activeAssignment,
+    sessionCode,
+    currentContent,
+    assignmentProgress,
+    onSubmissionMade,
+    solutions,
+    viewingSubmissionId
+}: SubmitOptions) {
     const assignmentId = activeAssignment.id
 
     const executor = useExecutor()
-    const [feedback, setFeedback] = useState<FeedbackBannerProps | null>(null)
     const [submitFlash, setSubmitFlash] = useState<{ id: number, passed: boolean } | null>(null)
     const [isSubmittingPredict, setIsSubmittingPredict] = useState(false)
-    const [isMarkingDone, setIsMarkingDone] = useState(false)
     const [predictStatus, setPredictStatus] = useState<Record<number, PredictStatus>>({})
 
     const submitGenerationRef = useRef(0)
+
+    useEffect(() => {
+        executor.reset()
+    }, [assignmentId, viewingSubmissionId])
 
     const submission = useSubmission({
         onResult: (result) => {
@@ -46,7 +50,6 @@ export function useWorkspaceSubmit({
         if (activeAssignment.kind !== 'code') return
 
         executor.reset()
-        setFeedback(null)
 
         const request = Array.isArray(currentContent)
             ? { files: currentContent, entryClass: activeAssignment.entryClass, stdin: activeAssignment.stdin }
@@ -80,26 +83,10 @@ export function useWorkspaceSubmit({
             if (submitGenerationRef.current === generation) setSubmitFlash({ id: assignmentId, passed: correct })
             return result;
         } catch (err) {
-            setFeedback({ tone: 'hint', message: `Could not submit your answer. err: ` + err })
+            console.error(`Could not submit your answer. err: ` + err)
             return null
         } finally {
             setIsSubmittingPredict(false)
-        }
-    }
-
-    const handleMarkAsDone = async () => {
-        setIsMarkingDone(true)
-        try {
-            const result = await submitAssignment({ assignmentId, content: currentContent, sessionCode })
-            assignmentProgress.complete(assignmentId)
-            solutions.hideSolution(assignmentId)
-            setSubmitFlash({ id: assignmentId, passed: true })
-            return result;
-        } catch (err) {
-            setFeedback({ tone: 'hint', message: `Could not save your progress. err: ` + err })
-            return null
-        } finally {
-            setIsMarkingDone(false)
         }
     }
 
@@ -107,17 +94,13 @@ export function useWorkspaceSubmit({
         isRunning: executor.isRunning,
         isSubmitting: submission.isSubmitting,
         submitFlash: submitFlash?.id === assignmentId ? submitFlash : null,
-        feedback,
         predictStatus: predictStatus[assignmentId] ?? 'idle',
-
         handleRunCode,
         handleSubmitCode,
         handlePredictSubmit,
         handleProjectSubmit: handleSubmitCode,
-        isMarkingDone,
-        handleMarkAsDone,
-
         outputState: { output: executor.output, status: executor.status },
+        handleClearOutput: executor.reset,
         isSubmittingPredict
     }
 }

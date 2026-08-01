@@ -83,7 +83,8 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
         currentContent: mode.currentContent,
         assignmentProgress: progress.assignmentProgress,
         solutions: assignmentData,
-        onSubmissionMade: props.onSubmissionMade
+        onSubmissionMade: props.onSubmissionMade,
+        viewingSubmissionId: viewingSubmission?.subId
     })
 
     const handleToggleSolution = () => {
@@ -175,7 +176,6 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                     <div className={STUDENT_WORKSPACE_CLASS}>
                         <AssignmentPanel
                             {...progress.assignmentPanelProps}
-                            feedback={submit.feedback ?? undefined}
                             onViewSubmission={handleViewSubmission}
                             viewingSubmissionId={viewingSubmission?.subId}
                         />
