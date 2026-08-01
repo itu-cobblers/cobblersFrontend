@@ -57,6 +57,7 @@ interface AssignmentBase {
   lesson?: LessonBlock[]
   hint?: string
   kind: AssignmentKind
+  solution?: string | SourceFile[] | null
 }
 
 /** Write-and-run Java assignment (coding exercises, incl. class-authoring). */

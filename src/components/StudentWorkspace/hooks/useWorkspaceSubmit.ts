@@ -12,7 +12,7 @@ interface SubmitOptions {
     currentContent: string | SourceFile[]
     assignmentProgress: ReturnType<typeof useAssignments>
     onSubmissionMade: () => void
-    solutions: ReturnType<typeof import('./useAssignmentSolutions').useAssignmentSolutions>
+    solutions: ReturnType<typeof import('./useAssignmentData.ts').useAssignmentData>
 }
 
 export function useWorkspaceSubmit({

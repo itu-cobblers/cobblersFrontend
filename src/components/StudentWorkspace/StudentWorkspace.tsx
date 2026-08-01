@@ -20,7 +20,7 @@ import {
 
 import { useWorkspaceProgress } from './hooks/useWorkspaceProgress'
 import { useLocalDrafts } from './hooks/useLocalDrafts'
-import { useAssignmentSolutions } from './hooks/useAssignmentSolutions'
+import { useAssignmentData } from './hooks/useAssignmentData.ts'
 import { useWorkspaceMode } from './hooks/useWorkspaceMode'
 import { useWorkspaceSubmit } from './hooks/useWorkspaceSubmit'
 import type { AssignmentSet, SubmissionHistoryItem } from '@types'
@@ -39,20 +39,27 @@ interface StudentWorkspaceProps {
 }
 
 export default function StudentWorkspace(props: StudentWorkspaceProps) {
+
+    const assignmentData = useAssignmentData(
+        props.assignmentSet,
+        props.submissionHistory
+    )
+
     const progress = useWorkspaceProgress({
         assignmentSet: props.assignmentSet,
         submissionHistory: props.submissionHistory,
-        teacherFocusedAssignmentId: props.teacherFocusedAssignmentId
+        teacherFocusedAssignmentId: props.teacherFocusedAssignmentId,
+        getAssignment: assignmentData.getAssignment
     })
+
     const activeAssignment = progress.activeAssignment
 
     const drafts = useLocalDrafts(props.assignmentSet.assignments)
-    const solutions = useAssignmentSolutions()
 
     const mode = useWorkspaceMode({
         activeAssignment,
         drafts,
-        solutions
+        solutions: assignmentData
     })
 
     const submit = useWorkspaceSubmit({
@@ -60,14 +67,15 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
         sessionCode: props.sessionCode,
         currentContent: mode.currentContent,
         assignmentProgress: progress.assignmentProgress,
-        solutions: solutions,
+        solutions: assignmentData,
         onSubmissionMade: props.onSubmissionMade
     })
 
     const isCompleted = progress.assignmentProgress.completedAssignments.has(activeAssignment.id)
     const hasSubmitted = props.submissionHistory.some(item => item.assignmentId === activeAssignment.id)
-    const isSolutionVisible = solutions.isSolutionVisible[activeAssignment.id] ?? false
-    const isLoadingSolution = solutions.loadingId === activeAssignment.id
+
+    const isSolutionVisible = assignmentData.isSolutionVisible[activeAssignment.id] ?? false
+    const isLoadingSolution = assignmentData.loadingId === activeAssignment.id
 
     const canRevealAnswer = hasSubmitted && !isCompleted
     const canMarkAsDone = isSolutionVisible && !isCompleted
@@ -129,7 +137,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                         canRevealAnswer,
                                         isSolutionVisible,
                                         isLoadingSolution,
-                                        onToggleSolution: () => solutions.toggleSolution(activeAssignment.id, activeAssignment.kind),
+                                        onToggleSolution: () => assignmentData.toggleSolution(activeAssignment.id, activeAssignment.kind),
                                         canMarkAsDone,
                                         isMarkingDone: submit.isMarkingDone,
                                         onMarkAsDone: submit.handleMarkAsDone
@@ -146,7 +154,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     expectedOutput={activeAssignment.expectedOutput}
                                     canRevealAnswer={canRevealAnswer}
                                     isSolutionVisible={isSolutionVisible}
-                                    onToggleSolution={() => solutions.toggleSolution(activeAssignment.id, activeAssignment.kind)}
+                                    onToggleSolution={() => assignmentData.toggleSolution(activeAssignment.id, activeAssignment.kind)}
                                     canMarkAsDone={canMarkAsDone}
                                     onMarkAsDone={submit.handleMarkAsDone}
                                     onAnswerChange={(val) => drafts.updatePredict(activeAssignment.id, val)}
@@ -163,7 +171,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     onSubmit={submit.handleProjectSubmit}
                                     isLoadingSolution={isLoadingSolution}
                                     isSolutionVisible={isSolutionVisible}
-                                    onToggleSolution={() => solutions.toggleSolution(activeAssignment.id, activeAssignment.kind)}
+                                    onToggleSolution={() => assignmentData.toggleSolution(activeAssignment.id, activeAssignment.kind)}
                                 />
                             )}
                         </div>

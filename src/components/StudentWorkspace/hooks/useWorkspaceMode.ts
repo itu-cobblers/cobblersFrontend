@@ -6,7 +6,7 @@ import { projectUploadStarter, defaultStarter } from '@lib/defaultStarter'
 interface ModeOptions {
     activeAssignment: Assignment
     drafts: ReturnType<typeof import('./useLocalDrafts').useLocalDrafts>
-    solutions: ReturnType<typeof import('./useAssignmentSolutions').useAssignmentSolutions>
+    solutions: ReturnType<typeof import('./useAssignmentData.ts').useAssignmentData>
 }
 
 type WriteKind = 'none' | 'code' | 'multi' | 'project'
