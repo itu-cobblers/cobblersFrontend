@@ -28,7 +28,6 @@ import {
   PANEL_SUBMISSIONS_EMPTY_CLASS,
   PANEL_SUBMISSIONS_LIST_CLASS,
 } from './AssignmentPanel.constants'
-import {describeSource, formatAttemptTime} from "@/components";
 import {SubmissionRow} from "@components/SubmissionRow";
 
 const TABS: AssignmentPanelTab[] = ['description', 'submissions']
@@ -55,6 +54,8 @@ export default function AssignmentPanel({
   projectIdentity,
   hint,
   feedback,
+  onViewSubmission,
+  viewingSubmissionId
 }: AssignmentPanelProps) {
   const [isHintExpanded, handleHintToggle] = useHintDisclosure(hint)
 
@@ -134,8 +135,10 @@ export default function AssignmentPanel({
                     <SubmissionRow
                         key={submission.subId}
                         submission={submission}
-                        title={submission.passed === false ? 'Tried' : 'Accepted'}
-                        meta={`${formatAttemptTime(submission.submittedAt)} · ${describeSource(submission.sessionId)}`}
+                        title="Submission"
+                        meta={submission.submittedAt}
+                        isActive={viewingSubmissionId === submission.subId}
+                        onClick={() => onViewSubmission?.(submission)}
                     />
                 )
               })}

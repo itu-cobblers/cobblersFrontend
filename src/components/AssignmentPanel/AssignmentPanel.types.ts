@@ -28,4 +28,6 @@ export interface AssignmentPanelProps {
   hint?: string
   /** Check feedback pinned at the bottom; omitted ⇒ no banner. */
   feedback?: FeedbackBannerProps
+  onViewSubmission?: (item: SubmissionHistoryItem) => void;
+  viewingSubmissionId?: string;
 }

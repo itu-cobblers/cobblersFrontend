@@ -52,7 +52,7 @@ export async function fetchSubmissionHistory(studentId: string): Promise<Submiss
   }
 }
 
-export async function fetchSubmissionDetailsById(submissionId: number): Promise<SubmissionDetails | null> {
+export async function fetchSubmissionDetailsById(submissionId: string): Promise<SubmissionDetails | null> {
   const res = await fetch(`/api/submissions/${submissionId}`)
   if (res.status === 404) {
     return null;
