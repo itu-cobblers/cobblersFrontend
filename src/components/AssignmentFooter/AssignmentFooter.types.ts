@@ -1,4 +1,4 @@
-import type { SubmitButtonStatus } from '@components/SubmitButton'
+import type {SubmitButtonStatus} from "@/components";
 
 /**
  * Shared footer for code / predict / project panels:
@@ -10,20 +10,14 @@ import type { SubmitButtonStatus } from '@components/SubmitButton'
  * is visible, reusing the Submit button and its status animation.
  */
 export interface AssignmentFooterProps {
-  submitStatus: SubmitButtonStatus
-  onSubmit: () => void
-  isSubmitDisabled?: boolean
-
-  /** True once the student has submitted at least once and has not yet completed. */
-  canRevealAnswer?: boolean
-  isSolutionVisible?: boolean
-  isLoadingSolution?: boolean
-  onToggleSolution?: () => void
-
-  /** `code` / `predict` only — replaces Submit's action while the reference answer is open. */
-  canMarkAsDone?: boolean
-  isMarkingDone?: boolean
-  onMarkAsDone?: () => void
-
+  submitStatus: SubmitButtonStatus;
+  onSubmit: () => void;
+  isSubmitDisabled?: boolean;
+  canRevealAnswer?: boolean;
+  isSolutionVisible?: boolean;
+  isLoadingSolution?: boolean;
+  onToggleSolution?: () => void;
   historyStatus?: 'success' | 'error' | null;
+  viewStatusLabel?: string;
+  onExitView?: () => void;
 }

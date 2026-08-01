@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-export type ButtonVariant = 'primary' | 'ghost' | 'solid'
+export type ButtonVariant = 'primary' | 'ghost' | 'solid' | 'zinc'
 
 export interface ButtonProps {
   variant?: ButtonVariant

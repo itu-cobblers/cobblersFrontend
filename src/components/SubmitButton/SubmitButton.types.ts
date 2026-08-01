@@ -7,7 +7,7 @@
  * `success`/`error` relax back to `idle` on their own a couple seconds after
  * landing — see `useSubmitButtonDisplayStatus` in `SubmitButton.hooks.ts`.
  */
-export type SubmitButtonStatus = 'idle' | 'waiting' | 'success' | 'error'
+export type SubmitButtonStatus = 'idle' | 'waiting'
 
 export interface SubmitButtonProps {
   status: SubmitButtonStatus

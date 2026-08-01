@@ -127,6 +127,10 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
         }
     }
 
+    const handleBackToEditor = () => {
+        if(mode.onExitView) mode.onExitView();
+        progress.assignmentPanelProps.onTabChange('description');
+    }
 
     // Fetch details when a history row is clicked
     const handleViewSubmission = async (item: SubmissionHistoryItem) => {
@@ -145,13 +149,10 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
         }
     }
 
-    const isCompleted = progress.assignmentProgress.completedAssignments.has(activeAssignment.id)
     const hasSubmitted = props.submissionHistory.some(item => item.assignmentId === activeAssignment.id)
 
     const isSolutionVisible = assignmentData.isSolutionVisible[activeAssignment.id] ?? false
     const isLoadingSolution = assignmentData.loadingId === activeAssignment.id
-
-    const defaultSubmitStatus = submit.isSubmitting ? 'waiting' : submit.submitFlash ? (submit.submitFlash.passed ? 'success' : 'error') : 'idle'
 
     return (
         <div className={STUDENT_WORKSPACE_LAYOUT_CLASS}>
@@ -187,8 +188,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     onSelectFile={mode.handleSelectFile}
                                     isRunning={submit.isRunning}
                                     onRun={submit.handleRunCode}
-                                    viewStatusLabel={mode.viewStatusLabel}
-                                    onExitView={mode.onExitView}
+                                    isReadOnly={mode.isReadOnly}
                                 />
                             )}
                             <CodeEditor
@@ -224,24 +224,21 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                 />
                             )}
                             <AssignmentFooter
-                                submitStatus={defaultSubmitStatus}
+                                submitStatus={submit.isSubmitting ? 'waiting' : 'idle'}
                                 onSubmit={handleGlobalSubmit}
                                 isSubmitDisabled={submit.isRunning || submit.isSubmitting || submit.isSubmittingPredict}
 
-                                canRevealAnswer={hasSubmitted && !isCompleted}
+                                canRevealAnswer={hasSubmitted}
                                 isSolutionVisible={isSolutionVisible}
                                 isLoadingSolution={isLoadingSolution}
                                 onToggleSolution={handleToggleSolution}
-
-                                canMarkAsDone={isSolutionVisible && !isCompleted}
-                                isMarkingDone={submit.isMarkingDone}
-                                onMarkAsDone={submit.handleMarkAsDone}
-
                                 historyStatus={
                                     viewingSubmission
                                         ? (viewingSubmission.passed ? 'success' : 'error')
                                         : null
                                 }
+                                viewStatusLabel={mode.viewStatusLabel}
+                                onExitView={handleBackToEditor}
                             />
                         </div>
                     </div>

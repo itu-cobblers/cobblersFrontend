@@ -1,8 +1,8 @@
 export const SUBMISSION_ROW_ACTIVE_CLASS =
-    'flex items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-primary/10 cursor-pointer bg-primary'
+    'flex items-center justify-between gap-3 px-4 py-3 text-left text-sm cursor-pointer bg-white/[0.06]'
 
 export const SUBMISSION_ROW_IDLE_CLASS = '' +
-    'flex items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-primary/10 cursor-pointer bg-transparent'
+    'flex items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-white/[0.03] cursor-pointer bg-transparent'
 
 export const SUBMISSION_BADGE_PASSED_CLASS =
     'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-500'

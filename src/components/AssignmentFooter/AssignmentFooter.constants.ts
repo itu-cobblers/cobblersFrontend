@@ -3,10 +3,6 @@ export const ASSIGNMENT_FOOTER_CLASS =
 
 export const ASSIGNMENT_FOOTER_RIGHT_CLASS = 'flex items-center gap-2.5'
 
-export const ASSIGNMENT_FOOTER_REVEAL_LABEL = {
-  show: 'Show reference answer',
-  hide: 'Hide reference answer',
-  loading: 'Loading…',
-} as const
+export const ASSIGNMENT_FOOTER_PASSED_LABEL_CLASS = 'flex items-center gap-2.5 text-sm font-medium mr-2 text-status-success'
 
-export const ASSIGNMENT_FOOTER_MARK_DONE_LABEL = 'Marked as done'
+export const ASSIGNMENT_FOOTER_TRIED_LABEL_CLASS = 'flex items-center gap-2.5 text-sm font-medium mr-2 text-status-warning'
