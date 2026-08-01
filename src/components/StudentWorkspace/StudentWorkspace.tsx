@@ -77,10 +77,14 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
         onExitHistoryView: () => setViewingSubmission(null)
     })
 
+    const actualContent = activeAssignment.kind === 'predict'
+        ? drafts.state.predict[activeAssignment.id] ?? ''
+        : mode.currentContent
+
     const submit = useWorkspaceSubmit({
         activeAssignment,
         sessionCode: props.sessionCode,
-        currentContent: mode.currentContent,
+        currentContent: actualContent,
         assignmentProgress: progress.assignmentProgress,
         solutions: assignmentData,
         onSubmissionMade: props.onSubmissionMade,
@@ -120,9 +124,8 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                 assignmentId: activeAssignment.id,
                 passed: submitResult.passed,
                 result: submitResult.result,
-                content: typeof mode.currentContent === 'string'
-                ? mode.currentContent
-                : JSON.stringify(mode.currentContent),
+                content: activeAssignment.kind === 'predict'
+                    ? drafts.state.predict[activeAssignment.id] ?? '' : mode.currentContent,
                 submittedAt: submitResult.submittedAt
         });
         }

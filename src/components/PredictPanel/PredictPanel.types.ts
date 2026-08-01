@@ -3,9 +3,8 @@
  * tried    — at least one wrong answer submitted; the input stays open for
  *            another attempt and "Show reference answer" appears alongside Submit
  * correct  — an answer matched — completed (reveal button hidden)
- * done     — "Marked as done" was pressed after revealing — completed
  */
-export type PredictStatus = 'idle' | 'tried' | 'correct' | 'done'
+export type PredictStatus = 'idle' | 'tried' | 'correct'
 
 export interface PredictPanelProps {
   answer: string

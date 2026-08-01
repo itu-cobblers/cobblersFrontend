@@ -17,14 +17,14 @@ interface SubmitOptions {
 }
 
 export function useWorkspaceSubmit({
-    activeAssignment,
-    sessionCode,
-    currentContent,
-    assignmentProgress,
-    onSubmissionMade,
-    solutions,
-    viewingSubmissionId
-}: SubmitOptions) {
+                                       activeAssignment,
+                                       sessionCode,
+                                       currentContent,
+                                       assignmentProgress,
+                                       onSubmissionMade,
+                                       solutions,
+                                       viewingSubmissionId
+                                   }: SubmitOptions) {
     const assignmentId = activeAssignment.id
 
     const executor = useExecutor()
@@ -60,7 +60,21 @@ export function useWorkspaceSubmit({
 
     const handleSubmitCode = async () => {
         const generation = ++submitGenerationRef.current
-        const result = await submission.confirm(currentContent, assignmentId, sessionCode)
+        const codeContent = typeof currentContent === 'string' ? currentContent : ''
+
+        const result = await submission.confirm(codeContent, assignmentId, sessionCode)
+        if (submitGenerationRef.current === generation) setSubmitFlash({ id: assignmentId, passed: result?.passed === true })
+        if (result?.passed === true) solutions.hideSolution(assignmentId)
+        return result;
+    }
+
+    const handleProjectSubmit = async () => {
+        const generation = ++submitGenerationRef.current
+        const projectContent = typeof currentContent === 'string'
+            ? currentContent
+            : JSON.stringify(currentContent)
+
+        const result = await submission.confirm(projectContent, assignmentId, sessionCode)
         if (submitGenerationRef.current === generation) setSubmitFlash({ id: assignmentId, passed: result?.passed === true })
         if (result?.passed === true) solutions.hideSolution(assignmentId)
         return result;
@@ -70,8 +84,7 @@ export function useWorkspaceSubmit({
         const generation = ++submitGenerationRef.current
         setIsSubmittingPredict(true)
         try {
-            const answer = typeof currentContent === 'string' ? currentContent : ''
-            const result = await submitAssignment({ assignmentId, content: answer, sessionCode })
+            const result = await submitAssignment({ assignmentId, content: currentContent, sessionCode })
             const correct = result.passed === true
 
             setPredictStatus(prev => ({ ...prev, [assignmentId]: correct ? 'correct' : 'tried' }))
@@ -98,7 +111,7 @@ export function useWorkspaceSubmit({
         handleRunCode,
         handleSubmitCode,
         handlePredictSubmit,
-        handleProjectSubmit: handleSubmitCode,
+        handleProjectSubmit,
         outputState: { output: executor.output, status: executor.status },
         handleClearOutput: executor.reset,
         isSubmittingPredict
