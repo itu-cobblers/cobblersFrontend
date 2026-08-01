@@ -1,5 +1,4 @@
 import type { LessonBlock, SubmissionHistoryItem } from '@types'
-import type { FeedbackBannerProps } from '@components/FeedbackBanner'
 import type { ProjectIdentity } from '@lib/projectIdentity'
 
 export type AssignmentPanelTab = 'description' | 'submissions'
@@ -26,8 +25,6 @@ export interface AssignmentPanelProps {
    */
   projectIdentity?: ProjectIdentity
   hint?: string
-  /** Check feedback pinned at the bottom; omitted ⇒ no banner. */
-  feedback?: FeedbackBannerProps
   onViewSubmission?: (item: SubmissionHistoryItem) => void;
   viewingSubmissionId?: string;
 }

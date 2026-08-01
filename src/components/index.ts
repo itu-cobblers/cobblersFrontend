@@ -40,9 +40,6 @@ export type { ProjectPanelProps } from './ProjectPanel'
 export { CodeEditor, useCodeEditorSetup } from './CodeEditor'
 export type { CodeEditorProps } from './CodeEditor'
 
-export { FeedbackBanner } from './FeedbackBanner'
-export type { FeedbackBannerProps, FeedbackTone } from './FeedbackBanner'
-
 export { AssignmentPanel } from './AssignmentPanel'
 export type { AssignmentPanelProps, AssignmentPanelTab } from './AssignmentPanel'
 
