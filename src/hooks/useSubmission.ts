@@ -4,7 +4,7 @@ import { submitAssignment } from '@lib/submissionApi'
 
 interface UseSubmissionOptions {
   /** Cross-cutting effects on a result (mirror in terminal, grade the assignment). */
-  onResult?: (content: string | SourceFile[], result: SubmissionResult) => void
+  onResult?: ( result: SubmissionResult) => void
 }
 
 export interface UseSubmission {
@@ -39,7 +39,7 @@ export function useSubmission({ onResult }: UseSubmissionOptions = {}): UseSubmi
     try {
       const r = await submitAssignment({ assignmentId, content, sessionCode })
       setResult(r)
-      onResult?.(content, r)
+      onResult?.(r)
       return r
     } catch (err) {
       const reason = err instanceof Error ? err.message : String(err)

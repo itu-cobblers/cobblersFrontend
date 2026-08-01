@@ -35,12 +35,9 @@ export function useWorkspaceSubmit({
     const submitGenerationRef = useRef(0)
 
     const submission = useSubmission({
-        onResult: (content, result) => {
+        onResult: (result) => {
             if (!result.result) return
             executor.showResult(result.result)
-            if (result.passed === true && typeof content === 'string') {
-                assignmentProgress.grade(content, result.result, { forceComplete: true })
-            }
             onSubmissionMade()
         },
     })
@@ -55,12 +52,7 @@ export function useWorkspaceSubmit({
             ? { files: currentContent, entryClass: activeAssignment.entryClass, stdin: activeAssignment.stdin }
             : { code: currentContent, stdin: activeAssignment.stdin }
 
-        const data = await executor.run(request)
-        if (data) {
-            const codeStr = Array.isArray(currentContent) ? '' : currentContent
-            const verdict = assignmentProgress.grade(codeStr, data)
-            if (verdict) setFeedback({ tone: verdict.passed ? 'success' : 'hint', message: verdict.message })
-        }
+        await executor.run(request)
     }
 
     const handleSubmitCode = async () => {
