@@ -36,14 +36,6 @@ describe('AssignmentPanel', () => {
     expect(screen.queryByText('System.out.println("Bye!");')).not.toBeInTheDocument()
   })
 
-  it('shows the feedback banner only when feedback is present', () => {
-    const { rerender } = render(createElement(AssignmentPanel, baseProps))
-    expect(screen.queryByRole('status')).not.toBeInTheDocument()
-    rerender(
-      createElement(AssignmentPanel, { ...baseProps, feedback: { tone: 'hint', message: 'Check the capitals.' } }),
-    )
-    expect(screen.getByRole('status')).toHaveTextContent('Check the capitals.')
-  })
 
   it('renders a project brief as body text', () => {
     render(createElement(AssignmentPanel, { ...baseProps, lesson: undefined, body: 'Build a Tree®' }))

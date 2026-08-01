@@ -2,7 +2,6 @@ import classNames from 'classnames'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Icon } from '@components/Icon'
 import type { SubmitButtonProps } from './SubmitButton.types'
-import { useSubmitButtonDisplayStatus } from './SubmitButton.hooks'
 import {
   SUBMIT_BUTTON_LABEL,
   SUBMIT_BUTTON_ICON,
@@ -36,9 +35,8 @@ const SPIN_TRANSITION = { repeat: Infinity, ease: 'linear', duration: 0.8 } as c
  * easing back to idle on its own.
  */
 export default function SubmitButton({ status, onClick, isDisabled = false, label }: SubmitButtonProps) {
-  const displayStatus = useSubmitButtonDisplayStatus(status)
   const isWaiting = status === 'waiting'
-  const displayLabel = label ?? SUBMIT_BUTTON_LABEL[displayStatus]
+  const displayLabel = label ?? SUBMIT_BUTTON_LABEL[status]
 
   return (
       <motion.button
@@ -48,11 +46,11 @@ export default function SubmitButton({ status, onClick, isDisabled = false, labe
           disabled={isDisabled || isWaiting}
           initial="rest"
           whileHover="hover"
-          className={classNames(SUBMIT_BUTTON_CLASS, SUBMIT_BUTTON_BG_CLASS[displayStatus], { [SUBMIT_BUTTON_WAITING_CLASS]: isWaiting })}
+          className={classNames(SUBMIT_BUTTON_CLASS, SUBMIT_BUTTON_BG_CLASS[status], { [SUBMIT_BUTTON_WAITING_CLASS]: isWaiting })}
       >
         <AnimatePresence mode="wait" initial={false}>
           <motion.span
-              key={displayStatus}
+              key={status}
               className="flex items-center gap-2"
               variants={CONTENT_VARIANTS}
               initial="initial"
@@ -66,7 +64,7 @@ export default function SubmitButton({ status, onClick, isDisabled = false, labe
                   animate={isWaiting ? { rotate: 360 } : { rotate: 0 }}
                   transition={isWaiting ? SPIN_TRANSITION : { duration: 0.15 }}
               >
-                <Icon name={SUBMIT_BUTTON_ICON[displayStatus]} />
+                <Icon name={SUBMIT_BUTTON_ICON[status]} />
               </motion.span>
             </motion.span>
             <span>{displayLabel}</span>

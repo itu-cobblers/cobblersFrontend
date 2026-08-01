@@ -1,10 +1,9 @@
-import type { ProblemStatus } from '@components/ProblemsList/ProblemsList.types'
+import type {ProblemStatus} from "@/components";
 
 export interface AttendanceStudent {
   studentId: string
   displayName: string
   isActive?: boolean
-  /** When an assignment is selected in Col 1, this represents the student's status for that assignment */
   assignmentStatus?: ProblemStatus
 }
 

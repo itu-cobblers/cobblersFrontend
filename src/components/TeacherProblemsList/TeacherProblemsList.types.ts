@@ -1,5 +1,5 @@
 import type { AssignmentKind } from '@types'
-import type { ProblemStatus } from '@components/ProblemsList/ProblemsList.types'
+import type {ProblemStatus} from "@/components";
 
 export interface TeacherProblemItem {
   id: number

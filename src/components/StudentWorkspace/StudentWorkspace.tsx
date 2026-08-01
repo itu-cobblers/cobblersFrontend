@@ -205,6 +205,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                             : submit.outputState.output
                                     }
                                     status={viewingSubmission ? (viewingSubmission.result?.status ?? null ) : submit.outputState.status}
+                                    placeHolder={mode.isReadOnly ? 'Back to Editor to run your code…' : 'Press Run to see your output…'}
                                 />
                             )}
                             {activeAssignment.kind === 'predict' && (
