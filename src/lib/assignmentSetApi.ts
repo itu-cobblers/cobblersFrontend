@@ -92,6 +92,6 @@ export async function fetchAssignmentSet(assignmentSetId: string): Promise<Assig
 }
 
 /** The solo cohort's assignment set (the room cohort resolves its id via GET /api/sessions/:code). */
-export async function fetchStudentAssignmentSet(): Promise<AssignmentSet> {
+export async function fetchSoloAssignmentSet(): Promise<AssignmentSet> {
   return fetchAssignmentSet(SOLO_ASSIGNMENT_SET_ID)
 }

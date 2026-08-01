@@ -1,4 +1,4 @@
-import type { SourceFile, SubmissionResult, SubmissionHistoryItem } from '@types'
+import type { SourceFile, SubmissionResult, SubmissionHistoryItem, SolutionResult } from '@types'
 import { getStudentId } from './identity'
 
 /**
@@ -55,5 +55,22 @@ export async function fetchSubmissionHistory(studentId: string): Promise<Submiss
     return (await res.json()) as SubmissionHistoryItem[]
   } catch {
     return []
+  }
+}
+
+/**
+ * `GET /api/assignments/{assignmentId}/solution` (CONTRACT.md "Solution") —
+ * returns a code/project assignment's reference solution from
+ * `SampleSolutionJson`. Reveal gating (submit first) is enforced in the view
+ * layer, not here. Degrades to `{ solution: null }` on any failure so the
+ * reveal button simply shows nothing instead of breaking the app.
+ */
+export async function fetchAssignmentSolution(assignmentId: number): Promise<SolutionResult> {
+  try {
+    const res = await fetch(`/api/assignments/${assignmentId}/solution`)
+    if (!res.ok) return { solution: null }
+    return (await res.json()) as SolutionResult
+  } catch {
+    return { solution: null }
   }
 }

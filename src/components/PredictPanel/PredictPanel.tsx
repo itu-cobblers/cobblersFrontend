@@ -1,7 +1,7 @@
 import { type ChangeEvent } from 'react'
-import {Icon} from "@/components";
-import { SubmitButton, type SubmitButtonStatus } from '@components/SubmitButton'
-import { ShowAnswerButton } from '@components/ShowAnswerButton'
+import { Icon } from '@/components'
+import { AssignmentFooter } from '@components/AssignmentFooter'
+import type { SubmitButtonStatus } from '@components/SubmitButton'
 import type { PredictPanelProps } from '@/components'
 import {
   PREDICT_PANEL_CLASS,
@@ -13,12 +13,14 @@ import {
   PREDICT_TEXTAREA_CLASS,
   PREDICT_REVEAL_LABEL_CLASS,
   PREDICT_REVEAL_CLASS,
-  PREDICT_FOOTER_CLASS, PREDICT_HEADER_LEFT_CLASS,
+  PREDICT_HEADER_LEFT_CLASS,
 } from './PredictPanel.constants'
 
 /**
  * The answer area for a predict-the-output quiz, shown in the terminal slot.
- * State (the answer + status) is owned by the view's hook.
+ * State (the answer + status) is owned by the view's hook. The reference
+ * answer toggles in place of the student's input — hide returns them to a
+ * clean answering view.
  */
 export default function PredictPanel({
   answer,
@@ -27,29 +29,30 @@ export default function PredictPanel({
   isMarkingDone = false,
   lastAnswerCorrect = null,
   expectedOutput,
+  canRevealAnswer,
+  isSolutionVisible,
+  onToggleSolution,
+  canMarkAsDone,
+  onMarkAsDone,
   onAnswerChange,
   onSubmit,
-  onShowAnswer,
-  onMarkAsDone,
 }: PredictPanelProps) {
   function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
     onAnswerChange(event.target.value)
   }
 
   const isTried = status === 'tried'
-  const isRevealed = status === 'revealed'
   const isCorrect = status === 'correct'
   const isDone = status === 'done'
-  // The input stays open for another attempt until the student reveals the
-  // answer — only "revealed"/"correct"/"done" replace it with the result view.
-  const isInput = status === 'idle' || isTried
+  const isCompleted = isCorrect || isDone
+  // The input stays open until the student completes — revealing the reference
+  // answer temporarily replaces it; hiding restores this view.
+  const showInput = !isCompleted && !isSolutionVisible
 
   // The Submit button's own well-done/not-quite flash is driven only by
   // `lastAnswerCorrect` — the *this-exact-submit's* outcome — never by
   // `status`, which is the persisted, de-facto record (used for the header
-  // badge, the reveal, "show answer", …) and stays true across assignment
-  // switches. Deriving the button from `status` instead would replay/hold a
-  // stale flash every time this same assignment is revisited.
+  // badge, the reveal, …) and stays true across assignment switches.
   const buttonStatus: SubmitButtonStatus = isSubmitting
     ? 'waiting'
     : lastAnswerCorrect === true
@@ -69,10 +72,10 @@ export default function PredictPanel({
         </span>
       </div>
       <div className={PREDICT_BODY_CLASS}>
-        {isInput ? (
+        {showInput ? (
           <>
             {isTried && (
-              <p className={PREDICT_HINT_CLASS}>Not quite — try again, or show the answer below.</p>
+              <p className={PREDICT_HINT_CLASS}>Not quite — try again, or show the reference answer below.</p>
             )}
             <textarea
               className={PREDICT_TEXTAREA_CLASS}
@@ -86,7 +89,7 @@ export default function PredictPanel({
           <>
             {isCorrect && <p className={PREDICT_SUCCESS_CLASS}>✓ Correct — well predicted!</p>}
             {isDone && <p className={PREDICT_SUCCESS_CLASS}>✓ Marked complete.</p>}
-            {isRevealed && (
+            {isSolutionVisible && !isCompleted && (
               <p className={PREDICT_HINT_CLASS}>Not quite — here&rsquo;s what it actually prints:</p>
             )}
             <div className={PREDICT_REVEAL_LABEL_CLASS}>Correct output</div>
@@ -95,20 +98,17 @@ export default function PredictPanel({
         )}
       </div>
 
-      {isInput && (
-        <div className={PREDICT_FOOTER_CLASS}>
-          {isTried && <ShowAnswerButton onClick={onShowAnswer} label="Show answer" />}
-          <SubmitButton status={buttonStatus} onClick={onSubmit} isDisabled={!answer.trim()} />
-        </div>
-      )}
-      {!isInput && (
-        <div className={PREDICT_FOOTER_CLASS}>
-          {isRevealed && (
-            <ShowAnswerButton onClick={onMarkAsDone} label="Marked as done" isDisabled={isMarkingDone} />
-          )}
-          <SubmitButton status={buttonStatus} onClick={onSubmit} isDisabled />
-        </div>
-      )}
+      <AssignmentFooter
+        submitStatus={buttonStatus}
+        onSubmit={onSubmit}
+        isSubmitDisabled={isCompleted || !answer.trim()}
+        canRevealAnswer={canRevealAnswer}
+        isSolutionVisible={isSolutionVisible}
+        onToggleSolution={onToggleSolution}
+        canMarkAsDone={canMarkAsDone}
+        isMarkingDone={isMarkingDone}
+        onMarkAsDone={onMarkAsDone}
+      />
     </div>
   )
 }

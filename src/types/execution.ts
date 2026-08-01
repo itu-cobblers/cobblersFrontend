@@ -54,3 +54,14 @@ export interface SubmissionHistoryItem {
   passed: boolean | null
   submittedAt: string
 }
+
+/**
+ * `GET /api/assignments/{assignmentId}/solution` → response (CONTRACT.md
+ * "Solution"). Shape mirrors `Assignment.SampleSolutionJson` for the
+ * assignment's kind: a single Java source string for `code`, a file list for
+ * `project`. The frontend gates when the reveal button is shown; the backend
+ * just returns the stored reference answer.
+ */
+export interface SolutionResult {
+  solution: string | SourceFile[] | null
+}

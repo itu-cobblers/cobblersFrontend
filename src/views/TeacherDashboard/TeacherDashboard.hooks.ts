@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react'
-import type { Assignment } from '@types'
+import type { Assignment, SourceFile } from '@types'
 import { createSession, getSession, startTimer, endSession } from '@lib/sessionApi'
 import { fetchAssignmentSets, fetchAssignmentSet, type AssignmentSetSummary } from '@lib/assignmentSetApi'
 import { groupAssignments } from '@lib/assignmentSet'
 import { observeSession, focusAssignment, type Student } from '@lib/sessionHub'
 import { revokeTeacher } from '@lib/teacherAuth'
+import { fetchAssignmentSolution } from '@lib/submissionApi'
 import {
   getPersistedTeacherSession,
   setPersistedTeacherSession,
@@ -200,6 +201,38 @@ export function useTeacherSession() {
     setSelectedStudentId(null)
   }
 
+  // ── project reference solution & predict expected-output reveal ──────────
+  // Both mirror the student view's "Show answer" behavior — toggled by the
+  // same shared button, no re-fetch on hide — but are never gated: the
+  // teacher can reveal either at any time, with no submission required.
+  const [solutionByAssignment, setSolutionByAssignment] = useState<Record<number, SourceFile[]>>({})
+  const [loadingSolutionAssignmentId, setLoadingSolutionAssignmentId] = useState<number | null>(null)
+  const [isSolutionVisibleByAssignment, setIsSolutionVisibleByAssignment] = useState<Record<number, boolean>>({})
+  const [isAnswerVisibleByAssignment, setIsAnswerVisibleByAssignment] = useState<Record<number, boolean>>({})
+
+  async function handleToggleSolution(assignmentId: number) {
+    if (isSolutionVisibleByAssignment[assignmentId]) {
+      setIsSolutionVisibleByAssignment((prev) => ({ ...prev, [assignmentId]: false }))
+      return
+    }
+    if (!solutionByAssignment[assignmentId]) {
+      setLoadingSolutionAssignmentId(assignmentId)
+      try {
+        const result = await fetchAssignmentSolution(assignmentId)
+        if (Array.isArray(result.solution)) {
+          setSolutionByAssignment((prev) => ({ ...prev, [assignmentId]: result.solution as SourceFile[] }))
+        }
+      } finally {
+        setLoadingSolutionAssignmentId((current) => (current === assignmentId ? null : current))
+      }
+    }
+    setIsSolutionVisibleByAssignment((prev) => ({ ...prev, [assignmentId]: true }))
+  }
+
+  function handleToggleAnswer(assignmentId: number) {
+    setIsAnswerVisibleByAssignment((prev) => ({ ...prev, [assignmentId]: !prev[assignmentId] }))
+  }
+
 
   /**
    * The teacher's manual "End session" action: marks the room ended in the DB
@@ -273,5 +306,12 @@ export function useTeacherSession() {
     handleSelectAssignment,
     handleSelectStudent,
     handleClearStudentFilter,
+    // Project reference solution & predict expected-output reveal
+    solutionByAssignment,
+    loadingSolutionAssignmentId,
+    isSolutionVisibleByAssignment,
+    isAnswerVisibleByAssignment,
+    handleToggleSolution,
+    handleToggleAnswer,
   }
 }

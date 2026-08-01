@@ -3,6 +3,7 @@ import { AssignmentStepper } from '@components/AssignmentStepper'
 import { FeedbackBanner } from '@components/FeedbackBanner'
 import { formatAttemptTime, describeSource } from '@components/ProblemsList'
 import { Icon } from '@components/Icon'
+import { ProjectBrief } from '@components/ProjectBrief'
 import type { AssignmentPanelProps, AssignmentPanelTab } from './AssignmentPanel.types'
 import { useHintDisclosure } from './AssignmentPanel.hooks'
 import {
@@ -59,6 +60,7 @@ export default function AssignmentPanel({
   lesson,
   description,
   body,
+  projectIdentity,
   hint,
   feedback,
 }: AssignmentPanelProps) {
@@ -101,9 +103,17 @@ export default function AssignmentPanel({
               </p>
             ),
           )}
-          <h3 className={PANEL_TASK_LABEL_CLASS}>Your task</h3>
-          <p className={PANEL_TASK_CLASS}>{description}</p>
-          {body && <p className={PANEL_BODY_CLASS}>{body}</p>}
+          { (
+            <>
+              <h3 className={PANEL_TASK_LABEL_CLASS}>Your task</h3>
+              <p className={PANEL_TASK_CLASS}>{description}</p>
+            </>
+          )}
+
+          {projectIdentity && <ProjectBrief title={title} projectIdentity={projectIdentity} />}
+
+          {!projectIdentity && body && <p className={PANEL_BODY_CLASS}>{body}</p>}
+
           {hint && (
             <div className={PANEL_HINT_CLASS}>
               <button type="button" onClick={handleHintToggle} className={PANEL_HINT_TOGGLE_CLASS}>
@@ -131,21 +141,25 @@ export default function AssignmentPanel({
             </div>
           ) : (
             <ul className={PANEL_SUBMISSIONS_LIST_CLASS}>
-              {submissions.map((submission) => (
+              {submissions.map((submission) => {
+                // `passed === null` (ungraded projects) and `true` both read as Accepted;
+                // only an explicit `false` is Not accepted.
+                const isFailed = submission.passed === false
+                return (
                 <li key={submission.subId} className={PANEL_SUBMISSION_ROW_CLASS}>
                   <div className="flex items-center gap-3">
                     <span
                       className={
-                        submission.passed === false
+                        isFailed
                           ? PANEL_SUBMISSION_BADGE_FAILED_CLASS
                           : PANEL_SUBMISSION_BADGE_PASSED_CLASS
                       }
                     >
-                      <Icon name={submission.passed === false ? 'x' : 'check'} />
+                      <Icon name={isFailed ? 'x' : 'check'} />
                     </span>
                     <div>
                       <div className={PANEL_SUBMISSION_TITLE_CLASS}>
-                        {submission.passed === false ? 'Not accepted' : 'Accepted'}
+                        {isFailed ? 'Not accepted' : 'Accepted'}
                       </div>
                       <div className={PANEL_SUBMISSION_META_CLASS}>
                         {formatAttemptTime(submission.submittedAt)} · {describeSource(submission.sessionId)}
@@ -153,7 +167,8 @@ export default function AssignmentPanel({
                     </div>
                   </div>
                 </li>
-              ))}
+                )
+              })}
             </ul>
           )}
         </div>

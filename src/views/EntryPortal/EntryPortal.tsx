@@ -2,6 +2,7 @@ import { type ChangeEvent } from 'react'
 import { DISPLAY_NAME_MAX_LENGTH } from '@lib/identity'
 import { Icon } from '@components/Icon'
 import type { EntryPortalProps } from './EntryPortal.types.ts'
+import { useEntryPortal } from './EntryPortal.hooks.ts'
 import {
   ENTRY_PORTAL_SCREEN_CLASS,
   ENTRY_PORTAL_HEADER_CLASS,
@@ -24,23 +25,23 @@ import {
   ENTRY_PORTAL_CHECKING_LABEL,
 } from './EntryPortal.constants.ts'
 
-/**
- * Full-screen "boot" entry — type your name, then either join today's
- * session with one click (no code to type — see `todayLatestSessionCode`)
- * or start solo practice. Presentational only; the student flow owns the
- * join/solo logic via `src/views/StudentView/useStudentSession`.
- */
 export default function EntryPortal({
-  name,
-  isReturningStudent,
-  todayLatestSessionCode,
-  isJoining,
-  isStartingSolo,
-  onNameChange,
-  onJoinToday,
-  onStartSolo,
-  onRefreshTodayLatestSession,
-}: EntryPortalProps) {
+                                      onJoinSuccess,
+                                      onSoloSuccess,
+                                      onError,
+                                    }: EntryPortalProps) {
+  const {
+    name,
+    isReturningStudent,
+    todayLatestSessionCode,
+    isJoining,
+    isStartingSolo,
+    onNameChange,
+    onJoinToday,
+    onStartSolo,
+    onRefreshTodayLatestSession,
+  } = useEntryPortal({ onJoinSuccess, onSoloSuccess, onError })
+
   const hasName = Boolean(name.trim())
   const isCheckingSession = todayLatestSessionCode === undefined
   const canJoinToday = hasName && !isCheckingSession && todayLatestSessionCode !== null && !isJoining

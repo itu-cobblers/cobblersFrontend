@@ -16,6 +16,10 @@ export const PANEL_TASK_CLASS = 'whitespace-pre-wrap text-[15px] leading-relaxed
 
 export const PANEL_BODY_CLASS = 'mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-muted-foreground'
 
+// Project briefs (embedded PDF + setup-guide popup) render via the shared
+// `ProjectBrief` component (@components/ProjectBrief) — used here and by
+// `TeacherAssignmentPanel` so both look identical.
+
 export const PANEL_HINT_CLASS =
   'mt-4 bg-black/10 px-2.5 py-2 text-[12px] leading-relaxed text-foreground'
 
