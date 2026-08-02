@@ -41,6 +41,7 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
+  --color-divider: var(--divider);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-terminal: var(--terminal);
@@ -98,6 +99,10 @@
   --status-warning-bg: oklch(0.97 0.03 90); /* #FFF9E6 */
   --status-warning-text: oklch(0.5 0.15 60); /* #B26A00 */
   --border: oklch(0 0 0); /* turned this black YA*/
+  /* Structural separations between the three workspace regions — assignment
+     panel, editor, terminal. Deliberately NOT --border: that one is black and
+     belongs to buttons and inputs. */
+  --divider: oklch(0.88 0 0);
   --input: oklch(0 0 0); /* turned this black YA*/
   --ring: oklch(0 0 0); /* turned this black YA*/
   /* Dark "glass" zone — Monaco stays vs-dark, so the editor/output area keeps
@@ -132,6 +137,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(1 0 0 / 8%);
+  --divider: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 12%);
   --ring: oklch(0.551 0.027 264.364);
   --terminal: oklch(0.16 0.012 260);

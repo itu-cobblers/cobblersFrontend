@@ -1,5 +1,5 @@
 export const PREDICT_PANEL_CLASS =
-  'flex h-[40%] shrink-0 flex-col bg-terminal font-mono'
+  'flex h-[40%] shrink-0 flex-col border-t border-divider bg-terminal font-mono'
 
 export const PREDICT_HEADER_CLASS =
   'flex shrink-0 items-center justify-between px-3.5 py-1.5 text-[11px] uppercase tracking-[0.8px] text-terminal-muted'

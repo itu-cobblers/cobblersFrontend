@@ -1,5 +1,7 @@
 // 4:6 split with the editor column (STUDENT_EDITOR_COLUMN_CLASS / PROJECT_PANEL_CLASS) — description gets 4, code gets 6.
-export const PANEL_CLASS = 'flex min-w-0 flex-[4] flex-col overflow-hidden bg-card'
+/** `border-divider`, not `border-border` — this is a region separation, not a control edge. */
+export const PANEL_CLASS =
+  'flex min-w-0 flex-[4] flex-col overflow-hidden border-r border-divider bg-card'
 
 export const PANEL_SCROLL_CLASS = 'flex-1 overflow-y-auto px-5 py-4'
 

@@ -1,5 +1,5 @@
 export const FILE_TABS_ROW_CLASS =
-  'flex h-10 shrink-0 items-center justify-between gap-2 bg-black/20 px-2'
+  'flex h-10 shrink-0 items-center justify-between gap-2 bg-background px-2'
 
 export const FILE_TABS_LIST_CLASS = 'flex h-full items-center gap-0 overflow-hidden'
 
