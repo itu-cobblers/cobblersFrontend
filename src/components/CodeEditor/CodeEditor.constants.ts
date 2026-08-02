@@ -6,11 +6,15 @@ export const CODE_EDITOR_CONTAINER_CLASS = 'min-h-0 flex-1 overflow-hidden bg-te
 export const CODE_EDITOR_SURFACE_CLASS = 'h-full w-full transition-opacity duration-200'
 
 /**
- * Read-only view (reference solution, past submission): the code washes toward
- * the background so the pane reads as inert on sight, instead of needing a
- * badge to say so.
+ * Read-only view (reference solution, past submission): the code desaturates
+ * and washes toward the background, so the pane reads as inert on sight
+ * instead of needing a badge to say so.
+ *
+ * `grayscale` opens a stacking context and a containing block for fixed
+ * descendants — harmless here because read-only mode already switches off the
+ * suggest widget and context menu, which are the overlays that would care.
  */
-export const CODE_EDITOR_DIMMED_CLASS = 'opacity-45'
+export const CODE_EDITOR_DIMMED_CLASS = 'opacity-45 grayscale'
 
 export const EDITOR_THEME = 'vs'
 

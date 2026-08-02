@@ -171,8 +171,8 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
     const isSolutionVisible = assignmentData.isSolutionVisible[activeAssignment.id] ?? false
     const isLoadingSolution = assignmentData.loadingId === activeAssignment.id
 
-    // Rendered inside the tab rail for code/project; on predict there is no
-    // rail, so it stands alone above the editor.
+    // Lives in the tab rail for every assignment kind, so Submit sits in the
+    // same place whatever you're working on.
     const assignmentActions = (
         <AssignmentFooter
             submitStatus={submit.isSubmitting ? 'waiting' : 'idle'}
@@ -222,18 +222,14 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                         />
 
                         <div className={STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS}>
-                            {activeAssignment.kind === 'code' || activeAssignment.kind === 'project' ? (
-                                <CodeFileTabs
-                                    files={mode.tabFiles}
-                                    activeIndex={mode.activeTabIndex}
-                                    onSelectFile={mode.handleSelectFile}
-                                    isRunning={submit.isRunning}
-                                    onRun={submit.handleRunCode}
-                                    actions={assignmentActions}
-                                />
-                            ) : (
-                                assignmentActions
-                            )}
+                            <CodeFileTabs
+                                files={mode.tabFiles}
+                                activeIndex={mode.activeTabIndex}
+                                onSelectFile={mode.handleSelectFile}
+                                isRunning={submit.isRunning}
+                                onRun={submit.handleRunCode}
+                                actions={assignmentActions}
+                            />
                             {viewingSubmission && (
                                 <SubmissionBanner
                                     number={getSubmissionNumber(
