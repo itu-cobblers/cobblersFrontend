@@ -18,7 +18,7 @@ export default function SubmissionBanner({ number, submittedAt, passed }: Submis
     <div className={SUBMISSION_BANNER_CLASS}>
       <StatusBadge status={isPassed ? 'passed' : 'tried'} size="s" />
       <span className={SUBMISSION_BANNER_TITLE_CLASS}>Submission #{number}</span>
-      <span className={SUBMISSION_BANNER_META_CLASS}>submitted at {formatAttemptTime(submittedAt)}</span>
+      <span className={SUBMISSION_BANNER_META_CLASS}>submitted on {formatAttemptTime(submittedAt)}</span>
     </div>
   )
 }

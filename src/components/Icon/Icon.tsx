@@ -69,6 +69,11 @@ const ICONS: Record<IconName, ReactElement> = {
       <path d="M2.5 2.5 7 7l-4.5 4.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   ),
+  chevronDown: (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+      <path d="M2.5 5 7 9.5 11.5 5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
   check: (
     <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
       <path d="M2.5 7.3 5.5 10.5 11.5 3.5" strokeLinecap="round" strokeLinejoin="round" />

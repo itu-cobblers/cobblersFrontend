@@ -28,6 +28,7 @@ import {
 } from './AssignmentPanel.constants'
 import {SubmissionRow} from "@components/SubmissionRow";
 import { getSubmissionNumber } from '@components/SubmissionBanner'
+import { formatSubmittedAt } from '@components/ProblemsList'
 
 const TABS: AssignmentPanelTab[] = ['description', 'submissions']
 
@@ -133,7 +134,7 @@ export default function AssignmentPanel({
                         key={submission.subId}
                         submission={submission}
                         title={`Submission #${getSubmissionNumber(submissions, submission.assignmentId, submission.subId)}`}
-                        meta={submission.submittedAt}
+                        meta={formatSubmittedAt(submission.submittedAt)}
                         isActive={viewingSubmissionId === submission.subId}
                         onClick={() => onViewSubmission?.(submission)}
                     />

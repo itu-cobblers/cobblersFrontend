@@ -1,6 +1,6 @@
 import type { IconName } from '@components'
 import type { SubmitButtonStatus } from './SubmitButton.types'
-import {BUTTON_BASE_CLASS, BUTTON_BASE_TYPOGRAPHY} from "@components/Button/Button.constants.ts";
+import {BUTTON_BASE_CLASS, BUTTON_BASE_TYPOGRAPHY, BUTTON_HEIGHT_CLASS} from "@components/Button/Button.constants.ts";
 
 /** How long a landed success/error result holds before the button relaxes back to idle. */
 export const SUBMIT_BUTTON_RESET_DELAY_MS = 2000
@@ -18,7 +18,7 @@ export const SUBMIT_BUTTON_ICON: Record<SubmitButtonStatus, IconName> = {
 /** Icon stays white on every status — the pill's own background now carries the status color. */
 export const SUBMIT_BUTTON_ICON_CLASS = 'text-primary-foreground'
 
-export const SUBMIT_BUTTON_CLASS = `${BUTTON_BASE_CLASS} ${BUTTON_BASE_TYPOGRAPHY} min-w-[128px] relative`;
+export const SUBMIT_BUTTON_CLASS = `${BUTTON_BASE_CLASS} ${BUTTON_BASE_TYPOGRAPHY} ${BUTTON_HEIGHT_CLASS} min-w-[128px] relative`;
 
 export const SUBMIT_BUTTON_BG_CLASS: Record<SubmitButtonStatus, string> = {
   idle: 'bg-primary text-primary-foreground enabled:hover:bg-primary/90',

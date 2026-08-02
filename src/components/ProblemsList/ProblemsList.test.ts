@@ -3,6 +3,7 @@ import { createElement } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import ProblemsList from './ProblemsList'
 import type { ProblemListItem } from './ProblemsList.types'
+import { formatSubmittedAt } from './ProblemsList.utils'
 
 const sessionItems: ProblemListItem[] = [
   { id: 1, title: 'Hello, World!', kind: 'code', status: 'passed' },
@@ -100,4 +101,17 @@ describe('ProblemsList', () => {
   })
 
 
+})
+
+describe('formatSubmittedAt', () => {
+  it('reads as a date at a time, not a raw stamp', () => {
+    const formatted = formatSubmittedAt('2026-08-02T19:05:37.864681+00:00')
+    expect(formatted).toContain(' at ')
+    expect(formatted).not.toContain('T')
+    expect(formatted).toContain('2026')
+  })
+
+  it('passes an unparseable value straight through rather than showing Invalid Date', () => {
+    expect(formatSubmittedAt('not-a-date')).toBe('not-a-date')
+  })
 })

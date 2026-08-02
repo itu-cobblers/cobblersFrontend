@@ -37,6 +37,6 @@ describe('SubmissionBanner', () => {
       passed: false,
     }))
     expect(screen.getByText('Submission #2')).toBeInTheDocument()
-    expect(screen.getByText(/submitted at/)).toBeInTheDocument()
+    expect(screen.getByText(/submitted on/)).toBeInTheDocument()
   })
 })

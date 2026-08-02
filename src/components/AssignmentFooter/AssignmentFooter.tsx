@@ -1,4 +1,5 @@
 import { Icon } from '@components/Icon'
+import { RunMenu } from '@components/RunMenu'
 import { SubmitButton } from '@components/SubmitButton'
 import type { AssignmentFooterProps } from './AssignmentFooter.types'
 import {
@@ -9,6 +10,8 @@ import {Button, ShowAnswerButton} from "@/components";
 
 export default function AssignmentFooter({
     submitStatus,
+    onRun,
+    isRunning = false,
     onSubmit,
     isSubmitDisabled = false,
     canRevealAnswer = false,
@@ -42,7 +45,16 @@ export default function AssignmentFooter({
                         <Icon name="arrowBack" />
                         <span>Back to Editor</span>
                     </Button>
+                ) : onRun ? (
+                    <RunMenu
+                        onRun={onRun}
+                        onSubmit={onSubmit}
+                        isRunning={isRunning}
+                        isSubmitting={submitStatus === 'waiting'}
+                        isSubmitDisabled={isSubmitDisabled}
+                    />
                 ) : (
+                    /* Nothing to run — a play icon would be a lie, so Submit stays a button. */
                     <SubmitButton
                         status={submitStatus}
                         onClick={onSubmit}

@@ -11,6 +11,9 @@ import type {SubmitButtonStatus} from "@/components";
  */
 export interface AssignmentFooterProps {
   submitStatus: SubmitButtonStatus;
+  /** Omit when the assignment has nothing to execute — the menu drops the Run item. */
+  onRun?: () => void;
+  isRunning?: boolean;
   onSubmit: () => void;
   isSubmitDisabled?: boolean;
   canRevealAnswer?: boolean;

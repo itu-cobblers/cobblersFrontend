@@ -176,6 +176,8 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
     const assignmentActions = (
         <AssignmentFooter
             submitStatus={submit.isSubmitting ? 'waiting' : 'idle'}
+            onRun={activeAssignment.kind === 'code' ? submit.handleRunCode : undefined}
+            isRunning={submit.isRunning}
             onSubmit={handleGlobalSubmit}
             isSubmitDisabled={submit.isRunning || submit.isSubmitting || submit.isSubmittingPredict}
 
@@ -226,8 +228,6 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                 files={mode.tabFiles}
                                 activeIndex={mode.activeTabIndex}
                                 onSelectFile={mode.handleSelectFile}
-                                isRunning={submit.isRunning}
-                                onRun={submit.handleRunCode}
                                 actions={assignmentActions}
                             />
                             {viewingSubmission && (

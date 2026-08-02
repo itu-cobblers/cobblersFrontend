@@ -6,6 +6,19 @@ export function formatPassedRatio(items: ProblemListItem[]): string {
   return `${passed}/${items.length}`
 }
 
+/**
+ * e.g. "Jul 24, 2026 at 14:30" — for a submission list, where the reader is
+ * placing an attempt in time rather than scanning. Renders in the reader's own
+ * locale and timezone, so it never shows a raw UTC stamp.
+ */
+export function formatSubmittedAt(iso: string): string {
+  const date = new Date(iso)
+  if (Number.isNaN(date.getTime())) return iso
+  const day = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+  const time = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })
+  return `${day} at ${time}`
+}
+
 /** e.g. "Jul 24, 14:30" — compact enough for a list of attempts. */
 export function formatAttemptTime(iso: string): string {
   const date = new Date(iso)
@@ -15,6 +28,7 @@ export function formatAttemptTime(iso: string): string {
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    hour12: false,
   })
 }
 

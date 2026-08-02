@@ -8,6 +8,7 @@ export type IconName =
   | 'logout'
   | 'chevronsLeft'
   | 'chevronsRight'
+  | 'chevronDown'
   | 'check'
   | 'x'
   | 'circle'
