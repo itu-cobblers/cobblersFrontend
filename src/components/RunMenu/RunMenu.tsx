@@ -1,7 +1,7 @@
 import { Icon } from '@components/Icon'
 import { Spinner } from '@components/Spinner'
 import type { RunMenuAction, RunMenuProps } from './RunMenu.types'
-import { useRunMenu } from './RunMenu.hooks'
+import { useMenuDisclosure } from '@hooks/useMenuDisclosure'
 import {
   RUN_MENU_WRAPPER_CLASS,
   RUN_MENU_SHELL_CLASS,
@@ -27,7 +27,7 @@ export default function RunMenu({
   isSubmitting = false,
   isSubmitDisabled = false,
 }: RunMenuProps) {
-  const { isOpen, setIsOpen, wrapperRef } = useRunMenu()
+  const { isOpen, setIsOpen, wrapperRef } = useMenuDisclosure()
 
   const actions: RunMenuAction[] = [
     { id: 'run', label: RUN_MENU_LABEL.run, onSelect: onRun, isDisabled: isRunning },

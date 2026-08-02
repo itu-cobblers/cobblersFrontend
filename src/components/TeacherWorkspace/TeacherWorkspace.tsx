@@ -13,13 +13,13 @@ import type { TeacherWorkspaceProps } from './TeacherWorkspace.types'
 import { defaultStarter } from '@lib/defaultStarter'
 import { getProjectIdentity } from '@lib/projectIdentity'
 import {useTeacherUI} from "@components/TeacherWorkspace/hooks/useTesacherUI.ts";
-import {TEACHER_BODY_CLASS} from "@components/TeacherWorkspace/TeacherWorkspace.constants.ts";
+import {TEACHER_BODY_CLASS, TEACHER_PANEL_COLUMN_CLASS} from "@components/TeacherWorkspace/TeacherWorkspace.constants.ts";
 
 function starterFileTabs(files?: { name: string }[]): CodeFileTab[] {
     return files?.map((file) => ({ name: file.name })) ?? [{ name: 'Main.java' }]
 }
 
-export default function TeacherWorkspace({ sessionCode, assignmentData, session }: TeacherWorkspaceProps) {
+export default function TeacherWorkspace({ sessionCode, assignmentData }: TeacherWorkspaceProps) {
     const roster = useLiveRoster(sessionCode, assignmentData.previewCount)
     const ui = useTeacherUI(assignmentData.previewAssignmentIds)
 
@@ -43,15 +43,6 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
         handleToggleSolution,
         handleToggleAnswer,
     } = ui
-    const {
-        minutes,
-        isStartingTimer,
-        timerEndsAt,
-        timerError,
-        isEndingSession,
-        setMinutes: handleMinutesChange,
-        handleStartTimer,
-    } = session
 
     const problemItems: TeacherProblemItem[] = previewGroups.flatMap((group) =>
         group.items.map((item) => ({
@@ -90,10 +81,6 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
     const projectIdentity = activeAssignment?.kind === 'project' ? getProjectIdentity(activeAssignment.title) : undefined
     const editorKey = activeSubmission ? `sub-${activeSubmission.subId}` : `assignment-${selectedAssignmentId ?? 'none'}`
 
-    async function handleEndSession() {
-        await session.handleEndSession()
-    }
-
     function handleSelectAssignmentAndResetFile(id: number) {
         setActiveFileIndex(0)
         setActiveSubId(null)
@@ -103,21 +90,12 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
     return (
         <div className={TEACHER_BODY_CLASS}>
             <TeacherProblemsList
-                sessionCode={sessionCode}
                 items={problemItems}
                 activeId={selectedAssignmentId}
                 onSelect={handleSelectAssignmentAndResetFile}
                 teacherFocusId={focusedAssignmentId}
                 isOpen={isRailOpen}
                 onToggleOpen={() => setIsRailOpen(!isRailOpen)}
-                minutes={minutes}
-                isStartingTimer={isStartingTimer}
-                timerEndsAt={timerEndsAt}
-                timerError={timerError}
-                onMinutesChange={handleMinutesChange}
-                onStartTimer={handleStartTimer}
-                onEndSession={handleEndSession}
-                isEndingSession={isEndingSession}
             />
 
             <AttendanceList
@@ -127,7 +105,7 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
                 selectedAssignmentTitle={activeAssignmentItem?.title}
             />
 
-            <div className="flex flex-[4] min-w-0 flex-col overflow-hidden">
+            <div className={TEACHER_PANEL_COLUMN_CLASS}>
                 <TeacherAssignmentPanel
                     activeTab={activeTab}
                     onTabChange={setActiveTab}

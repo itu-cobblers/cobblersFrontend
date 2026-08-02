@@ -48,3 +48,6 @@ export const FOOTER_CLASS = 'mt-auto flex items-stretch border-t border-border'
 
 export const FOOTER_BUTTON_CLASS =
   'flex flex-1 items-center justify-center gap-2 px-3 py-3 text-xs font-semibold text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50'
+
+/** The teacher rail has no tab row, so its outline is a plain card. */
+export const TEACHER_LIST_CARD_CLASS = 'rounded-md border border-divider'

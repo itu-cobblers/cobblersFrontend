@@ -1,7 +1,7 @@
-import { useState } from 'react'
 import classNames from 'classnames'
+import { StatusBadge } from '@components/StatusBadge'
 import { Icon } from '@components/Icon'
-import {TextField, Button, StatusBadge} from '@components'
+
 import type { TeacherProblemsListProps, TeacherProblemItem } from './TeacherProblemsList.types'
 import {
   LIST_CLASS_BASE,
@@ -21,59 +21,28 @@ import {
   KIND_LABEL,
 } from '@components/ProblemsList/ProblemsList.constants'
 import {
-  ROOM_CODE_SECTION_CLASS,
-  ROOM_CODE_LABEL_CLASS,
-  ROOM_CODE_VALUE_CLASS,
-  TIMER_SECTION_CLASS,
-  TIMER_TOGGLE_CLASS,
-  TIMER_TOGGLE_LABEL_CLASS,
-  TIMER_ENDS_BADGE_CLASS,
-  TIMER_BODY_CLASS,
-  TIMER_INPUT_ROW_CLASS,
-  TIMER_INPUT_CLASS,
-  TIMER_UNIT_LABEL_CLASS,
-  TIMER_ERROR_CLASS,
   ITEM_CONTENT_CLASS,
   ITEM_META_ROW_CLASS,
   ITEM_STATS_GROUP_CLASS,
   ITEM_PASSED_COUNT_CLASS,
   ITEM_LIVE_BADGE_CLASS,
   ITEM_NUMBER_BADGE_CLASS,
-  FOOTER_CLASS,
-  FOOTER_BUTTON_CLASS,
+  TEACHER_LIST_CARD_CLASS,
 } from './TeacherProblemsList.constants'
 
 
-function formatTimerEnds(endsAt: string): string {
-  try {
-    const end = new Date(endsAt)
-    return end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-  } catch {
-    return endsAt
-  }
-}
 
 export default function TeacherProblemsList({
-  sessionCode,
   items,
   activeId,
   onSelect,
   teacherFocusId,
   isOpen,
   onToggleOpen,
-  minutes,
-  isStartingTimer,
-  timerEndsAt,
-  timerError,
-  onMinutesChange,
-  onStartTimer,
-  onEndSession,
-  isEndingSession,
 }: TeacherProblemsListProps) {
-  const [isTimerExpanded, setIsTimerExpanded] = useState(false)
 
   return (
-    <aside className={classNames(LIST_CLASS_BASE, isOpen ? LIST_CLASS_OPEN : LIST_CLASS_CLOSED)}>
+    <aside className={classNames(LIST_CLASS_BASE, TEACHER_LIST_CARD_CLASS, isOpen ? LIST_CLASS_OPEN : LIST_CLASS_CLOSED)}>
       {/* Header */}
       <div className={LIST_HEADER_CLASS}>
         <Icon name="book" />
@@ -90,48 +59,6 @@ export default function TeacherProblemsList({
           </button>
         </span>
       </div>
-
-      {isOpen && (
-        <>
-          {/* Room Display (Big Room Code) */}
-          <div className={ROOM_CODE_SECTION_CLASS}>
-            <span className={ROOM_CODE_LABEL_CLASS}>Room Code</span>
-            <div className={ROOM_CODE_VALUE_CLASS}>{sessionCode}</div>
-          </div>
-
-          {/* Timer Section */}
-          <div className={TIMER_SECTION_CLASS}>
-            <button type="button" onClick={() => setIsTimerExpanded(!isTimerExpanded)} className={TIMER_TOGGLE_CLASS}>
-              <span className={TIMER_TOGGLE_LABEL_CLASS}>
-                <Icon name="check" /> Timer
-                {timerEndsAt && <span className={TIMER_ENDS_BADGE_CLASS}>ends {formatTimerEnds(timerEndsAt)}</span>}
-              </span>
-              <Icon name={isTimerExpanded ? 'chevronsLeft' : 'chevronsRight'} />
-            </button>
-
-            {isTimerExpanded && (
-              <div className={TIMER_BODY_CLASS}>
-                <div className={TIMER_INPUT_ROW_CLASS}>
-                  <TextField
-                    type="number"
-                    value={minutes}
-                    onChange={(val) => onMinutesChange(Number(val))}
-                    min={1}
-                    max={120}
-                    isDisabled={isStartingTimer}
-                    className={TIMER_INPUT_CLASS}
-                  />
-                  <span className={TIMER_UNIT_LABEL_CLASS}>min</span>
-                  <Button onClick={onStartTimer} isLoading={isStartingTimer}>
-                    Start
-                  </Button>
-                </div>
-                {timerError && <p className={TIMER_ERROR_CLASS}>{timerError}</p>}
-              </div>
-            )}
-          </div>
-        </>
-      )}
 
       {/* Assignment Items */}
       <ul className={LIST_ITEMS_CLASS}>
@@ -179,13 +106,6 @@ export default function TeacherProblemsList({
         })}
       </ul>
 
-      {/* Footer / End Session Button */}
-      <div className={FOOTER_CLASS}>
-        <button type="button" disabled={isEndingSession} className={FOOTER_BUTTON_CLASS} onClick={onEndSession}>
-          <Icon name="logout" />
-          {isOpen && <span>{isEndingSession ? 'Ending session…' : 'End session'}</span>}
-        </button>
-      </div>
     </aside>
   )
 }

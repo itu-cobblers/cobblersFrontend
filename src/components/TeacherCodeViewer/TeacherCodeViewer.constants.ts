@@ -1,4 +1,5 @@
-export const VIEWER_CLASS = 'flex h-full min-w-0 flex-[6] flex-col overflow-hidden border-l border-border bg-background'
+export const VIEWER_CLASS =
+  'flex h-full min-w-0 flex-[6] flex-col overflow-hidden bg-background rounded-md border border-divider'
 
 export const HEADER_CLASS = 'flex h-10 shrink-0 items-center justify-between border-b border-border bg-card px-4 text-xs'
 export const HEADER_LEFT_CLASS = 'flex items-center gap-2 truncate font-mono text-muted-foreground'

@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 
 /**
- * Open state for the action list, plus the two ways out a menu is expected to
- * have: clicking elsewhere, and Escape. Without those the list survives a click
- * on the editor and hangs over the code.
+ * Open state for a popover anchored to a button, plus the two ways out a menu
+ * is expected to have: clicking elsewhere, and Escape. Without those the panel
+ * survives a click on the editor and hangs over the content.
+ *
+ * Shared by RunMenu and TimerMenu — spread the returned ref on the element that
+ * wraps both the trigger and the panel, or the outside-click check will treat
+ * the panel itself as outside.
  */
-export function useRunMenu() {
+export function useMenuDisclosure() {
   const [isOpen, setIsOpen] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
 

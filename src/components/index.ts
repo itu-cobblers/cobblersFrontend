@@ -100,3 +100,9 @@ export type { SubmissionBannerProps } from './SubmissionBanner'
 
 export { RunMenu } from './RunMenu'
 export type { RunMenuProps } from './RunMenu'
+
+export { TimerMenu } from './TimerMenu'
+export type { TimerMenuProps } from './TimerMenu'
+
+export { RoomCodeModal } from './RoomCodeModal'
+export type { RoomCodeModalProps } from './RoomCodeModal'

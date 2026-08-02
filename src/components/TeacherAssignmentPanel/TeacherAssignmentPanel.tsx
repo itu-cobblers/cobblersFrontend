@@ -26,6 +26,7 @@ import {
   PANEL_TAB_IDLE_CLASS,
   PANEL_SUBMISSIONS_EMPTY_CLASS,
   PANEL_SUBMISSIONS_LIST_CLASS,
+  PANEL_CARD_BODY_CLASS,
 } from '@components/AssignmentPanel/AssignmentPanel.constants'
 import {
   FILTER_BAR_CLASS,
@@ -110,6 +111,7 @@ export default function TeacherAssignmentPanel({
         ))}
       </div>
 
+      <div className={PANEL_CARD_BODY_CLASS}>
       {activeTab === 'description' ? (
         <div className={PANEL_SCROLL_CLASS}>
           <div className="flex items-center justify-between gap-3">
@@ -198,6 +200,7 @@ export default function TeacherAssignmentPanel({
           )}
         </div>
       )}
+      </div>
     </section>
   )
 }

@@ -10,9 +10,9 @@ export default function AttendanceList({
   selectedAssignmentTitle,
 }: AttendanceListProps) {
   return (
-    <aside className="flex h-full w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-card">
+    <aside className="flex h-full w-64 shrink-0 flex-col overflow-hidden rounded-md border border-divider bg-card">
       {/* Header */}
-      <div className="flex h-10 shrink-0 items-center justify-between border-b border-border px-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+      <div className="flex h-10 shrink-0 items-center justify-between border-b border-divider px-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
         <span className="flex items-center gap-1.5 font-bold">
           <Icon name="book" /> Students
         </span>

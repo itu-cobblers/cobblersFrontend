@@ -40,7 +40,9 @@ import {
 export default function AppHeader({
   variant = 'hero',
   section,
+  actions,
   sessionLabel,
+  onSessionLabelClick,
   displayName,
   onLeaveSession,
   leaveLabel,
@@ -73,7 +75,19 @@ export default function AppHeader({
         </div>
 
         <nav className={APP_HEADER_NAV_CLASS} aria-label="Main">
-          {sessionLabel && <span className={APP_HEADER_CHIP_CLASS}>{sessionLabel}</span>}
+          {actions}
+          {sessionLabel &&
+            (onSessionLabelClick ? (
+              <button
+                type="button"
+                onClick={onSessionLabelClick}
+                className={classNames(APP_HEADER_CHIP_CLASS, APP_HEADER_ACTION_CLASS)}
+              >
+                {sessionLabel}
+              </button>
+            ) : (
+              <span className={APP_HEADER_CHIP_CLASS}>{sessionLabel}</span>
+            ))}
           {displayName && (
             <span className={classNames(APP_HEADER_CHIP_CLASS, APP_HEADER_SESSION_NAME_CLASS)}>
               Signed in as <span className={APP_HEADER_SESSION_NAME_STRONG_CLASS}>{displayName}</span>

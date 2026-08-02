@@ -14,7 +14,6 @@ export interface TeacherProblemItem {
 }
 
 export interface TeacherProblemsListProps {
-  sessionCode: string
   items: TeacherProblemItem[]
   activeId: number | null
   /** Fires when an assignment row is clicked — always switches selection; the task filter can never be empty. */
@@ -24,13 +23,5 @@ export interface TeacherProblemsListProps {
   isOpen: boolean
   onToggleOpen: () => void
   // Timer controls
-  minutes: number
-  isStartingTimer: boolean
-  timerEndsAt: string | null
-  timerError: string | null
-  onMinutesChange: (minutes: number) => void
-  onStartTimer: () => void
   // Session end
-  onEndSession: () => void
-  isEndingSession?: boolean
 }

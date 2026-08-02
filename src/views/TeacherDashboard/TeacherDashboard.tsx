@@ -4,12 +4,15 @@ import {TeacherSessionCreator} from "@components/TeacherSessionCreator";
 import {TeacherWorkspace} from "@components/TeacherWorkspace";
 import {
   TEACHER_LAYOUT_CLASS,
-  TEACHER_RESTORING_CLASS
+  TEACHER_RESTORING_CLASS,
+  TEACHER_SECTION_LABEL
 } from "@views/TeacherDashboard/TeacherDashboard.constants.ts";
-import {Spinner} from "@components";
+import {useState} from "react";
+import {Spinner, AppHeader, TimerMenu, RoomCodeModal} from "@components";
 
 export default function TeacherDashboard() {
   const assignmentData = useAssignmentData()
+  const [isRoomCodeOpen, setIsRoomCodeOpen] = useState(false)
 
   const session = useSessionLifecycle(assignmentData.setSelectedAssignmentSetId)
 
@@ -19,6 +22,34 @@ export default function TeacherDashboard() {
 
   return (
       <div className={TEACHER_LAYOUT_CLASS}>
+        <AppHeader
+            variant="bar"
+            section={TEACHER_SECTION_LABEL}
+            actions={
+              session.sessionCode ? (
+                  <TimerMenu
+                      minutes={session.minutes}
+                      onMinutesChange={session.setMinutes}
+                      onStartTimer={session.handleStartTimer}
+                      isStartingTimer={session.isStartingTimer}
+                      timerEndsAt={session.timerEndsAt}
+                      timerError={session.timerError}
+                  />
+              ) : undefined
+            }
+            sessionLabel={session.sessionCode ? `Room: ${session.sessionCode}` : undefined}
+            onSessionLabelClick={session.sessionCode ? () => setIsRoomCodeOpen(true) : undefined}
+            onLeaveSession={session.sessionCode ? session.handleEndSession : undefined}
+            leaveLabel={session.isEndingSession ? 'Ending session…' : 'End session'}
+        />
+
+        {session.sessionCode && (
+            <RoomCodeModal
+                isOpen={isRoomCodeOpen}
+                onClose={() => setIsRoomCodeOpen(false)}
+                sessionCode={session.sessionCode}
+            />
+        )}
 
         {!session.sessionCode ? (
             <TeacherSessionCreator
@@ -29,7 +60,6 @@ export default function TeacherDashboard() {
             <TeacherWorkspace
                 sessionCode={session.sessionCode}
                 assignmentData={assignmentData}
-                session={session}
             />
         )}
       </div>
