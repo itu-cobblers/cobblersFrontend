@@ -10,10 +10,10 @@ This repo is the React frontend. The backend lives in the sibling repo `cobblers
 - **TypeScript** (strict, `verbatimModuleSyntax`) — no `any`, no manual type casts anywhere
 - **Tailwind CSS v4** (`@tailwindcss/vite`) — the design system lives in `src/index.css`
 - **@monaco-editor/react** + **monaco-editor** — the code editor (same engine as VS Code)
-- **three** — the café 3D scene (3 files, currently **inactive**; see Theme boundary)
+- **three** — **orphaned.** The café scene it powered was deleted in #28; nothing imports it.
 - **classnames** — every `className` is computed with it (no ternaries/template literals for classes)
 - **framer-motion** — used in exactly one component (`SubmitButton`)
-- **Vitest** + **@testing-library/react** (jsdom) — 29 co-located `*.test.ts` files
+- **Vitest** + **@testing-library/react** (jsdom) — co-located `*.test.ts` files
 - **ESLint 10** (flat config: `js.recommended`, `typescript-eslint`, `react-hooks`, `react-refresh`)
 
 > **`package.json` lies about this app.** It carries ~25 `@radix-ui/*` packages plus
@@ -51,30 +51,29 @@ src/
   index.css                 # THE design system — tokens, :root/.dark blocks, keyframes (see Style)
   vite-env.d.ts             # ImportMetaEnv (VITE_TEACHER_CODE) + vite/client types
   constants/                # palette.ts — hex+oklch mirror of the tokens, DOCUMENTATION ONLY
-  types/                    # cross-cutting domain types (Assignment, ExecuteResult, Theme, …) + barrel
+  types/                    # cross-cutting domain types (Assignment, ExecuteResult, …) + barrel
   components/               # PURE, reusable presentational components (visual props only)
-    Button/ Spinner/ Icon/ Badge/ ProgressBar/ TextField/ Modal/ IconButton/ Toast/
-    CodeEditor/ Toolbar/ FileTabs/ OutputPanel/ AssignmentPanel/ AssignmentStepper/
-    FeedbackBanner/ SubmitButton/ ShowAnswerButton/ PredictPanel/ FileUpload/ ProjectPanel/
-    ProjectBrief/ ProblemsList/ AssignmentSetPreview/      # student side
+    Button/ Spinner/ Icon/ StatusBadge/ ProgressBar/ TextField/ Modal/ IconButton/ Toast/
+    CodeEditor/ CodeFileTabs/ OutputPanel/ AssignmentPanel/ AssignmentFooter/
+    SubmitButton/ ShowAnswerButton/ PredictPanel/ FileUpload/ ProjectPanel/
+    ProjectBrief/ ProblemsList/ SubmissionRow/ AssignmentSetPreview/       # student side
     StudentWorkspace/       # the IDE itself — NOT pure; owns the workspace hooks (see below)
+    TeacherWorkspace/ TeacherSessionCreator/                # teacher side, post-#28
     TeacherAssignmentPanel/ TeacherProblemsList/ TeacherCodeViewer/ TeacherFollowBanner/
-    AttendanceList/ StudentRoster/                         # teacher side
+    AttendanceList/ StudentRoster/
     index.ts                # barrel re-exporting every component + its types
   views/                    # page-level views — OWN state/business logic via co-located hooks
     EntryPortal/            # name + join/solo entry screen; rendered BY StudentView, not by main.tsx
     StudentView/            # StudentView.tsx (entry vs workspace) + StudentView.hooks.ts
                             #   useStudentSession = join/solo/rehydrate
     TeacherGate/            # code-entry gate; useTeacherAuth
-    TeacherDashboard/       # session + timer + roster; useTeacherSession
+    TeacherDashboard/       # thin shell since #28 — useAssignmentData + useSessionLifecycle,
+                            #   then TeacherSessionCreator or TeacherWorkspace
   hooks/                    # cross-cutting state hooks: useExecutor, useAssignments, useSubmission
-  themes/                   # pluggable visual skins — the THEME BOUNDARY
-    index.ts                # registry + ACTIVE_THEME (= nullTheme) + nullTheme
-    cafe/                   # CafeScene.tsx + useCafeScene (Three.js) — inactive
   lib/                      # framework-agnostic client-side tooling — see src/lib/CLAUDE.md
     assignmentSet.ts        # groups an assignment set's list for the teacher preview
     defaultStarter.ts       # fallback Java template when an assignment omits `starter`
-    grade.ts / predict.ts   # stdout grading helpers + predict-quiz grading (helpers, not the runtime path)
+    predict.ts              # predict-quiz comparison helper (unit-tested; NOT the runtime path)
     executeApi.ts / submissionApi.ts / studentApi.ts / sessionApi.ts / assignmentSetApi.ts   # REST seams
     sessionHub.ts           # SignalR seam: joinSession (student) / observeSession (teacher) / TimerStarted
     identity.ts / teacherAuth.ts   # anon studentId + displayName; teacher sessionStorage flag
@@ -90,11 +89,19 @@ local bundle; content comes from the backend), `StudentIde.tsx` (the workspace m
 `components/StudentWorkspace/`), and the `SubmitModal` / `StudentEntry` components
 (replaced by `SubmitButton` and `EntryPortal`).
 
-**`AssignmentFooter/` was deleted on `design-ITU-style`.** It used to sit under every panel
-carrying Submit, mark-as-done and reveal-answer. Submit + mark-as-done moved up into
-`Toolbar`; the reveal toggle moved into `AssignmentPanel` under the hint. Note `Toolbar` is
-a *different* component from the long-dead original of that name — it's `CodeFileTabs`
-renamed, since it now carries the actions as well as the tabs.
+**Deleted by upstream in #28 — do not reintroduce:** `AssignmentStepper/`, `Badge/`
+(superseded by `StatusBadge/`), `FeedbackBanner/`, `FileTabs/`, **all of `src/themes/`**
+(the café Three.js scene, the registry, `ACTIVE_THEME`) plus `src/types/theme.ts`, and
+`src/lib/grade.ts`. `Signals` / `CheckResult` / `Verdict` are gone from `src/types`.
+
+> **The theme boundary no longer exists.** Older notes describe a pluggable `Theme` seam with
+> a `Scene` component fed by `signals`. That is all deleted. `three` is still in
+> `package.json` with **no importer left** — it can go whenever someone prunes deps.
+>
+> **Client-side grading no longer exists.** `grade.ts` and every assignment's `check()` are
+> gone; the server grades and returns `passed`. `lib/predict.ts` survives as a unit-tested
+> helper but is *not* on the runtime path. `FeedbackBanner` was deleted with them, since its
+> only job was rendering `verdict.message`.
 
 ### Component folder layout (the strict convention)
 
@@ -117,37 +124,43 @@ distinction matters:
   `useAssignments` / `useSubmission`, holds per-assignment `code` + feedback state, and shapes
   the props each component renders.
 
-`StudentWorkspace` splits its own concerns across four co-located hooks:
-`useLocalDrafts` (per-assignment draft persistence), `useWorkspaceMode` (which files the tabs
-show, what the editor holds, and whether it's read-only), `useWorkspaceProgress`, and
-`useWorkspaceSubmit`. `useAssignmentSolutions` fetches + caches reference answers and owns the
-per-assignment `isSolutionVisible` flag.
+`StudentWorkspace` splits its own concerns across co-located hooks: `useLocalDrafts`
+(per-assignment draft persistence), `useWorkspaceMode` (which files the tabs show, what the
+editor holds, and whether it's read-only), `useWorkspaceProgress`, `useWorkspaceSubmit`, and
+`useAssignmentData` (fetches + caches reference answers *and* submission history; owns the
+per-assignment `isSolutionVisible` flag).
 
 **Layout (`StudentWorkspace.tsx`), left to right:** a full-height `ProblemsList` rail, then a
 content column holding an optional `TeacherFollowBanner` above a workspace split **4:6** —
-`AssignmentPanel` (lesson blocks, description, hint, the reveal-answer toggle, pinned
-`FeedbackBanner`) against the editor column (`Toolbar`, `CodeEditor`, then `OutputPanel` or
-`PredictPanel`). `ProjectPanel` replaces the terminal slot for `project` assignments. The
-`bootit-grid` / `bootit-glow` decorative layers are deleted from the TSX.
+`AssignmentPanel` (lesson blocks, description, hint, and the Submissions tab listing past
+attempts as `SubmissionRow`s) against the editor column (`CodeFileTabs`, `CodeEditor`, then
+`OutputPanel` or `PredictPanel`), with `AssignmentFooter` underneath carrying Submit,
+mark-as-done and the reveal toggle. `ProjectPanel` replaces the terminal slot for `project`
+assignments. The `bootit-grid` / `bootit-glow` decorative layers are deleted from the TSX.
 
-**`Toolbar` renders for every assignment kind** — tabs on the left, actions on the right. Run
-appears only for `kind:'code'`; Submit always does. While a reference answer is open, Submit
-rebinds to "Mark As Done" (`onMarkAsDone`) and reuses its own status animation. Its `files` /
-`activeIndex` / `onSelectFile` / `onRun` props are all optional, so `predict` and `project`
-render Submit alone.
+### Three viewing modes, one editor
 
-Run flow: Run → `executor.run(code)` → `executeCode(code)` (`@lib/executeApi`) → `POST /api/execute` → `{ status, stdout, stderr }` → terminal shows `stdout` (falls back to `stderr`, then `"(no output)"`). Then it grades **generically** via the active assignment's `check({ code, output, stderr, exitCode })` (contract mapped: `stdout`→`output`, `status`→`exitCode`). On a passing verdict the assignment completes and `verdict.signals` merge into `signals`, which is handed to the active theme's `Scene`. The returned verdict also drives the **FeedbackBanner**: `verdict.message` (a beginner-friendly hint on failure) renders in the assignment panel — deliberately separate from the terminal so students can tell classroom guidance from real program output. Feedback is replaced on each run and cleared on assignment switch. No assignment- or theme-specific logic lives in the view — see the two boundaries below.
+`useWorkspaceMode` collapses student / reference-solution / submission-history into one set of
+props. Two things follow from that and are easy to break:
 
-## Boundaries (assignment ⟂ theme)
+- **`isReadOnly`** is true for `predict`, for solution view, for history view, and for an empty
+  `project`. `CodeFileTabs` uses it to hide Run and show a `pencilOff` "Read Only" chip instead.
+- **`viewStatusLabel` + `onExitView`** are the *only* way out of both non-student modes —
+  "Viewing reference solution" exits via `hideSolution`, "Viewing historical submission from
+  &lt;date&gt;" via `onExitHistoryView`. Switching assignments also clears both. Anything that
+  relocates or restyles that control has to keep both exits reachable.
 
-The IDE core (editor, assignment list, output) is decoupled from both *what the assignments are* and *which visual theme is shown*, so either can be added, changed, or removed without touching the views. Domain shapes (`Assignment`, `Verdict`, `ExecuteResult`, `Theme`, …) live in `src/types/`.
+Run flow: Run → `executor.run(code)` → `executeCode(code)` (`@lib/executeApi`) → `POST /api/execute` → `{ status, stdout, stderr }` → terminal shows `stdout` (falls back to `stderr`, then `"(no output)"`). **Running does not grade.** Grading happens only on Submit, server-side: `POST /api/assignments/{id}/submissions` returns `passed`, which drives the assignment's status in `ProblemsList` and the `StatusBadge` on each `SubmissionRow`.
 
-- **Assignment boundary — `src/types/assignment.ts` + `src/lib/assignmentSetApi.ts`.** `Assignment` is a **discriminated union on `kind`**; the stepper/progress/boundary use only the shared base fields (`id`, `title`, `description`, optional `lesson` — teaching content as `LessonBlock[]` of text/code blocks — and `hint`), and only render+grade branch on `kind`. Assignments come from the backend only (`GET /api/assignmentsets/:id/assignments`) — the old local `src/lib/assignments.ts` bundle is deleted:
-  - `kind:'code'` — write & run Java; graded by `check(result)` (`result = { code, output, stderr, exitCode }` → `{ passed, signals?, message? }`; every failure path should return a beginner-friendly `message` — it renders in the FeedbackBanner). Structural code checks run on `stripCode(code)` (comments + string literals removed) so `// c2f(` can't fake a pass. Optional `stdin` (interactive, e.g. guess-the-number) and `starterFiles` + `entryClass` — multiple editable files rendered as tabs (`FileTabs`, above the `CodeEditor`) for the Day-3 class-authoring assignments (`person-class`, `container-class`, `flight-ticket-class`: a driver `Main.java` + a stubbed class file, e.g. `Person.java`). File names are fixed — students only edit contents, never rename tabs. Run sends `{ files, entryClass }`; submit sends `content` as a `{ name, content }[]` matching every tab (see `submissionApi.ts`). API-served assignments carry no `check()` — grading is moving server-side.
+## Boundary (assignment)
+
+The IDE core (editor, assignment list, output) is decoupled from *what the assignments are*, so content can be added or changed without touching the views. Domain shapes (`Assignment`, `ExecuteResult`, `SubmissionDetails`, …) live in `src/types/`.
+
+- **Assignment boundary — `src/types/assignment.ts` + `src/lib/assignmentSetApi.ts`.** `Assignment` is a **discriminated union on `kind`**; shared code uses only the base fields (`id`, `title`, `description`, optional `lesson` — teaching content as `LessonBlock[]` of text/code blocks — and `hint`), and only rendering branches on `kind`. Assignments come from the backend only (`GET /api/assignmentsets/:id/assignments`); the old local `src/lib/assignments.ts` bundle is deleted:
+  - `kind:'code'` — write & run Java. Optional `stdin` (interactive, e.g. guess-the-number) and `starterFiles` + `entryClass` — multiple editable files rendered as tabs (`CodeFileTabs`, above the `CodeEditor`) for the Day-3 class-authoring assignments (`person-class`, `container-class`, `flight-ticket-class`: a driver `Main.java` + a stubbed class file, e.g. `Person.java`). File names are fixed — students only edit contents, never rename tabs. `useWorkspaceMode` enforces this: an edit that declares a class name not matching the tab's filename is **silently discarded**. Run sends `{ files, entryClass }`; submit sends `content` as a `{ name, content }[]` matching every tab (see `submissionApi.ts`).
   - `kind:'predict'` — read-only `snippet`; the student types the output. Submit answer → `POST /api/assignments/{id}/submissions` (`submissionApi`); server grades from `GradingJson` `{ predict: { compare, expectedOutput, accept? } }`. `content.expectedOutput` is still sent for the post-submit reveal UI. Client `predict.ts` remains as a unit-tested helper, not the runtime path.
   - `kind:'project'` — Day-3 mini-projects: a `brief` (shown in the assignment panel) + multi-file upload (scaffolded grading).
-  Grading helpers live in `grade.ts`; the editor fallback template is `defaultStarter.ts`. `signals` is a free-form, theme-agnostic payload. See `src/lib/CLAUDE.md`.
-- **Theme boundary — `src/themes/`.** A theme implements the `Theme` type (`@types`): `{ id, name, subtitle, Scene }`, where `Scene` is a React component (the right-hand panel) receiving `SceneProps` `{ signals, completedAssignments, activeAssignment }` — or `null` for no scene. It decides which `signals` keys it cares about. Swap themes by changing `ACTIVE_THEME` in `src/themes/index.ts`; `nullTheme` (the current default) runs the **plain IDE with no 3D scene at all**. The legacy café Three.js scene stays under `src/themes/cafe/` but is inactive. Add a theme by dropping a folder under `src/themes/`, exporting the `Theme` shape, and registering it in `THEMES`.
+  The editor fallback template is `defaultStarter.ts`. See `src/lib/CLAUDE.md`.
 
 ## Backend API contract
 
@@ -192,16 +205,24 @@ leftover mock behaviour: `fetchSubmissionHistory` resolves to an empty result an
 > / `--border` / `--input` / `--ring` / `--primary` are black, `--terminal` is white, all
 > shadows and `backdrop-blur` are removed, every `bg-card/NN` translucency is flat
 > `bg-card`, and all the `bootit-*` decorative layers (grid, glow, scanline, title
-> gradient, fake caret, teacher pulse) are deleted from the TSX. The editor toolbar's Run
-> and Submit buttons were matched to each other by hand — both `h-[29px]`, `text-xs
-> font-medium`, `gap-1.5` — so `SUBMIT_BUTTON_CLASS` no longer derives its type scale from
-> `TYPOGRAPHY_LEVELS`. Still to do: fold the raw `bg-black/NN` values into semantic tokens,
-> decide on `--radius`, and restyle whatever arrives from upstream unstyled.
+> gradient, fake caret, teacher pulse) are deleted from the TSX. Still to do: fold the raw
+> `bg-black/NN` values into semantic tokens, decide on `--radius`, and restyle whatever
+> arrives from upstream unstyled.
 >
-> **`TYPOGRAPHY_LEVELS` (in `palette.ts`) now has zero consumers app-wide.** `SubmitButton`
-> was its last one. Worth knowing before the next upstream merge: upstream's new
-> `Button.constants.ts` reintroduces it as `BUTTON_BASE_TYPOGRAPHY` *alongside* a literal
-> `text-[13px]` in `BUTTON_BASE_CLASS` — two competing font-size utilities on one element.
+> **Reverted, to be redone:** commit `31dac15` moved Submit up beside Run in the toolbar,
+> moved the reveal toggle into `AssignmentPanel`, and deleted `AssignmentFooter`. It was
+> reverted before merging #28 (which reworked both of those components and added history
+> view) and is to be reapplied on top once history view's behaviour is understood. The
+> hand-matched Submit scale (`h-[29px] text-xs font-medium gap-1.5`, replacing the
+> `TYPOGRAPHY_LEVELS` interpolation) went with it — it lives in `cbd0455`.
+>
+> **Upstream's new `Button.constants.ts` is built on tokens this app doesn't have.**
+> `BUTTON_VARIANT_CLASS` uses `bg-action`, `bg-action-strong`, `text-ink-muted`, `text-ink`
+> and `border-line` — pre-#21 names, absent from `index.css`, so those utilities generate
+> nothing and the `primary`/`ghost` variants render unstyled. It also stacks a literal
+> `text-[13px]` in `BUTTON_BASE_CLASS` against `BUTTON_BASE_TYPOGRAPHY`
+> (= `TYPOGRAPHY_LEVELS.bodyStrong` = `text-sm`) — two font sizes on one element.
+> `SUBMIT_BUTTON_CLASS` imports that base, so both problems reach the Submit button.
 
 **`src/index.css` (334 lines) is the entire design system.** Nothing else defines a colour.
 It was rebuilt in #21/#22 into a shadcn-style token set; the old `canvas`/`surface`/`panel`/
@@ -234,10 +255,13 @@ into all four view root class strings (`EntryPortal`, `StudentView` ×2, `Teache
 `TeacherGate`), which is the only reason the app rendered dark while `:root` was pure white.
 
 **Those have been removed on `design-ITU-style`, so the whole `.dark` block (~35 lines) is
-now dead code.** It's deliberately left in place rather than deleted: `upstream/main` still
-ships those `dark` classes, so it will come back in the next merge and has to be resolved
-per-file. Decide its fate *after* that merge — either delete it, or keep it as the seed for
-a real theme toggle.
+now dead code.** It's deliberately left in place rather than deleted.
+
+Note this is a **recurring merge chore, not a one-off**: `upstream/main` still ships the
+literal `dark` class on its view roots, so every upstream merge reintroduces it. It came back
+in #28 on `STUDENT_WORKSPACE_LAYOUT_CLASS` and `TEACHER_LAYOUT_CLASS` (along with the
+`bootit-grid` / `bootit-glow` layers) and was stripped again by hand. After any merge, sweep
+with `grep -rn "bootit-\|'dark " src` before trusting the result.
 
 ### Things the tokens do NOT control
 

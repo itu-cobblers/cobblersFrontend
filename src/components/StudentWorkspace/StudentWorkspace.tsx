@@ -12,8 +12,6 @@ import {
 } from '@components'
 import {
     STUDENT_WORKSPACE_LAYOUT_CLASS,
-    STUDENT_WORKSPACE_GRID_CLASS,
-    STUDENT_WORKSPACE_GLOW_CLASS,
     STUDENT_WORKSPACE_MAIN_CLASS,
     STUDENT_WORKSPACE_CLASS,
     STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS,
@@ -159,8 +157,6 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
 
     return (
         <div className={STUDENT_WORKSPACE_LAYOUT_CLASS}>
-            <div className={STUDENT_WORKSPACE_GRID_CLASS} />
-            <div className={STUDENT_WORKSPACE_GLOW_CLASS} />
             <div className={STUDENT_WORKSPACE_MAIN_CLASS}>
 
                 <ProblemsList
