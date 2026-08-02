@@ -3,6 +3,7 @@ import { AssignmentStepper } from '@components/AssignmentStepper'
 import { FeedbackBanner } from '@components/FeedbackBanner'
 import { formatAttemptTime, describeSource } from '@components/ProblemsList'
 import { Icon } from '@components/Icon'
+import { ShowAnswerButton } from '@components/ShowAnswerButton'
 import { ProjectBrief } from '@components/ProjectBrief'
 import type { AssignmentPanelProps, AssignmentPanelTab } from './AssignmentPanel.types'
 import { useHintDisclosure } from './AssignmentPanel.hooks'
@@ -20,6 +21,8 @@ import {
   PANEL_HINT_ARROW_CLASS,
   PANEL_HINT_ARROW_EXPANDED_CLASS,
   PANEL_HINT_BODY_CLASS,
+  PANEL_REVEAL_ROW_CLASS,
+  PANEL_REVEAL_LABEL,
   PANEL_HINT_CODE_CLASS,
   PANEL_TABS_CLASS,
   PANEL_TAB_BASE_CLASS,
@@ -63,6 +66,10 @@ export default function AssignmentPanel({
   projectIdentity,
   hint,
   feedback,
+  canRevealAnswer = false,
+  isSolutionVisible = false,
+  isLoadingSolution = false,
+  onToggleSolution,
 }: AssignmentPanelProps) {
   const [isHintExpanded, handleHintToggle] = useHintDisclosure(hint)
 
@@ -129,6 +136,22 @@ export default function AssignmentPanel({
                   <code className={PANEL_HINT_CODE_CLASS}>{hint}</code>
                 </div>
               )}
+            </div>
+          )}
+
+          {canRevealAnswer && onToggleSolution && (
+            <div className={PANEL_REVEAL_ROW_CLASS}>
+              <ShowAnswerButton
+                onClick={onToggleSolution}
+                isDisabled={isLoadingSolution}
+                label={
+                  isLoadingSolution
+                    ? PANEL_REVEAL_LABEL.loading
+                    : isSolutionVisible
+                      ? PANEL_REVEAL_LABEL.hide
+                      : PANEL_REVEAL_LABEL.show
+                }
+              />
             </div>
           )}
         </div>

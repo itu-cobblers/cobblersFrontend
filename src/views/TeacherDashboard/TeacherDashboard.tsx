@@ -9,7 +9,7 @@ import {
   type TeacherProblemItem,
   type AttendanceStudent,
   type TeacherSubmissionItem,
-  type CodeFileTab,
+  type ToolbarFile,
 } from '@components'
 import { defaultStarter } from '@lib/defaultStarter'
 import { getProjectIdentity } from '@lib/projectIdentity'
@@ -31,7 +31,7 @@ import {
 import type { AssignmentPanelTab } from '@components/AssignmentPanel/AssignmentPanel.types'
 
 /** The file tabs for a code assignment's starter — mirrors the student view's `codeFiles`. */
-function starterFileTabs(files?: { name: string }[]): CodeFileTab[] {
+function starterFileTabs(files?: { name: string }[]): ToolbarFile[] {
   return files?.map((file) => ({ name: file.name })) ?? [{ name: 'Main.java' }]
 }
 

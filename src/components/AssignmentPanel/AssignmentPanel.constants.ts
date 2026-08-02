@@ -62,3 +62,11 @@ export const PANEL_SUBMISSION_BADGE_FAILED_CLASS =
 export const PANEL_SUBMISSION_TITLE_CLASS = 'text-sm font-medium text-foreground'
 
 export const PANEL_SUBMISSION_META_CLASS = 'text-[11px] text-muted-foreground'
+
+export const PANEL_REVEAL_ROW_CLASS = 'mt-4 flex'
+
+export const PANEL_REVEAL_LABEL = {
+  show: 'Show reference answer',
+  hide: 'Hide reference answer',
+  loading: 'Loading…',
+} as const

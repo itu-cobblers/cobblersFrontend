@@ -2,7 +2,7 @@ import {
     ProblemsList,
     TeacherFollowBanner,
     AssignmentPanel,
-    CodeFileTabs,
+    Toolbar,
     CodeEditor,
     OutputPanel,
     PredictPanel,
@@ -10,8 +10,6 @@ import {
 } from '@components'
 import {
     STUDENT_WORKSPACE_LAYOUT_CLASS,
-    STUDENT_WORKSPACE_GRID_CLASS,
-    STUDENT_WORKSPACE_GLOW_CLASS,
     STUDENT_WORKSPACE_MAIN_CLASS,
     STUDENT_WORKSPACE_CLASS,
     STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS,
@@ -75,8 +73,6 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
 
     return (
         <div className={STUDENT_WORKSPACE_LAYOUT_CLASS}>
-            <div className={STUDENT_WORKSPACE_GRID_CLASS} />
-            <div className={STUDENT_WORKSPACE_GLOW_CLASS} />
             <div className={STUDENT_WORKSPACE_MAIN_CLASS}>
 
                 <ProblemsList
@@ -95,20 +91,32 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                         <AssignmentPanel
                             {...progress.assignmentPanelProps}
                             feedback={submit.feedback ?? undefined}
+                            canRevealAnswer={canRevealAnswer}
+                            isSolutionVisible={isSolutionVisible}
+                            isLoadingSolution={isLoadingSolution}
+                            onToggleSolution={() => solutions.toggleSolution(activeAssignment.id, activeAssignment.kind)}
                         />
 
                         <div className={STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS}>
-                            {(activeAssignment.kind === 'code' || activeAssignment.kind === 'project') && (
-                                <CodeFileTabs
-                                    files={mode.tabFiles}
-                                    activeIndex={mode.activeTabIndex}
-                                    onSelectFile={mode.handleSelectFile}
-                                    isRunning={submit.isRunning}
-                                    onRun={submit.handleRunCode}
-                                    viewStatusLabel={mode.viewStatusLabel}
-                                    onExitView={mode.onExitView}
-                                />
-                            )}
+                            <Toolbar
+                                files={mode.tabFiles}
+                                activeIndex={mode.activeTabIndex}
+                                onSelectFile={mode.handleSelectFile}
+                                {...(activeAssignment.kind === 'code'
+                                    ? { isRunning: submit.isRunning, onRun: submit.handleRunCode }
+                                    : {})}
+                                submitStatus={submitStatus}
+                                onSubmit={
+                                    activeAssignment.kind === 'predict'
+                                        ? submit.handlePredictSubmit
+                                        : activeAssignment.kind === 'project'
+                                            ? submit.handleProjectSubmit
+                                            : submit.handleSubmitCode
+                                }
+                                canMarkAsDone={canMarkAsDone}
+                                isMarkingDone={submit.isMarkingDone}
+                                onMarkAsDone={submit.handleMarkAsDone}
+                            />
                             {(activeAssignment.kind === 'code' ||
                                 activeAssignment.kind === 'project' ||
                                 activeAssignment.kind === 'predict') && (
@@ -123,34 +131,15 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                 <OutputPanel
                                     output={submit.outputState.output}
                                     status={submit.outputState.status}
-                                    footer={{
-                                        submitStatus,
-                                        onSubmit: submit.handleSubmitCode,
-                                        canRevealAnswer,
-                                        isSolutionVisible,
-                                        isLoadingSolution,
-                                        onToggleSolution: () => solutions.toggleSolution(activeAssignment.id, activeAssignment.kind),
-                                        canMarkAsDone,
-                                        isMarkingDone: submit.isMarkingDone,
-                                        onMarkAsDone: submit.handleMarkAsDone
-                                    }}
                                 />
                             )}
                             {activeAssignment.kind === 'predict' && (
                                 <PredictPanel
                                     answer={drafts.state.predict[activeAssignment.id] ?? ''}
                                     status={submit.predictStatus}
-                                    isSubmitting={submit.isSubmittingPredict}
-                                    isMarkingDone={submit.isMarkingDone}
-                                    lastAnswerCorrect={submit.submitFlash?.passed ?? null}
                                     expectedOutput={activeAssignment.expectedOutput}
-                                    canRevealAnswer={canRevealAnswer}
                                     isSolutionVisible={isSolutionVisible}
-                                    onToggleSolution={() => solutions.toggleSolution(activeAssignment.id, activeAssignment.kind)}
-                                    canMarkAsDone={canMarkAsDone}
-                                    onMarkAsDone={submit.handleMarkAsDone}
                                     onAnswerChange={(val) => drafts.updatePredict(activeAssignment.id, val)}
-                                    onSubmit={submit.handlePredictSubmit}
                                 />
                             )}
                             {activeAssignment.kind === 'project' && (
@@ -158,12 +147,6 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     files={drafts.state.project[activeAssignment.id] ?? []}
                                     onFilesChange={(files) => drafts.updateProject(activeAssignment.id, files)}
                                     hasSubmitted={hasSubmitted}
-                                    isSubmitting={submit.isSubmitting}
-                                    lastSubmitPassed={submit.submitFlash?.passed ?? null}
-                                    onSubmit={submit.handleProjectSubmit}
-                                    isLoadingSolution={isLoadingSolution}
-                                    isSolutionVisible={isSolutionVisible}
-                                    onToggleSolution={() => solutions.toggleSolution(activeAssignment.id, activeAssignment.kind)}
                                 />
                             )}
                         </div>

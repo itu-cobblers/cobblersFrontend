@@ -74,4 +74,32 @@ describe('AssignmentPanel', () => {
     )
     expect(screen.getByText('Accepted')).toBeInTheDocument()
   })
+
+  // The reveal toggle moved here from the panels' footers: revealing changes
+  // what the content panels show, so it belongs with the task, not with Submit.
+  it('offers the reference-answer toggle once it is unlocked', () => {
+    const onToggleSolution = vi.fn()
+    render(
+      createElement(AssignmentPanel, { ...baseProps, canRevealAnswer: true, onToggleSolution }),
+    )
+    fireEvent.click(screen.getByText('Show reference answer'))
+    expect(onToggleSolution).toHaveBeenCalledOnce()
+  })
+
+  it('hides the toggle until it is unlocked', () => {
+    render(createElement(AssignmentPanel, baseProps))
+    expect(screen.queryByText('Show reference answer')).not.toBeInTheDocument()
+  })
+
+  it('reads as Hide while the reference answer is open', () => {
+    render(
+      createElement(AssignmentPanel, {
+        ...baseProps,
+        canRevealAnswer: true,
+        isSolutionVisible: true,
+        onToggleSolution: vi.fn(),
+      }),
+    )
+    expect(screen.getByText('Hide reference answer')).toBeInTheDocument()
+  })
 })

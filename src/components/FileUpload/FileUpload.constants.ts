@@ -1,5 +1,5 @@
 // Lives inside the project panel's terminal-styled bottom strip — dark
-// "glass" tokens (terminal-*) so it matches OutputPanel/CodeFileTabs instead
+// "glass" tokens (terminal-*) so it matches OutputPanel/Toolbar instead
 // of the light chrome tokens the rest of the app uses.
 export const FILE_UPLOAD_CLASS = 'flex flex-1 min-h-[180px] flex-col gap-2.5'
 
