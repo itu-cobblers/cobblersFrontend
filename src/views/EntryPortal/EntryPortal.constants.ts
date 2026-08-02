@@ -1,33 +1,3 @@
-export const ENTRY_PORTAL_SCREEN_CLASS =
-  'relative flex min-h-screen flex-col overflow-hidden bg-background text-foreground'
-
-/**
- * Takes the atrium band out of flow so it reads as a backsplash behind the
- * page rather than a block that pushes content down — which is what lets the
- * card overlap it.
- */
-export const ENTRY_PORTAL_BACKDROP_CLASS = 'absolute inset-x-0 top-0'
-
-/**
- * The same treatment `MODAL_OVERLAY_CLASS` puts behind a dialog, minus the
- * `fixed` positioning and the click target. Sits at `z-[1]`, which puts it
- * above the atrium photo (so the photo blurs) but below the header bar
- * (`z-20`) and the card (`z-10`), both of which stay crisp.
- */
-export const ENTRY_PORTAL_SCRIM_CLASS = 'absolute inset-0 z-[1] bg-black/50 backdrop-blur-[2px]'
-
-/** Centres the card in the viewport, the way the Modal overlay centres a dialog. */
-export const ENTRY_PORTAL_CENTER_CLASS =
-  'relative z-10 flex flex-1 items-center justify-center p-5'
-
-/**
- * Borrows the Modal's card chrome (radius, border, background) but not its
- * proportions: narrower than a `lg` dialog, and a deeper bottom pad, since
- * nothing sits under the buttons the way a Close button does in a modal.
- */
-export const ENTRY_PORTAL_CARD_CLASS =
-  'w-full max-w-[560px] max-h-[85vh] overflow-y-auto rounded-[10px] border border-border bg-background p-[22px] pb-10 text-center'
-
 export const ENTRY_PORTAL_TITLE_CLASS = 'text-5xl font-light leading-[1.05] tracking-tight sm:text-6xl'
 
 /**
@@ -40,8 +10,7 @@ export const ENTRY_PORTAL_BODY_CLASS =
 
 export const ENTRY_PORTAL_NAME_ROW_CLASS = 'mx-auto mt-10 flex w-full max-w-md items-center justify-center'
 
-export const ENTRY_PORTAL_NAME_INPUT_CLASS =
-  'w-full rounded-md border border-border bg-black/[0.03] px-6 py-3 text-left text-sm text-foreground outline-none transition placeholder:text-foreground/40 focus:border-black/30 focus:bg-black/[0.06]'
+export { PORTAL_FIELD_CLASS as ENTRY_PORTAL_NAME_INPUT_CLASS } from '@components/PortalShell/PortalShell.constants'
 
 export const ENTRY_PORTAL_CTA_ROW_CLASS = 'mt-12 flex flex-col-reverse items-center justify-center gap-4 sm:flex-row'
 

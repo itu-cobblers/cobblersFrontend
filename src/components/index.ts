@@ -106,3 +106,6 @@ export type { TimerMenuProps } from './TimerMenu'
 
 export { RoomCodeModal } from './RoomCodeModal'
 export type { RoomCodeModalProps } from './RoomCodeModal'
+
+export { PortalShell } from './PortalShell'
+export type { PortalShellProps } from './PortalShell'

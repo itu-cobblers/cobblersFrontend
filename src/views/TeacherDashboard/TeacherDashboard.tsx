@@ -8,7 +8,7 @@ import {
   TEACHER_SECTION_LABEL
 } from "@views/TeacherDashboard/TeacherDashboard.constants.ts";
 import {useState} from "react";
-import {Spinner, AppHeader, TimerMenu, RoomCodeModal} from "@components";
+import {Spinner, AppHeader, TimerMenu, RoomCodeModal, PortalShell} from "@components";
 
 export default function TeacherDashboard() {
   const assignmentData = useAssignmentData()
@@ -18,6 +18,14 @@ export default function TeacherDashboard() {
 
   if (session.isRestoringSession) {
     return <div className={TEACHER_RESTORING_CLASS}><Spinner /></div>
+  }
+
+  if (!session.sessionCode) {
+    return (
+        <PortalShell>
+          <TeacherSessionCreator assignmentData={assignmentData} session={session} />
+        </PortalShell>
+    )
   }
 
   return (
@@ -51,17 +59,10 @@ export default function TeacherDashboard() {
             />
         )}
 
-        {!session.sessionCode ? (
-            <TeacherSessionCreator
-                assignmentData={assignmentData}
-                session={session}
-            />
-        ) : (
-            <TeacherWorkspace
-                sessionCode={session.sessionCode}
-                assignmentData={assignmentData}
-            />
-        )}
+        <TeacherWorkspace
+            sessionCode={session.sessionCode}
+            assignmentData={assignmentData}
+        />
       </div>
   )
 }

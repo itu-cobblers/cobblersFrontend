@@ -1,21 +1,20 @@
-export const TEACHER_ASSIGNMENT_SET_ROW_CLASS = 'flex flex-col gap-1.5'
+/**
+ * Card contents only — PortalShell owns the page chrome, the field styling and
+ * the heading type.
+ */
+/**
+ * The heading shares the field's column rather than centring in the card, so
+ * "Classroom" and "Assignment set" hang off the same left edge — with only one
+ * control on this card, a centred title had nothing to centre against.
+ */
+export const CREATOR_COLUMN_CLASS = 'mx-auto w-full max-w-md text-left'
 
-export const TEACHER_ASSIGNMENT_SET_LABEL_CLASS = 'text-xs text-muted-foreground'
+export const CREATOR_FIELD_ROW_CLASS = 'mt-4 flex flex-col gap-2'
 
-export const TEACHER_ASSIGNMENT_SET_SELECT_CLASS =
-    'rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors focus:border-accent'
+export const CREATOR_LABEL_CLASS = 'text-[11px] uppercase tracking-[0.2em] text-foreground/40'
 
-export const TEACHER_ERROR_CLASS = 'text-xs text-destructive'
+export const CREATOR_ERROR_CLASS = 'mx-auto mt-4 max-w-md text-left text-sm text-destructive'
 
-export const TEACHER_BROWSE_CLASS =
-    'relative z-10 mx-auto flex w-full max-w-3xl flex-1 flex-col gap-6 overflow-y-auto p-8'
+export const CREATOR_CTA_ROW_CLASS = 'mt-12 flex flex-col-reverse items-center justify-center gap-4 sm:flex-row'
 
-export const TEACHER_BROWSE_HEAD_CLASS = 'flex flex-col gap-1.5'
-
-export const TEACHER_BROWSE_TITLE_CLASS = 'text-2xl font-extrabold tracking-tight text-foreground'
-
-export const TEACHER_BROWSE_SUBTITLE_CLASS = 'text-sm text-muted-foreground'
-
-export const TEACHER_BROWSE_ACTIONS_CLASS =
-    'flex items-end gap-4 rounded-xl border border-border bg-card/80 p-5 shadow-lg backdrop-blur-md'
-
+export const CREATOR_TITLE = 'Classroom'

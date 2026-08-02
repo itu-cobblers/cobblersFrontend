@@ -1,2 +1,7 @@
-export const TEXT_FIELD_BASE_CLASS =
-  'rounded-md border bg-card px-3 py-[9px] text-[14px] text-foreground outline-none transition-colors focus:border-accent'
+import { PORTAL_FIELD_CLASS } from '@components/PortalShell/PortalShell.constants'
+
+/**
+ * TextField is used only on the teacher gate, so it takes the portal field
+ * styling directly rather than keeping a second look for one input.
+ */
+export const TEXT_FIELD_BASE_CLASS = PORTAL_FIELD_CLASS

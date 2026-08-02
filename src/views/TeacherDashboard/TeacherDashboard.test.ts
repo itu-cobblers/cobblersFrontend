@@ -27,7 +27,7 @@ describe('TeacherDashboard', () => {
 
   it('shows the Browse screen when there is no persisted session', async () => {
     render(createElement(TeacherDashboard))
-    expect(await screen.findByRole('heading', { name: 'Start a session' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Classroom' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'End session' })).not.toBeInTheDocument()
   })
 
@@ -47,7 +47,7 @@ describe('TeacherDashboard', () => {
     render(createElement(TeacherDashboard))
 
     expect(await screen.findByRole('button', { name: 'End session' })).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: 'Start a session' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Classroom' })).not.toBeInTheDocument()
   })
 
   it('ending a session clears storage and returns to Browse', async () => {
@@ -58,7 +58,7 @@ describe('TeacherDashboard', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'End session' }))
 
-    expect(await screen.findByRole('heading', { name: 'Start a session' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Classroom' })).toBeInTheDocument()
     expect(localStorage.getItem('bootit.teacherSession')).toBeNull()
   })
 })

@@ -13,8 +13,8 @@ describe('TeacherGate', () => {
 
   it('renders the access form', () => {
     render(createElement(TeacherGate))
-    expect(screen.getByRole('heading', { name: 'BootIT' })).toBeInTheDocument()
-    expect(screen.getByText('Teacher access')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'BootCode' })).toBeInTheDocument()
+    expect(screen.getByText(/Teacher access/)).toBeInTheDocument()
   })
 
   it('shows an error for the wrong code', () => {
@@ -32,6 +32,6 @@ describe('TeacherGate', () => {
       target: { value: 'secret' },
     })
     fireEvent.click(screen.getByText('Enter'))
-    expect(screen.getByText('BootIT Teacher Portal')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Classroom' })).toBeInTheDocument()
   })
 })
