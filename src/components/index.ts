@@ -22,6 +22,8 @@ export type { IconButtonProps } from './IconButton'
 export { Modal, useEscapeToClose } from './Modal'
 export type { ModalProps, ModalSize } from './Modal'
 
+export { AssignmentFooter } from './AssignmentFooter'
+export type { AssignmentFooterProps } from './AssignmentFooter'
 
 export { OutputPanel } from './OutputPanel'
 export type { OutputPanelProps } from './OutputPanel'
@@ -59,8 +61,8 @@ export type { ProblemsListProps, ProblemListItem, ProblemStatus, ProblemsListTab
 export { TeacherFollowBanner } from './TeacherFollowBanner'
 export type { TeacherFollowBannerProps } from './TeacherFollowBanner'
 
-export { Toolbar } from './Toolbar'
-export type { ToolbarProps, ToolbarFile, ToolbarFileVariant } from './Toolbar'
+export { CodeFileTabs } from './CodeFileTabs'
+export type { CodeFileTabsProps, CodeFileTab, CodeFileTabVariant } from './CodeFileTabs'
 
 export { EntryPortal } from '@views/EntryPortal'
 export type { EntryPortalProps, JoinMode } from '@views/EntryPortal'

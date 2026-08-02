@@ -1,5 +1,5 @@
 import type { ExecuteResult, AssignmentKind, SourceFile } from '@types'
-import type { ToolbarFile } from '@components/Toolbar'
+import type { CodeFileTab } from '@components/CodeFileTabs'
 
 export interface TeacherCodeViewerProps {
   /** Drives which read-only view mirrors the student's IDE column below. */
@@ -18,7 +18,7 @@ export interface TeacherCodeViewerProps {
    * preview (matching the student view) to the submitted code + stored result. */
   hasSubmission: boolean
   // Starter-code mode (no submission selected yet) — mirrors the student's file tabs. Code kind only.
-  fileTabs?: ToolbarFile[]
+  fileTabs?: CodeFileTab[]
   activeFileIndex?: number
   onSelectFile?: (index: number) => void
   // Submission mode

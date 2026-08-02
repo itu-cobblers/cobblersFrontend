@@ -1,5 +1,6 @@
 import classNames from 'classnames'
 import { Icon } from '@components/Icon'
+import { AssignmentFooter } from '@components/AssignmentFooter'
 import type { OutputPanelProps } from './OutputPanel.types'
 import {
   OUTPUT_PANEL_CLASS,
@@ -11,7 +12,7 @@ import {
 } from './OutputPanel.constants'
 import { isErrorStatus, getStatusLabel } from './OutputPanel.utils'
 
-export default function OutputPanel({ output, status }: OutputPanelProps) {
+export default function OutputPanel({ output, status, footer }: OutputPanelProps) {
   const isError = isErrorStatus(status)
   const statusLabel = getStatusLabel(status)
 
@@ -36,6 +37,7 @@ export default function OutputPanel({ output, status }: OutputPanelProps) {
       <pre className={classNames(OUTPUT_CONTENT_CLASS, { 'text-term-err': isError })}>
         {output || <span className={OUTPUT_PLACEHOLDER_CLASS}>Press Run to see your output…</span>}
       </pre>
+      {footer && <AssignmentFooter {...footer} />}
     </div>
   )
 }

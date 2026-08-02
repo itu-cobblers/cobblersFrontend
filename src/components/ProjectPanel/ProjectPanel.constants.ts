@@ -2,7 +2,7 @@
 // chrome as OutputPanel (bg-terminal, terminal-line borders) so swapping
 // between assignment kinds doesn't jar, but there's no run output here: the
 // content is a big upload dropzone instead, and no Run button (see
-// Toolbar, which omits it for this kind).
+// CodeFileTabs, which omits it for this kind).
 export const PROJECT_PANEL_CLASS = 'flex h-[40%] shrink-0 flex-col border-t border-terminal-line bg-terminal font-mono'
 
 export const PROJECT_HEADER_CLASS =

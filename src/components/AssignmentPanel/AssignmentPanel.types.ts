@@ -6,17 +6,6 @@ import type { ProjectIdentity } from '@lib/projectIdentity'
 export type AssignmentPanelTab = 'description' | 'submissions'
 
 export interface AssignmentPanelProps {
-  /**
-   * Reference-answer toggle, shown under the hint. Lives here rather than beside
-   * Submit because revealing changes what the *content* panels show — the editor's
-   * files for `code`/`project`, the expected output inside PredictPanel for
-   * `predict` — and never affects submission itself.
-   */
-  canRevealAnswer?: boolean
-  isSolutionVisible?: boolean
-  isLoadingSolution?: boolean
-  onToggleSolution?: () => void
-
   steps: StepperStep[]
   onSelectStep: (id: number) => void
   /** Hide the compact stepper strip visually (kept in the DOM/a11y tree) when a richer nav — e.g. ProblemsList — already shows it. Defaults to visible. */

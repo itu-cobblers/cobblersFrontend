@@ -1,9 +1,7 @@
-export const TOOLBAR_ROW_CLASS =
+export const FILE_TABS_ROW_CLASS =
   'flex h-10 shrink-0 items-center justify-between gap-2 border-b border-terminal-line px-2'
 
-export const TOOLBAR_ACTIONS_CLASS = 'flex shrink-0 items-center gap-3'
-
-export const TOOLBAR_TABS_CLASS = 'flex h-full items-center gap-0 overflow-hidden'
+export const FILE_TABS_LIST_CLASS = 'flex h-full items-center gap-0 overflow-hidden'
 
 export const FILE_TAB_BASE_CLASS =
   'relative flex h-full items-center gap-1.5 px-3 font-mono text-[11px] transition-colors'

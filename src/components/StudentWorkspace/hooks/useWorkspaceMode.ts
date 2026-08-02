@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect, useLayoutEffect } from 'react'
 import type { Assignment, SourceFile } from '@types'
-import type { ToolbarFile } from '@components'
+import type { CodeFileTab } from '@components'
 import { projectUploadStarter, defaultStarter } from '@lib/defaultStarter'
 
 interface ModeOptions {
@@ -67,7 +67,7 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions }: ModeOp
     const safeStudentIndex = rawStudentIndex < studentFiles.length ? rawStudentIndex : 0
     const safeSolutionIndex = solutionFiles && rawSolutionIndex < solutionFiles.length ? rawSolutionIndex : 0
 
-    const tabFiles: ToolbarFile[] = useMemo(() => {
+    const tabFiles: CodeFileTab[] = useMemo(() => {
         if (isVisible && solutionFiles) {
             return solutionFiles.map(f => ({ name: f.name, variant: 'solution' as const }))
         }
