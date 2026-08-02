@@ -24,7 +24,6 @@ import {
   PANEL_TAB_BASE_CLASS,
   PANEL_TAB_ACTIVE_CLASS,
   PANEL_TAB_IDLE_CLASS,
-  PANEL_TAB_UNDERLINE_CLASS,
   PANEL_SUBMISSIONS_EMPTY_CLASS,
   PANEL_SUBMISSIONS_LIST_CLASS,
 } from '@components/AssignmentPanel/AssignmentPanel.constants'
@@ -107,7 +106,6 @@ export default function TeacherAssignmentPanel({
                 {submissions.length}
               </span>
             )}
-            {activeTab === tab && <span className={PANEL_TAB_UNDERLINE_CLASS} />}
           </button>
         ))}
       </div>

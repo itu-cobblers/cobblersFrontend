@@ -8,8 +8,7 @@ import {
     FILE_TAB_BASE_CLASS,
     FILE_TAB_ACTIVE_CLASS,
     FILE_TAB_IDLE_CLASS,
-    FILE_TAB_UNDERLINE_CLASS,
-    RUN_BUTTON_CLASS, FILE_TAB_READ_ONLY_LABEL_CLASS,
+      RUN_BUTTON_CLASS, FILE_TAB_READ_ONLY_LABEL_CLASS,
 } from './CodeFileTabs.constants'
 
 export default function CodeFileTabs({
@@ -36,9 +35,6 @@ export default function CodeFileTabs({
                         >
                             <Icon name="code" />
                             {file.name}
-                            {isActive && (
-                                <span className={FILE_TAB_UNDERLINE_CLASS} />
-                            )}
                         </button>
                     )
                 })}

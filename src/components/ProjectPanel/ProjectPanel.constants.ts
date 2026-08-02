@@ -3,10 +3,10 @@
 // between assignment kinds doesn't jar, but there's no run output here: the
 // content is a big upload dropzone instead, and no Run button (see
 // CodeFileTabs, which omits it for this kind).
-export const PROJECT_PANEL_CLASS = 'flex h-[40%] shrink-0 flex-col border-t border-terminal-line bg-terminal font-mono'
+export const PROJECT_PANEL_CLASS = 'flex h-[40%] shrink-0 flex-col bg-terminal font-mono'
 
 export const PROJECT_HEADER_CLASS =
-  'flex shrink-0 items-center justify-between border-b border-terminal-line px-3.5 py-1.5 text-[11px] uppercase tracking-[0.8px] text-terminal-muted'
+  'flex shrink-0 items-center justify-between px-3.5 py-1.5 text-[11px] uppercase tracking-[0.8px] text-terminal-muted'
 
 export const PROJECT_HEADER_LEFT_CLASS = 'flex items-center gap-2'
 

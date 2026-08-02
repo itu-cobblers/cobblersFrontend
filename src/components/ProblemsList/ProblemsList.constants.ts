@@ -1,7 +1,7 @@
 import type { AssignmentKind } from '@types'
 
 export const LIST_CLASS_BASE =
-  'flex h-full shrink-0 flex-col overflow-hidden border-r border-border bg-card transition-all duration-200 ease-out'
+  'flex h-full shrink-0 flex-col overflow-hidden bg-card transition-all duration-200 ease-out'
 
 export const LIST_CLASS_OPEN = 'w-64'
 
@@ -30,7 +30,7 @@ export const LIST_TOGGLE_CLASS = 'rounded p-1 text-muted-foreground normal-case 
  * to sit. `items-stretch` lets the tab fill the row so its active underline
  * lands on the row's own bottom border.
  */
-export const LIST_RAIL_TABS_CLASS = 'flex h-10 shrink-0 items-stretch border-b border-border'
+export const LIST_RAIL_TABS_CLASS = 'flex h-10 shrink-0 items-stretch'
 
 export const LIST_RAIL_TABS_OPEN_CLASS = 'pr-1'
 
@@ -46,8 +46,6 @@ export const LIST_RAIL_TAB_BASE_CLASS =
 export const LIST_RAIL_TAB_ACTIVE_CLASS = 'text-foreground'
 
 export const LIST_RAIL_TAB_IDLE_CLASS = 'text-muted-foreground hover:text-foreground'
-
-export const LIST_RAIL_TAB_UNDERLINE_CLASS = 'absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-black'
 
 export const LIST_RAIL_TAB_LABEL_CLASS = 'truncate normal-case tracking-normal'
 
@@ -79,7 +77,7 @@ export const LIST_ITEM_TITLE_CLASS = 'mt-0.5 truncate text-[13px] leading-tight'
 
 export const LIST_ITEM_LIVE_CLASS = 'ml-auto text-[9px] uppercase tracking-widest bg-accent text-white px-2 rounded-md'
 
-export const LIST_FOOTER_CLASS = 'flex items-center justify-center gap-3 border-t border-border px-4 py-2 text-[10px]'
+export const LIST_FOOTER_CLASS = 'flex items-center justify-center gap-3 px-4 py-2 text-[10px]'
 
 // Footer action bar pinned to the bottom of the rail — just Leave/Exit now
 // that "My Progress" lives inline as the History tab above.

@@ -15,7 +15,6 @@ import {
   LIST_RAIL_TAB_BASE_CLASS,
   LIST_RAIL_TAB_ACTIVE_CLASS,
   LIST_RAIL_TAB_IDLE_CLASS,
-  LIST_RAIL_TAB_UNDERLINE_CLASS,
   LIST_RAIL_TAB_LABEL_CLASS,
   LIST_HISTORY_LOADING_CLASS,
   LIST_ITEMS_CLASS,
@@ -92,7 +91,6 @@ export default function ProblemsList({
             {isOpen && tab === 'session' && (
               <span className={LIST_COUNT_CLASS}>{formatPassedRatio(sessionItems)}</span>
             )}
-            {activeTab === tab && <span className={LIST_RAIL_TAB_UNDERLINE_CLASS} />}
           </button>
         ))}
 

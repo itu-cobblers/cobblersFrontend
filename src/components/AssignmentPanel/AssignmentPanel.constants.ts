@@ -1,5 +1,5 @@
 // 4:6 split with the editor column (STUDENT_EDITOR_COLUMN_CLASS / PROJECT_PANEL_CLASS) — description gets 4, code gets 6.
-export const PANEL_CLASS = 'flex min-w-0 flex-[4] flex-col overflow-hidden border-r border-border bg-card'
+export const PANEL_CLASS = 'flex min-w-0 flex-[4] flex-col overflow-hidden bg-card'
 
 export const PANEL_SCROLL_CLASS = 'flex-1 overflow-y-auto px-5 py-4'
 
@@ -34,7 +34,7 @@ export const PANEL_HINT_BODY_CLASS = 'mt-1.5'
 
 export const PANEL_HINT_CODE_CLASS = 'font-mono text-[11px] text-foreground'
 
-export const PANEL_TABS_CLASS = 'flex h-10 shrink-0 items-stretch gap-1 border-b border-border px-3'
+export const PANEL_TABS_CLASS = 'flex h-10 shrink-0 items-stretch gap-1 px-3'
 
 export const PANEL_TAB_BASE_CLASS = 'relative flex h-full items-center px-3 text-sm transition-colors'
 
@@ -42,13 +42,11 @@ export const PANEL_TAB_ACTIVE_CLASS = 'text-foreground'
 
 export const PANEL_TAB_IDLE_CLASS = 'text-muted-foreground hover:text-foreground'
 
-export const PANEL_TAB_UNDERLINE_CLASS = 'absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-black'
-
 export const PANEL_TAB_COUNT_CLASS = 'ml-2 rounded bg-muted px-1.5 text-[10px]'
 
 export const PANEL_SUBMISSIONS_EMPTY_CLASS =
   'flex h-full flex-col items-center justify-center text-center text-sm text-muted-foreground'
 
-export const PANEL_SUBMISSIONS_LIST_CLASS = 'divide-y divide-border rounded-md border border-border'
+export const PANEL_SUBMISSIONS_LIST_CLASS = 'rounded-md'
 
 

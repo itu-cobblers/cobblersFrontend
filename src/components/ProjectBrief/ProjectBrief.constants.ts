@@ -12,7 +12,7 @@ export const BRIEF_PDF_LINK_CLASS =
 // Sized off the PDF's own aspect ratio (US Letter) rather than a fixed
 // viewport height, so it scales with the panel's actual width instead of
 // over/underflowing it — `max-h` only steps in as a ceiling on short windows.
-export const BRIEF_PDF_FRAME_CLASS = 'aspect-[8.5/11] h-[80vh]  w-full rounded-md border border-border bg-white'
+export const BRIEF_PDF_FRAME_CLASS = 'aspect-[8.5/11] h-[80vh]  w-full rounded-md bg-white'
 
 // Best-effort PDF-viewer open-params (honored by Chromium's built-in PDF
 // viewer, ignored harmlessly elsewhere): hide the toolbar/title bar, collapse
