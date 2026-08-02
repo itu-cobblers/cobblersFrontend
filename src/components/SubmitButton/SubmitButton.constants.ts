@@ -1,5 +1,4 @@
 import type { IconName } from '@components'
-import { TYPOGRAPHY_LEVELS } from '@constants'
 import type { SubmitButtonStatus } from './SubmitButton.types'
 
 /** How long a landed success/error result holds before the button relaxes back to idle. */
@@ -31,9 +30,9 @@ export const SUBMIT_BUTTON_BG_CLASS: Record<SubmitButtonStatus, string> = {
 }
 
 export const SUBMIT_BUTTON_CLASS =
-  `relative inline-flex h-10 min-w-[128px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg px-2 text-primary-foreground transition-colors duration-300 disabled:cursor-not-allowed ${TYPOGRAPHY_LEVELS.bodyStrong.tailwindClass}`
+  `relative inline-flex h-[29px] min-w-[90px] cursor-pointer items-center justify-center gap-1.5 overflow-hidden rounded-lg px-2 text-primary-foreground transition-colors duration-300 disabled:cursor-not-allowed text-xs font-medium`
 
 /** Waiting darkens the pill (still `bg-primary`, just dimmed) and blocks re-clicks. */
 export const SUBMIT_BUTTON_WAITING_CLASS = 'brightness-[0.6]'
 
-export const SUBMIT_BUTTON_ICON_WRAP_CLASS = 'flex h-5 w-5 items-center justify-center'
+export const SUBMIT_BUTTON_ICON_WRAP_CLASS = 'flex h-4 w-2 items-center justify-center'

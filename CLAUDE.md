@@ -54,16 +54,17 @@ src/
   types/                    # cross-cutting domain types (Assignment, ExecuteResult, Theme, …) + barrel
   components/               # PURE, reusable presentational components (visual props only)
     Button/ Spinner/ Icon/ Badge/ ProgressBar/ TextField/ Modal/ IconButton/ Toast/
-    CodeEditor/ CodeFileTabs/ FileTabs/ OutputPanel/ AssignmentPanel/ AssignmentStepper/
+    CodeEditor/ Toolbar/ FileTabs/ OutputPanel/ AssignmentPanel/ AssignmentStepper/
     FeedbackBanner/ SubmitButton/ ShowAnswerButton/ PredictPanel/ FileUpload/ ProjectPanel/
-    ProblemsList/ AssignmentSetPreview/                    # student side
+    ProjectBrief/ ProblemsList/ AssignmentSetPreview/      # student side
+    StudentWorkspace/       # the IDE itself — NOT pure; owns the workspace hooks (see below)
     TeacherAssignmentPanel/ TeacherProblemsList/ TeacherCodeViewer/ TeacherFollowBanner/
     AttendanceList/ StudentRoster/                         # teacher side
     index.ts                # barrel re-exporting every component + its types
   views/                    # page-level views — OWN state/business logic via co-located hooks
     EntryPortal/            # name + join/solo entry screen; rendered BY StudentView, not by main.tsx
-    StudentView/            # StudentView.tsx (entry vs IDE) + StudentIde.tsx (the workspace)
-                            #   useStudentSession = join/solo/rehydrate; useStudentWorkspace = the IDE
+    StudentView/            # StudentView.tsx (entry vs workspace) + StudentView.hooks.ts
+                            #   useStudentSession = join/solo/rehydrate
     TeacherGate/            # code-entry gate; useTeacherAuth
     TeacherDashboard/       # session + timer + roster; useTeacherSession
   hooks/                    # cross-cutting state hooks: useExecutor, useAssignments, useSubmission
@@ -85,8 +86,15 @@ src/
 
 **Gone, despite what older notes say:** `lib/mockApi.ts` (deleted in #15 — every seam now
 calls the real API and a failure surfaces as a failure), `lib/assignments.ts` (the legacy
-local bundle; content comes from the backend), and the `Toolbar`, `SubmitModal` and
-`StudentEntry` components (replaced by the view chrome, `SubmitButton`, and `EntryPortal`).
+local bundle; content comes from the backend), `StudentIde.tsx` (the workspace moved into
+`components/StudentWorkspace/`), and the `SubmitModal` / `StudentEntry` components
+(replaced by `SubmitButton` and `EntryPortal`).
+
+**`AssignmentFooter/` was deleted on `design-ITU-style`.** It used to sit under every panel
+carrying Submit, mark-as-done and reveal-answer. Submit + mark-as-done moved up into
+`Toolbar`; the reveal toggle moved into `AssignmentPanel` under the hint. Note `Toolbar` is
+a *different* component from the long-dead original of that name — it's `CodeFileTabs`
+renamed, since it now carries the actions as well as the tabs.
 
 ### Component folder layout (the strict convention)
 
@@ -104,18 +112,29 @@ distinction matters:
 
 - **`useStudentSession`** (`useStudentSession.ts`) — who you are and where: name, join-a-class
   vs solo, the SignalR join, rehydrating a persisted session. It decides whether
-  `StudentView.tsx` renders `EntryPortal` or `StudentIde`.
+  `StudentView.tsx` renders `EntryPortal` or `StudentWorkspace`.
 - **`useStudentWorkspace`** (`StudentView.hooks.ts`) — the IDE itself. Composes `useExecutor` /
   `useAssignments` / `useSubmission`, holds per-assignment `code` + feedback state, and shapes
   the props each component renders.
 
-**Layout (`StudentIde.tsx`), left to right — there is no Toolbar any more:** a full-height
-`ProblemsList` rail, then a content column holding an optional `TeacherFollowBanner` above a
-workspace split **4:6** — `AssignmentPanel` (lesson blocks, description, hint, pinned
-`FeedbackBanner`) against the editor column (`CodeFileTabs` when the assignment is multi-file,
-`CodeEditor`, then `OutputPanel` or `PredictPanel`). `ProjectPanel` replaces the whole editor
-column for `project` assignments. Two decorative layers (`bootit-grid`, `bootit-glow`) sit
-behind everything at `z-0`.
+`StudentWorkspace` splits its own concerns across four co-located hooks:
+`useLocalDrafts` (per-assignment draft persistence), `useWorkspaceMode` (which files the tabs
+show, what the editor holds, and whether it's read-only), `useWorkspaceProgress`, and
+`useWorkspaceSubmit`. `useAssignmentSolutions` fetches + caches reference answers and owns the
+per-assignment `isSolutionVisible` flag.
+
+**Layout (`StudentWorkspace.tsx`), left to right:** a full-height `ProblemsList` rail, then a
+content column holding an optional `TeacherFollowBanner` above a workspace split **4:6** —
+`AssignmentPanel` (lesson blocks, description, hint, the reveal-answer toggle, pinned
+`FeedbackBanner`) against the editor column (`Toolbar`, `CodeEditor`, then `OutputPanel` or
+`PredictPanel`). `ProjectPanel` replaces the terminal slot for `project` assignments. The
+`bootit-grid` / `bootit-glow` decorative layers are deleted from the TSX.
+
+**`Toolbar` renders for every assignment kind** — tabs on the left, actions on the right. Run
+appears only for `kind:'code'`; Submit always does. While a reference answer is open, Submit
+rebinds to "Mark As Done" (`onMarkAsDone`) and reuses its own status animation. Its `files` /
+`activeIndex` / `onSelectFile` / `onRun` props are all optional, so `predict` and `project`
+render Submit alone.
 
 Run flow: Run → `executor.run(code)` → `executeCode(code)` (`@lib/executeApi`) → `POST /api/execute` → `{ status, stdout, stderr }` → terminal shows `stdout` (falls back to `stderr`, then `"(no output)"`). Then it grades **generically** via the active assignment's `check({ code, output, stderr, exitCode })` (contract mapped: `stdout`→`output`, `status`→`exitCode`). On a passing verdict the assignment completes and `verdict.signals` merge into `signals`, which is handed to the active theme's `Scene`. The returned verdict also drives the **FeedbackBanner**: `verdict.message` (a beginner-friendly hint on failure) renders in the assignment panel — deliberately separate from the terminal so students can tell classroom guidance from real program output. Feedback is replaced on each run and cleared on assignment switch. No assignment- or theme-specific logic lives in the view — see the two boundaries below.
 
@@ -173,9 +192,16 @@ leftover mock behaviour: `fetchSubmissionHistory` resolves to an empty result an
 > / `--border` / `--input` / `--ring` / `--primary` are black, `--terminal` is white, all
 > shadows and `backdrop-blur` are removed, every `bg-card/NN` translucency is flat
 > `bg-card`, and all the `bootit-*` decorative layers (grid, glow, scanline, title
-> gradient, fake caret, teacher pulse) are deleted from the TSX. Still to do: fold the raw
-> `bg-black/NN` values into semantic tokens, decide on `--radius`, and restyle whatever
-> arrives from upstream unstyled.
+> gradient, fake caret, teacher pulse) are deleted from the TSX. The editor toolbar's Run
+> and Submit buttons were matched to each other by hand — both `h-[29px]`, `text-xs
+> font-medium`, `gap-1.5` — so `SUBMIT_BUTTON_CLASS` no longer derives its type scale from
+> `TYPOGRAPHY_LEVELS`. Still to do: fold the raw `bg-black/NN` values into semantic tokens,
+> decide on `--radius`, and restyle whatever arrives from upstream unstyled.
+>
+> **`TYPOGRAPHY_LEVELS` (in `palette.ts`) now has zero consumers app-wide.** `SubmitButton`
+> was its last one. Worth knowing before the next upstream merge: upstream's new
+> `Button.constants.ts` reintroduces it as `BUTTON_BASE_TYPOGRAPHY` *alongside* a literal
+> `text-[13px]` in `BUTTON_BASE_CLASS` — two competing font-size utilities on one element.
 
 **`src/index.css` (334 lines) is the entire design system.** Nothing else defines a colour.
 It was rebuilt in #21/#22 into a shadcn-style token set; the old `canvas`/`surface`/`panel`/
@@ -250,7 +276,7 @@ never hardcode hex outside `index.css`. No inline styles except genuinely dynami
 
 ## Roles
 
-Two views selected by URL path in `src/main.tsx`: `/teacher` → `TeacherGate` (code-entry, `VITE_TEACHER_CODE`) → `TeacherDashboard`; anything else → `StudentView`, which itself renders `EntryPortal` until a session is chosen and `StudentIde` after. **No router** — just a `pathname.startsWith('/teacher')` check. Teacher auth is a sessionStorage flag (`src/lib/teacherAuth.ts`); set `VITE_TEACHER_CODE` in `.env.local` (see `.env.example`).
+Two views selected by URL path in `src/main.tsx`: `/teacher` → `TeacherGate` (code-entry, `VITE_TEACHER_CODE`) → `TeacherDashboard`; anything else → `StudentView`, which itself renders `EntryPortal` until a session is chosen and `StudentWorkspace` after. **No router** — just a `pathname.startsWith('/teacher')` check. Teacher auth is a sessionStorage flag (`src/lib/teacherAuth.ts`); set `VITE_TEACHER_CODE` in `.env.local` (see `.env.example`).
 
 ## Git / current state
 
