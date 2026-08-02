@@ -39,10 +39,17 @@ describe('ProblemsList', () => {
     expect(screen.getByTitle('Session')).toHaveTextContent('3')
   })
 
-  it('keeps the count on the Session tab while History is the active tab', () => {
+  // The History tab is deliberately unrendered for now — but the view behind
+  // it still works, driven by activeTab from wherever we surface it next.
+  it('renders no History tab', () => {
+    render(createElement(ProblemsList, baseProps))
+    expect(screen.queryByTitle('History')).not.toBeInTheDocument()
+  })
+
+  it('still renders history items when activeTab is history, with no tab to reach it', () => {
     render(createElement(ProblemsList, { ...baseProps, activeTab: 'history' }))
-    expect(screen.getByTitle('Session')).toHaveTextContent('3')
-    expect(screen.getByTitle('History')).not.toHaveTextContent('2')
+    expect(screen.getByText('Yesterday quiz')).toBeInTheDocument()
+    expect(screen.queryByTitle('History')).not.toBeInTheDocument()
   })
 
   it('renders history items instead when the History tab is active', () => {
@@ -51,11 +58,11 @@ describe('ProblemsList', () => {
     expect(screen.queryByText('Predict this')).not.toBeInTheDocument()
   })
 
-  it('fires onTabChange when a rail tab is clicked', () => {
+  it('fires onTabChange when the Session tab is clicked, so history can be left', () => {
     const onTabChange = vi.fn()
-    render(createElement(ProblemsList, { ...baseProps, onTabChange }))
-    fireEvent.click(screen.getByTitle('History'))
-    expect(onTabChange).toHaveBeenCalledWith('history')
+    render(createElement(ProblemsList, { ...baseProps, activeTab: 'history', onTabChange }))
+    fireEvent.click(screen.getByTitle('Session'))
+    expect(onTabChange).toHaveBeenCalledWith('session')
   })
 
   it('shows a loading message on the History tab while loading', () => {
@@ -71,7 +78,7 @@ describe('ProblemsList', () => {
     expect(onSelect).toHaveBeenCalledWith(2)
   })
 
-  it('fires onToggleOpen from the collapse control in the session row', () => {
+  it('fires onToggleOpen from the collapse control in the tab strip', () => {
     const onToggleOpen = vi.fn()
     render(createElement(ProblemsList, { ...baseProps, onToggleOpen }))
     fireEvent.click(screen.getByLabelText('Collapse assignment list'))

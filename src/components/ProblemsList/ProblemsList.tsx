@@ -10,15 +10,15 @@ import {
   LIST_TOGGLE_CLASS,
   LIST_TOGGLE_LABEL,
   LIST_RAIL_TABS_CLASS,
+  LIST_RAIL_TABS_OPEN_CLASS,
+  LIST_RAIL_TABS_CLOSED_CLASS,
+  LIST_RAIL_TOGGLE_CLASS,
   LIST_RAIL_TAB_BASE_CLASS,
   LIST_RAIL_TAB_ACTIVE_CLASS,
   LIST_RAIL_TAB_IDLE_CLASS,
   LIST_RAIL_TAB_UNDERLINE_CLASS,
   LIST_RAIL_TAB_LABEL_CLASS,
   LIST_HISTORY_LOADING_CLASS,
-  LIST_SESSION_CLASS,
-  LIST_SESSION_OPEN_CLASS,
-  LIST_SESSION_CLOSED_CLASS,
   LIST_ITEMS_CLASS,
   LIST_ITEM_BASE_CLASS,
   LIST_ITEM_ACTIVE_CLASS,
@@ -43,7 +43,12 @@ const RAIL_TAB_LABEL: Record<ProblemsListTab, string> = {
   history: 'History',
 }
 
-const RAIL_TABS: ProblemsListTab[] = ['session', 'history']
+/**
+ * History has no tab for the moment — it wasn't earning its half of the row.
+ * The view itself is untouched: pass `activeTab: 'history'` and the rail
+ * renders `historyItems`. Re-add 'history' here to bring the tab back.
+ */
+const RAIL_TABS: ProblemsListTab[] = ['session']
 
 /**
  * The single left-hand rail: fold/unfold toggle, a Session/History
@@ -72,19 +77,11 @@ export default function ProblemsList({
   return (
     <aside className={classNames(LIST_CLASS_BASE, isOpen ? LIST_CLASS_OPEN : LIST_CLASS_CLOSED)}>
       <div
-        className={classNames(LIST_SESSION_CLASS, isOpen ? LIST_SESSION_OPEN_CLASS : LIST_SESSION_CLOSED_CLASS)}
+        className={classNames(
+          LIST_RAIL_TABS_CLASS,
+          isOpen ? LIST_RAIL_TABS_OPEN_CLASS : LIST_RAIL_TABS_CLOSED_CLASS,
+        )}
       >
-        <button
-          type="button"
-          onClick={onToggleOpen}
-          className={LIST_TOGGLE_CLASS}
-          aria-label={isOpen ? LIST_TOGGLE_LABEL.collapse : LIST_TOGGLE_LABEL.expand}
-        >
-          <Icon name={isOpen ? 'chevronsLeft' : 'chevronsRight'} />
-        </button>
-      </div>
-
-      <div className={LIST_RAIL_TABS_CLASS}>
         {isOpen && RAIL_TABS.map((tab) => (
           <button
             key={tab}
@@ -104,6 +101,15 @@ export default function ProblemsList({
             {activeTab === tab && <span className={LIST_RAIL_TAB_UNDERLINE_CLASS} />}
           </button>
         ))}
+
+        <button
+          type="button"
+          onClick={onToggleOpen}
+          className={classNames(LIST_TOGGLE_CLASS, LIST_RAIL_TOGGLE_CLASS)}
+          aria-label={isOpen ? LIST_TOGGLE_LABEL.collapse : LIST_TOGGLE_LABEL.expand}
+        >
+          <Icon name={isOpen ? 'chevronsLeft' : 'chevronsRight'} />
+        </button>
       </div>
 
       {activeTab === 'history' && isHistoryLoading ? (

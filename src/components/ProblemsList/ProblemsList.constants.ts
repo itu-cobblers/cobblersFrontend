@@ -17,19 +17,6 @@ export const LIST_HEADER_CLASS =
 
 export const LIST_HEADER_RIGHT_CLASS = 'ml-auto flex items-center gap-1.5'
 
-/**
- * Holds the collapse toggle alone — session identity moved to the AppHeader.
- * Always renders, even collapsed: it carries the only control that can
- * reopen the rail.
- */
-export const LIST_SESSION_CLASS =
-  'flex shrink-0 items-start gap-2 border-b border-border py-2 text-[11px] text-muted-foreground'
-
-export const LIST_SESSION_OPEN_CLASS = 'justify-end px-3'
-
-/** Collapsed, the toggle is all that's left, so it centres in the 48px rail. */
-export const LIST_SESSION_CLOSED_CLASS = 'justify-center px-1'
-
 export const LIST_COUNT_CLASS = 'rounded bg-muted px-1.5 py-0.5 text-[10px] normal-case tracking-normal'
 
 export const LIST_TOGGLE_CLASS = 'rounded p-1 text-muted-foreground normal-case tracking-normal transition-colors hover:bg-black/5'
@@ -38,7 +25,19 @@ export const LIST_TOGGLE_CLASS = 'rounded p-1 text-muted-foreground normal-case 
 // (this student's full cross-day submission history) — rendered as one
 // underlined tab pair right under the header, mirroring AssignmentPanel's
 // Description/Submissions tabs so the pattern reads consistently app-wide.
-export const LIST_RAIL_TABS_CLASS = 'flex shrink-0 border-b border-border'
+/**
+ * Session tab on the left, collapse toggle on the right where History used
+ * to sit. `items-stretch` lets the tab fill the row so its active underline
+ * lands on the row's own bottom border.
+ */
+export const LIST_RAIL_TABS_CLASS = 'flex h-10 shrink-0 items-stretch border-b border-border'
+
+export const LIST_RAIL_TABS_OPEN_CLASS = 'pr-1'
+
+/** Collapsed, the toggle is the only thing left in the row. */
+export const LIST_RAIL_TABS_CLOSED_CLASS = 'justify-center'
+
+export const LIST_RAIL_TOGGLE_CLASS = 'shrink-0 self-center'
 
 export const LIST_RAIL_TAB_BASE_CLASS =
   'relative flex flex-1 items-center justify-center gap-1.5 px-2 py-2.5 text-[11px] font-medium transition-colors'
