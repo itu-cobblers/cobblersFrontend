@@ -14,7 +14,7 @@ export default function AttendanceList({
       {/* Header */}
       <div className="flex h-10 shrink-0 items-center justify-between border-b border-divider px-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
         <span className="flex items-center gap-1.5 font-bold">
-          <Icon name="book" /> Students
+          <Icon name="users" /> Students
         </span>
         <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground/70">
           {students.length}

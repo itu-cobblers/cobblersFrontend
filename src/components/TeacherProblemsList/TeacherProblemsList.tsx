@@ -45,7 +45,6 @@ export default function TeacherProblemsList({
     <aside className={classNames(LIST_CLASS_BASE, TEACHER_LIST_CARD_CLASS, isOpen ? LIST_CLASS_OPEN : LIST_CLASS_CLOSED)}>
       {/* Header */}
       <div className={LIST_HEADER_CLASS}>
-        <Icon name="book" />
         {isOpen && 'Assignments'}
         <span className={LIST_HEADER_RIGHT_CLASS}>
           {isOpen && <span className={LIST_COUNT_CLASS}>{items.length}</span>}

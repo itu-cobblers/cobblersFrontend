@@ -53,6 +53,9 @@ export const RESULT_PANEL_CLASS =
   'flex h-[35%] shrink-0 flex-col overflow-hidden border-t border-divider bg-terminal font-mono text-xs text-term-ink'
 export const RESULT_HEADER_CLASS =
   'flex h-8 shrink-0 items-center justify-between border-b border-divider px-4 text-[11px] uppercase tracking-wider text-muted-foreground'
+/** Matches OUTPUT_HEADER_LEFT_CLASS on the student terminal. */
+export const RESULT_HEADER_LEFT_CLASS = 'flex items-center gap-2'
+
 export const RESULT_STATUS_BASE_CLASS = 'text-[10px] font-bold'
 export const RESULT_STATUS_ERROR_CLASS = 'text-status-error'
 export const RESULT_STATUS_OK_CLASS = 'text-status-success'

@@ -69,6 +69,14 @@ const ICONS: Record<IconName, ReactElement> = {
       <path d="M2.5 2.5 7 7l-4.5 4.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   ),
+  users: (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true">
+      <circle cx="5.4" cy="5" r="2.3" />
+      <path d="M1.6 12c0-2.1 1.7-3.5 3.8-3.5S9.2 9.9 9.2 12" strokeLinecap="round" />
+      <path d="M9.6 3c1.2 0 2.1.9 2.1 2.1S10.8 7.2 9.6 7.2" strokeLinecap="round" />
+      <path d="M10.4 8.8c1.3.3 2.2 1.4 2.2 3.2" strokeLinecap="round" />
+    </svg>
+  ),
   chevronDown: (
     <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
       <path d="M2.5 5 7 9.5 11.5 5" strokeLinecap="round" strokeLinejoin="round" />

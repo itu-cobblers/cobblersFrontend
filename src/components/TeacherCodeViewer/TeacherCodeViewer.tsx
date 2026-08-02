@@ -30,6 +30,7 @@ import {
   ANSWER_FOOTER_CLASS,
   RESULT_PANEL_CLASS,
   RESULT_HEADER_CLASS,
+  RESULT_HEADER_LEFT_CLASS,
   RESULT_STATUS_BASE_CLASS,
   RESULT_STATUS_ERROR_CLASS,
   RESULT_STATUS_OK_CLASS,
@@ -105,7 +106,7 @@ export default function TeacherCodeViewer({
                   onClick={() => onSelectFile?.(index)}
                   className={classNames(TAB_BASE_CLASS, index === activeFileIndex ? TAB_ACTIVE_CLASS : TAB_IDLE_CLASS)}
                 >
-                  <Icon name="book" />
+                  <Icon name="code" />
                   {file.name}
                 </button>
               ))}
@@ -160,7 +161,10 @@ export default function TeacherCodeViewer({
       {isCode && (
         <div className={RESULT_PANEL_CLASS}>
           <div className={RESULT_HEADER_CLASS}>
-            <span>Execution Output</span>
+            <span className={RESULT_HEADER_LEFT_CLASS}>
+              <Icon name="terminal" />
+              Execution Output
+            </span>
             {result?.status && (
               <span
                 className={classNames(
