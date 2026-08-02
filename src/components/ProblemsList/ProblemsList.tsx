@@ -21,7 +21,6 @@ import {
   LIST_ITEM_BASE_CLASS,
   LIST_ITEM_ACTIVE_CLASS,
   LIST_ITEM_IDLE_CLASS,
-  LIST_ITEM_ACCENT_BAR_CLASS,
   LIST_ITEM_META_CLASS,
   LIST_ITEM_KIND_BADGE_CLASS,
   LIST_ITEM_TITLE_CLASS,
@@ -123,7 +122,6 @@ export default function ProblemsList({
                     { '--foreground/60': isTeacherFocus },
                   )}
                 >
-                  {isActive && <span className={LIST_ITEM_ACCENT_BAR_CLASS} />}
                   <StatusBadge status={item.status} size="s" />
                   {isOpen && (
                     <div className="min-w-0 flex-1">

@@ -66,6 +66,7 @@ export const LIST_ITEM_ACTIVE_CLASS = 'bg-black/[0.06] text-foreground'
 
 export const LIST_ITEM_IDLE_CLASS = 'text-muted-foreground hover:bg-black/[0.03] hover:text-foreground'
 
+/** Kept for `TeacherProblemsList`; the student rail marks the active row with fill alone. */
 export const LIST_ITEM_ACCENT_BAR_CLASS = 'absolute inset-y-1 left-0 w-0.5 rounded-r bg-accent'
 
 export const LIST_ITEM_META_CLASS = 'flex items-center gap-1.5 text-[11px] font-mono text-foreground/40'
