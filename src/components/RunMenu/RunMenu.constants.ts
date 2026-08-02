@@ -16,12 +16,16 @@ export const RUN_MENU_PLAY_CLASS =
 export const RUN_MENU_CHEVRON_CLASS =
   `flex ${BUTTON_HEIGHT_CLASS} w-7 cursor-pointer items-center justify-center bg-primary transition-colors hover:bg-primary/85`
 
-/** Anchored to the right so it can't run off the edge of the rail. */
+/**
+ * Anchored right so it can't run off the edge of the rail. Black on white,
+ * matching the button it drops out of — so no grey outline, which would read
+ * as a seam around a solid block.
+ */
 export const RUN_MENU_LIST_CLASS =
-  'absolute right-0 top-full z-30 mt-1 min-w-[160px] overflow-hidden rounded-md border border-divider bg-background py-1'
+  'absolute right-0 top-full z-30 mt-1 min-w-[160px] overflow-hidden rounded-md bg-foreground py-1'
 
 export const RUN_MENU_ITEM_CLASS =
-  'flex w-full cursor-pointer items-center gap-2 px-3 py-1.5 text-left text-sm text-foreground transition-colors hover:bg-black/[0.06] disabled:cursor-not-allowed disabled:opacity-40'
+  'flex w-full cursor-pointer items-center gap-2 px-3 py-1.5 text-left text-sm text-background transition-colors hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-40'
 
 export const RUN_MENU_LABEL = {
   run: 'Run',
