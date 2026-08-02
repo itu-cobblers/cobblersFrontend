@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { ExecuteRequest, ExecuteResult, ExecuteStatus } from '@types'
-import { executeCode } from '@lib/executeApi'
+import { executeCode } from '@/api/executeApi.ts'
 
 export interface UseExecutor {
   output: string

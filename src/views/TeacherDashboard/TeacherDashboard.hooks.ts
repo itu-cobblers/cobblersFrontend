@@ -1,23 +1,24 @@
 import { useEffect, useState } from 'react'
-import type { Assignment, SourceFile } from '@types'
-import { createSession, getSession, startTimer, endSession } from '@lib/sessionApi'
-import { fetchAssignmentSets, fetchAssignmentSet, type AssignmentSetSummary } from '@lib/assignmentSetApi'
-import { groupAssignments } from '@lib/assignmentSet'
-import { observeSession, focusAssignment, type Student } from '@lib/sessionHub'
+import type {Assignment, AssignmentSetSummary, SourceFile, Student} from '@types'
+import { createSession, getSession, startTimer, endSession } from '@/api/sessionApi.ts'
+import { fetchAssignmentSets, fetchAssignmentSet } from '@/api/assignmentSetApi.ts'
+import { observeSession, focusAssignment } from '@/api/sessionHub.ts'
 import { revokeTeacher } from '@lib/teacherAuth'
-import { fetchAssignmentSolution } from '@lib/submissionApi'
+import { fetchAssignmentSolution } from '@/api/submissionApi.ts'
 import {
   getPersistedTeacherSession,
   setPersistedTeacherSession,
   clearPersistedTeacherSession,
 } from '@lib/teacherSession'
-import type { RosterEntry, AssignmentSetPreviewGroup } from '@components'
+import type { RosterEntry } from '@components'
 
 /** Owns the teacher session + timer lifecycle, the request state, and the live roster. */
 export function useTeacherSession() {
   const [assignmentSets, setAssignmentSets] = useState<AssignmentSetSummary[]>([])
   const [selectedAssignmentSetId, setSelectedAssignmentSetId] = useState('')
-  const [previewGroups, setPreviewGroups] = useState<AssignmentSetPreviewGroup[]>([])
+  const [previewAssignments, setPreviewAssignments] = useState<
+      Pick<Assignment, 'id' | 'title' | 'kind' | 'description' | 'hint'>[]
+  >([])
   const [previewTitle, setPreviewTitle] = useState('')
   // Full assignment objects (incl. starter/starterFiles) — the flattened preview
   // items above only carry the fields the read-only AssignmentSetPreview needs.
@@ -80,26 +81,24 @@ export function useTeacherSession() {
     if (!selectedAssignmentSetId) return
     let cancelled = false
     fetchAssignmentSet(selectedAssignmentSetId)
-      .then((assignmentSet) => {
-        if (cancelled) return
-        setPreviewTitle(assignmentSet.displayTitle)
-        setAssignments(assignmentSet.assignments)
-        setPreviewGroups(
-          groupAssignments(assignmentSet.assignments, 'Assignments').map((group) => ({
-            label: group.label,
-            items: group.items.map((assignment) => ({
-              id: assignment.id,
-              title: assignment.title,
-              kind: assignment.kind,
-              description: assignment.description,
-              hint: assignment.hint,
-            })),
-          })),
-        )
-      })
-      .catch((err: unknown) => {
-        console.warn('[teacher] fetchAssignmentSet failed:', err instanceof Error ? err.message : String(err))
-      })
+        .then((assignmentSet) => {
+          if (cancelled) return
+          setPreviewTitle(assignmentSet.displayTitle)
+          setAssignments(assignmentSet.assignments)
+
+          setPreviewAssignments(
+              assignmentSet.assignments.map((assignment) => ({
+                id: assignment.id,
+                title: assignment.title,
+                kind: assignment.kind,
+                description: assignment.description,
+                hint: assignment.hint,
+              }))
+          )
+        })
+        .catch((err: unknown) => {
+          console.warn('[teacher] fetchAssignmentSet failed:', err instanceof Error ? err.message : String(err))
+        })
     return () => {
       cancelled = true
     }
@@ -136,7 +135,7 @@ export function useTeacherSession() {
   }
 
   function previewCount() {
-    return previewGroups.reduce((sum, group) => sum + group.items.length, 0) || 1
+    return previewAssignments.length || 1
   }
 
   async function handleCreateSession() {
@@ -183,11 +182,11 @@ export function useTeacherSession() {
   const [selectedAssignmentIdRaw, setSelectedAssignmentIdRaw] = useState<number | null>(null)
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null)
 
-  const previewAssignmentIds = previewGroups.flatMap((group) => group.items.map((item) => item.id))
+  const previewAssignmentIds = previewAssignments.map((item) => item.id)
   const selectedAssignmentId =
-    selectedAssignmentIdRaw !== null && previewAssignmentIds.includes(selectedAssignmentIdRaw)
-      ? selectedAssignmentIdRaw
-      : previewAssignmentIds[0] ?? null
+      selectedAssignmentIdRaw !== null && previewAssignmentIds.includes(selectedAssignmentIdRaw)
+          ? selectedAssignmentIdRaw
+          : previewAssignmentIds[0] ?? null
 
   function handleSelectAssignment(id: number) {
     setSelectedAssignmentIdRaw(id)
@@ -280,7 +279,7 @@ export function useTeacherSession() {
     assignmentSets,
     selectedAssignmentSetId,
     onAssignmentSetChange: setSelectedAssignmentSetId,
-    previewGroups,
+    previewAssignments,
     previewTitle,
     assignments,
     sessionCode,

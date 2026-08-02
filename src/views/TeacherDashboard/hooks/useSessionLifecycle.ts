@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { createSession, getSession, startTimer, endSession } from '@lib/sessionApi.ts'
+import { createSession, getSession, startTimer, endSession } from '@/api/sessionApi.ts'
 import { getPersistedTeacherSession, setPersistedTeacherSession, clearPersistedTeacherSession } from '@lib/teacherSession.ts'
 
 export function useSessionLifecycle(onRestoreSetId: (id: string) => void) {

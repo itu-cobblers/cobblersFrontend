@@ -1,7 +1,7 @@
 import {useCallback, useEffect, useState} from 'react'
 import type {Assignment, AssignmentSet, SourceFile, SubmissionHistoryItem} from '@types'
-import { fetchAssignmentSolution } from '@lib/submissionApi'
-import {fetchAssignmentsByIds} from "@lib/assignmentSetApi.ts";
+import { fetchAssignmentSolution } from '@/api/submissionApi.ts'
+import {fetchAssignmentsByIds} from "@/api/assignmentSetApi.ts";
 
 function normalizeSolution(solution: string | SourceFile[] | null): SourceFile[] | null {
     if (solution == null) return null

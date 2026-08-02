@@ -26,7 +26,7 @@ import { useAssignmentData } from './hooks/useAssignmentData.ts'
 import { useWorkspaceMode } from './hooks/useWorkspaceMode'
 import { useWorkspaceSubmit } from './hooks/useWorkspaceSubmit'
 import type { AssignmentSet, SubmissionHistoryItem, SubmissionDetails } from '@types'
-import {fetchSubmissionDetailsById} from "@lib/submissionApi.ts";
+import {fetchSubmissionDetailsById} from "@/api/submissionApi.ts";
 
 interface StudentWorkspaceProps {
     assignmentSet: AssignmentSet
