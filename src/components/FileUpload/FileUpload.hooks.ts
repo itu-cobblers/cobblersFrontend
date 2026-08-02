@@ -8,7 +8,7 @@ import { readSourceFiles } from './FileUpload.utils'
  * path. `isDragActive` is purely visual (the dashed-border highlight while a
  * file is dragged over the zone).
  */
-export function useFileDropzone(onFilesChange: (files: SourceFile[]) => void) {
+export function useFileDropzone(onFilesChange: (incomingFiles: SourceFile[]) => void) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [isDragActive, setIsDragActive] = useState(false)
 

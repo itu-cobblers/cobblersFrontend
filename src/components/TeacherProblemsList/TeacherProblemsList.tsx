@@ -1,9 +1,7 @@
 import { useState } from 'react'
 import classNames from 'classnames'
 import { Icon } from '@components/Icon'
-import type { IconName } from '@components/Icon'
-import type { ProblemStatus } from '@components/ProblemsList/ProblemsList.types'
-import { TextField, Button } from '@components'
+import {TextField, Button, StatusBadge} from '@components'
 import type { TeacherProblemsListProps, TeacherProblemItem } from './TeacherProblemsList.types'
 import {
   LIST_CLASS_BASE,
@@ -20,7 +18,6 @@ import {
   LIST_ITEM_ACCENT_BAR_CLASS,
   LIST_ITEM_KIND_BADGE_CLASS,
   LIST_ITEM_TITLE_CLASS,
-  LIST_STATUS_DOT_CLASS,
   KIND_LABEL,
 } from '@components/ProblemsList/ProblemsList.constants'
 import {
@@ -46,19 +43,6 @@ import {
   FOOTER_BUTTON_CLASS,
 } from './TeacherProblemsList.constants'
 
-const STATUS_ICON: Record<ProblemStatus, IconName> = {
-  passed: 'check',
-  failed: 'x',
-  untried: 'circle',
-}
-
-function StatusDot({ status }: { status: ProblemStatus }) {
-  return (
-    <span className={LIST_STATUS_DOT_CLASS[status]}>
-      <Icon name={STATUS_ICON[status]} />
-    </span>
-  )
-}
 
 function formatTimerEnds(endsAt: string): string {
   try {
@@ -168,7 +152,7 @@ export default function TeacherProblemsList({
                 {isActive && <span className={LIST_ITEM_ACCENT_BAR_CLASS} />}
 
                 {item.studentStatus ? (
-                  <StatusDot status={item.studentStatus} />
+                  <StatusBadge status={item.studentStatus} />
                 ) : (
                   <span className={ITEM_NUMBER_BADGE_CLASS}>#{item.id}</span>
                 )}

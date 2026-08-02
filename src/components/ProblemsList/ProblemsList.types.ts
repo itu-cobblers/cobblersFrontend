@@ -1,6 +1,6 @@
 import type { AssignmentKind } from '@types'
 
-export type ProblemStatus = 'untried' | 'failed' | 'passed'
+import type {ProblemStatus} from "@components/StatusBadge";
 
 /** Which of the two rail tabs is showing. */
 export type ProblemsListTab = 'session' | 'history'

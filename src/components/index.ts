@@ -4,8 +4,8 @@ export type { SpinnerProps, SpinnerVariant } from './Spinner'
 export { Icon } from './Icon'
 export type { IconName, IconProps } from './Icon'
 
-export { Badge } from './Badge'
-export type { BadgeProps, BadgeTone } from './Badge'
+export { StatusBadge } from './StatusBadge'
+export type { StatusBadgeProps, ProblemStatus } from './StatusBadge'
 
 export { ProgressBar, getProgressPercent } from './ProgressBar'
 export type { ProgressBarProps } from './ProgressBar'
@@ -40,15 +40,6 @@ export type { ProjectPanelProps } from './ProjectPanel'
 export { CodeEditor, useCodeEditorSetup } from './CodeEditor'
 export type { CodeEditorProps } from './CodeEditor'
 
-export { FileTabs } from './FileTabs'
-export type { FileTabsProps } from './FileTabs'
-
-export { AssignmentStepper } from './AssignmentStepper'
-export type { AssignmentStepperProps, StepperStep } from './AssignmentStepper'
-
-export { FeedbackBanner } from './FeedbackBanner'
-export type { FeedbackBannerProps, FeedbackTone } from './FeedbackBanner'
-
 export { AssignmentPanel } from './AssignmentPanel'
 export type { AssignmentPanelProps, AssignmentPanelTab } from './AssignmentPanel'
 
@@ -56,7 +47,7 @@ export { ProjectBrief } from './ProjectBrief'
 export type { ProjectBriefProps } from './ProjectBrief'
 
 export { ProblemsList, formatAttemptTime, describeSource } from './ProblemsList'
-export type { ProblemsListProps, ProblemListItem, ProblemStatus, ProblemsListTab } from './ProblemsList'
+export type { ProblemsListProps, ProblemListItem, ProblemsListTab } from './ProblemsList'
 
 export { TeacherFollowBanner } from './TeacherFollowBanner'
 export type { TeacherFollowBannerProps } from './TeacherFollowBanner'

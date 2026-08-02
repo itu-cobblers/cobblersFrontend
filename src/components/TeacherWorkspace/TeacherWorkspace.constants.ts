@@ -1,0 +1,1 @@
+export const TEACHER_BODY_CLASS = 'relative z-10 flex flex-1 overflow-hidden'

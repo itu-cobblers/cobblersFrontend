@@ -1,23 +1,7 @@
 import classNames from 'classnames'
 import { Icon } from '@components/Icon'
-import type { IconName } from '@components/Icon'
-import type { ProblemStatus } from '@components/ProblemsList/ProblemsList.types'
 import type { AttendanceListProps, AttendanceStudent } from './AttendanceList.types'
-import { LIST_STATUS_DOT_CLASS } from '@components/ProblemsList/ProblemsList.constants'
-
-const STATUS_ICON: Record<ProblemStatus, IconName> = {
-  passed: 'check',
-  failed: 'x',
-  untried: 'circle',
-}
-
-function StatusDot({ status }: { status: ProblemStatus }) {
-  return (
-    <span className={LIST_STATUS_DOT_CLASS[status]}>
-      <Icon name={STATUS_ICON[status]} />
-    </span>
-  )
-}
+import {StatusBadge} from "@/components";
 
 export default function AttendanceList({
   students,
@@ -73,7 +57,7 @@ export default function AttendanceList({
                   </div>
 
                   {student.assignmentStatus && (
-                    <StatusDot status={student.assignmentStatus} />
+                    <StatusBadge status={student.assignmentStatus} />
                   )}
                 </button>
               </li>

@@ -1,8 +1,6 @@
 import { Icon } from '@components/Icon'
 import { FileUpload } from '@components/FileUpload'
-import { AssignmentFooter } from '@components/AssignmentFooter'
 import type { ProjectPanelProps } from './ProjectPanel.types'
-import { getProjectSubmitStatus } from './ProjectPanel.utils'
 import {
   PROJECT_PANEL_CLASS,
   PROJECT_HEADER_CLASS,
@@ -23,12 +21,6 @@ export default function ProjectPanel({
   files,
   onFilesChange,
   hasSubmitted,
-  isSubmitting,
-  lastSubmitPassed,
-  onSubmit,
-  isLoadingSolution,
-  isSolutionVisible,
-  onToggleSolution,
 }: ProjectPanelProps) {
   return (
     <div className={PROJECT_PANEL_CLASS}>
@@ -51,15 +43,6 @@ export default function ProjectPanel({
             : 'Upload your .java files (including a Main) — edit them in the tabs above if you need to. Submit to save your attempt and unlock the reference answer.'}
         </span>
       </div>
-      <AssignmentFooter
-        submitStatus={getProjectSubmitStatus(isSubmitting, lastSubmitPassed)}
-        onSubmit={onSubmit}
-        isSubmitDisabled={files.length === 0}
-        canRevealAnswer={hasSubmitted}
-        isSolutionVisible={isSolutionVisible}
-        isLoadingSolution={isLoadingSolution}
-        onToggleSolution={onToggleSolution}
-      />
     </div>
   )
 }

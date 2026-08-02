@@ -1,4 +1,4 @@
-import type { SourceFile, SubmissionResult, SubmissionHistoryItem, SolutionResult } from '@types'
+import type { SourceFile, SubmissionResult, SubmissionHistoryItem, SolutionResult, SubmissionDetails } from '@types'
 import { getStudentId } from './identity'
 
 /**
@@ -41,12 +41,6 @@ export async function submitAssignment({
  * history") — every submission this student has ever made, across all 3 days
  * and both solo/room modes. Drives the "My Progress" review panel and the
  * cross-reload/cross-day completed-assignment state.
- *
- * ⚠️ Not implemented on the backend yet (see STORIES.md S5) — this resolves
- * to `[]` on any failure (network error, 404, ...) so the rest of the app
- * behaves exactly as if the student had no history yet, instead of breaking.
- * Remove this fallback once the endpoint is live and 404 no longer means
- * "not built" vs. "genuinely no submissions".
  */
 export async function fetchSubmissionHistory(studentId: string): Promise<SubmissionHistoryItem[]> {
   try {
@@ -56,6 +50,17 @@ export async function fetchSubmissionHistory(studentId: string): Promise<Submiss
   } catch {
     return []
   }
+}
+
+export async function fetchSubmissionDetailsById(submissionId: string): Promise<SubmissionDetails | null> {
+  const res = await fetch(`/api/submissions/${submissionId}`)
+  if (res.status === 404) {
+    return null;
+  }
+  if (!res.ok) {
+    throw new Error(`API returned ${res.status}`)
+  }
+  return (await res.json()) as SubmissionDetails
 }
 
 /**

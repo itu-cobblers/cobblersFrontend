@@ -11,6 +11,6 @@ export function formatAttemptTime(iso: string): string {
 }
 
 /** "Solo" for a practice submission, otherwise the room's join code. */
-export function describeSource(sessionId: string | null): string {
+export function describeSource(sessionId: string | null | undefined): string {
   return sessionId ? `Room ${sessionId}` : 'Solo'
 }

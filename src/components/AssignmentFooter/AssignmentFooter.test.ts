@@ -47,8 +47,6 @@ describe('AssignmentFooter', () => {
         canRevealAnswer: true,
         isSolutionVisible: true,
         onToggleSolution: vi.fn(),
-        canMarkAsDone: true,
-        onMarkAsDone,
       }),
     )
     expect(screen.queryByText('Marked as done')).not.toBeInTheDocument()
@@ -61,9 +59,6 @@ describe('AssignmentFooter', () => {
       createElement(AssignmentFooter, {
         submitStatus: 'idle',
         onSubmit: vi.fn(),
-        canMarkAsDone: true,
-        isMarkingDone: true,
-        onMarkAsDone: vi.fn(),
       }),
     )
     expect(screen.getByRole('button', { name: 'Submitting…' })).toBeDisabled()

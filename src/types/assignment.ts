@@ -26,27 +26,6 @@ export interface SourceFile {
   content: string
 }
 
-/**
- * Free-form, theme-agnostic payload an assignment broadcasts on success (e.g.
- * `{ studentName }`). The core never interprets it — values are `unknown`.
- */
-export type Signals = Record<string, unknown>
-
-/** Input handed to a code assignment's `check()` — `output` is stdout, `code` the editor text. */
-export interface CheckResult {
-  code: string
-  output: string
-  stderr: string
-  exitCode: number
-}
-
-/** Verdict returned by a code assignment's `check()`. */
-export interface Verdict {
-  passed: boolean
-  signals?: Signals
-  message?: string
-}
-
 interface AssignmentBase {
   /** Server-assigned assignment id — used as the active/completed key. */
   id: number
@@ -57,6 +36,7 @@ interface AssignmentBase {
   lesson?: LessonBlock[]
   hint?: string
   kind: AssignmentKind
+  solution?: string | SourceFile[] | null
 }
 
 /** Write-and-run Java assignment (coding exercises, incl. class-authoring). */
@@ -76,8 +56,6 @@ export interface CodeAssignment extends AssignmentBase {
   starterFiles?: SourceFile[]
   /** The class whose `main` is run/submitted when `starterFiles` is set. */
   entryClass?: string
-  /** Passing criteria. Omit ⇒ never auto-completes. */
-  check?: (result: CheckResult) => Verdict
 }
 
 /** Predict-the-output quiz: read-only snippet, student types the expected output. */

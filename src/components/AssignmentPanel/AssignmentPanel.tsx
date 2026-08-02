@@ -1,7 +1,4 @@
 import classNames from 'classnames'
-import { AssignmentStepper } from '@components/AssignmentStepper'
-import { FeedbackBanner } from '@components/FeedbackBanner'
-import { formatAttemptTime, describeSource } from '@components/ProblemsList'
 import { Icon } from '@components/Icon'
 import { ProjectBrief } from '@components/ProjectBrief'
 import type { AssignmentPanelProps, AssignmentPanelTab } from './AssignmentPanel.types'
@@ -29,12 +26,8 @@ import {
   PANEL_TAB_COUNT_CLASS,
   PANEL_SUBMISSIONS_EMPTY_CLASS,
   PANEL_SUBMISSIONS_LIST_CLASS,
-  PANEL_SUBMISSION_ROW_CLASS,
-  PANEL_SUBMISSION_BADGE_PASSED_CLASS,
-  PANEL_SUBMISSION_BADGE_FAILED_CLASS,
-  PANEL_SUBMISSION_TITLE_CLASS,
-  PANEL_SUBMISSION_META_CLASS,
 } from './AssignmentPanel.constants'
+import {SubmissionRow} from "@components/SubmissionRow";
 
 const TABS: AssignmentPanelTab[] = ['description', 'submissions']
 
@@ -50,9 +43,6 @@ const TAB_LABEL: Record<AssignmentPanelTab, string> = {
  * bottom, outside the scroll region.
  */
 export default function AssignmentPanel({
-  steps,
-  onSelectStep,
-  isStepperVisible = true,
   activeTab,
   onTabChange,
   submissions,
@@ -62,16 +52,13 @@ export default function AssignmentPanel({
   body,
   projectIdentity,
   hint,
-  feedback,
+  onViewSubmission,
+  viewingSubmissionId
 }: AssignmentPanelProps) {
   const [isHintExpanded, handleHintToggle] = useHintDisclosure(hint)
 
   return (
     <section className={PANEL_CLASS}>
-      <div className={classNames({ 'sr-only': !isStepperVisible })}>
-        <AssignmentStepper steps={steps} onSelect={onSelectStep} />
-      </div>
-
       <div className={PANEL_TABS_CLASS}>
         {TABS.map((tab) => (
           <button
@@ -142,39 +129,21 @@ export default function AssignmentPanel({
           ) : (
             <ul className={PANEL_SUBMISSIONS_LIST_CLASS}>
               {submissions.map((submission) => {
-                // `passed === null` (ungraded projects) and `true` both read as Accepted;
-                // only an explicit `false` is Not accepted.
-                const isFailed = submission.passed === false
                 return (
-                <li key={submission.subId} className={PANEL_SUBMISSION_ROW_CLASS}>
-                  <div className="flex items-center gap-3">
-                    <span
-                      className={
-                        isFailed
-                          ? PANEL_SUBMISSION_BADGE_FAILED_CLASS
-                          : PANEL_SUBMISSION_BADGE_PASSED_CLASS
-                      }
-                    >
-                      <Icon name={isFailed ? 'x' : 'check'} />
-                    </span>
-                    <div>
-                      <div className={PANEL_SUBMISSION_TITLE_CLASS}>
-                        {isFailed ? 'Not accepted' : 'Accepted'}
-                      </div>
-                      <div className={PANEL_SUBMISSION_META_CLASS}>
-                        {formatAttemptTime(submission.submittedAt)} · {describeSource(submission.sessionId)}
-                      </div>
-                    </div>
-                  </div>
-                </li>
+                    <SubmissionRow
+                        key={submission.subId}
+                        submission={submission}
+                        title="Submission"
+                        meta={submission.submittedAt}
+                        isActive={viewingSubmissionId === submission.subId}
+                        onClick={() => onViewSubmission?.(submission)}
+                    />
                 )
               })}
             </ul>
           )}
         </div>
       )}
-
-      {feedback && <FeedbackBanner {...feedback} />}
     </section>
   )
 }

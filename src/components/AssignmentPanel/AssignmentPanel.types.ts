@@ -1,15 +1,9 @@
 import type { LessonBlock, SubmissionHistoryItem } from '@types'
-import type { StepperStep } from '@components/AssignmentStepper'
-import type { FeedbackBannerProps } from '@components/FeedbackBanner'
 import type { ProjectIdentity } from '@lib/projectIdentity'
 
 export type AssignmentPanelTab = 'description' | 'submissions'
 
 export interface AssignmentPanelProps {
-  steps: StepperStep[]
-  onSelectStep: (id: number) => void
-  /** Hide the compact stepper strip visually (kept in the DOM/a11y tree) when a richer nav — e.g. ProblemsList — already shows it. Defaults to visible. */
-  isStepperVisible?: boolean
   /** Which tab is showing — Description (the task) or Submissions (this assignment's attempt history). */
   activeTab: AssignmentPanelTab
   onTabChange: (tab: AssignmentPanelTab) => void
@@ -31,6 +25,6 @@ export interface AssignmentPanelProps {
    */
   projectIdentity?: ProjectIdentity
   hint?: string
-  /** Check feedback pinned at the bottom; omitted ⇒ no banner. */
-  feedback?: FeedbackBannerProps
+  onViewSubmission?: (item: SubmissionHistoryItem) => void;
+  viewingSubmissionId?: string;
 }
