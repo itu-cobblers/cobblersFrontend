@@ -1,14 +1,15 @@
 import { useState, useEffect, useMemo } from 'react'
 import { fetchAssignmentSets, fetchAssignmentSet, type AssignmentSetSummary } from '@/api/assignmentSetApi.ts'
 import type { Assignment } from '@types'
-import type { AssignmentSetPreviewGroup } from '@components'
 
 export function useAssignmentData() {
     const [assignmentSets, setAssignmentSets] = useState<AssignmentSetSummary[]>([])
     const [selectedAssignmentSetId, setSelectedAssignmentSetId] = useState('')
-    const [previewGroups, setPreviewGroups] = useState<AssignmentSetPreviewGroup[]>([])
     const [previewTitle, setPreviewTitle] = useState('')
     const [assignments, setAssignments] = useState<Assignment[]>([])
+    const [previewAssignments, setPreviewAssignments] = useState<
+        Pick<Assignment, 'id' | 'title' | 'kind' | 'description' | 'hint'>[]
+    >([])
 
     useEffect(() => {
         fetchAssignmentSets()
@@ -27,12 +28,13 @@ export function useAssignmentData() {
                 if (cancelled) return
                 setPreviewTitle(assignmentSet.displayTitle)
                 setAssignments(assignmentSet.assignments)
-                setPreviewGroups(
-                    groupAssignments(assignmentSet.assignments, 'Assignments').map((group) => ({
-                        label: group.label,
-                        items: group.items.map((a) => ({
-                            id: a.id, title: a.title, kind: a.kind, description: a.description, hint: a.hint,
-                        })),
+                setPreviewAssignments(
+                    assignmentSet.assignments.map((assignment) => ({
+                        id: assignment.id,
+                        title: assignment.title,
+                        kind: assignment.kind,
+                        description: assignment.description,
+                        hint: assignment.hint,
                     }))
                 )
             })
@@ -41,18 +43,18 @@ export function useAssignmentData() {
     }, [selectedAssignmentSetId])
 
     const previewCount = useMemo(() =>
-            previewGroups.reduce((sum, group) => sum + group.items.length, 0) || 1
-        , [previewGroups])
+            previewAssignments.length || 1
+        , [previewAssignments])
 
     const previewAssignmentIds = useMemo(() =>
-            previewGroups.flatMap((group) => group.items.map((item) => item.id))
-        , [previewGroups])
+            previewAssignments.flatMap((item) => item.id)
+        , [previewAssignments])
 
     return {
         assignmentSets,
         selectedAssignmentSetId,
         setSelectedAssignmentSetId,
-        previewGroups,
+        previewAssignments,
         previewTitle,
         assignments,
         previewCount,

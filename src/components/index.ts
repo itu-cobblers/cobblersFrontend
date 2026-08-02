@@ -61,13 +61,6 @@ export type { EntryPortalProps, JoinMode } from '@views/EntryPortal'
 export { Toast } from './Toast'
 export type { ToastProps, ToastTone } from './Toast'
 
-export { AssignmentSetPreview } from './AssignmentSetPreview'
-export type {
-  AssignmentSetPreviewProps,
-  AssignmentSetPreviewGroup,
-  AssignmentSetPreviewEntry,
-} from './AssignmentSetPreview'
-
 export { StudentRoster } from './StudentRoster'
 export type { StudentRosterProps, RosterEntry, RosterStatus } from './StudentRoster'
 

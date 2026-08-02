@@ -28,7 +28,7 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
     const [activeSubId, setActiveSubId] = useState<string | null>(null)
     const [activeFileIndex, setActiveFileIndex] = useState(0)
 
-    const { previewGroups, assignments, previewTitle } = assignmentData
+    const { assignments, previewTitle } = assignmentData
     const { students, focusedAssignmentId, handleFocusAssignment } = roster
     const {
         selectedAssignmentId,
@@ -53,15 +53,15 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
         handleStartTimer,
     } = session
 
-    const problemItems: TeacherProblemItem[] = previewGroups.flatMap((group) =>
-        group.items.map((item) => ({
+    const problemItems: TeacherProblemItem[] =
+        assignments.map((item) => ({
             id: item.id,
             title: item.title,
             kind: item.kind,
             passedNum: 0,
             totalNum: students.length,
             studentStatus: selectedStudentId ? 'untried' : undefined,
-        }))
+        })
     )
 
     const attendanceStudents: AttendanceStudent[] = students.map((s) => ({
