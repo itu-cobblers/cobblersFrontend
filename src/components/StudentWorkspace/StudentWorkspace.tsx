@@ -157,6 +157,27 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
     const isSolutionVisible = assignmentData.isSolutionVisible[activeAssignment.id] ?? false
     const isLoadingSolution = assignmentData.loadingId === activeAssignment.id
 
+    // Rendered inside the tab rail for code/project; on predict there is no
+    // rail, so it stands alone above the editor.
+    const assignmentActions = (
+        <AssignmentFooter
+            submitStatus={submit.isSubmitting ? 'waiting' : 'idle'}
+            onSubmit={handleGlobalSubmit}
+            isSubmitDisabled={submit.isRunning || submit.isSubmitting || submit.isSubmittingPredict}
+
+            canRevealAnswer={hasSubmitted}
+            isSolutionVisible={isSolutionVisible}
+            isLoadingSolution={isLoadingSolution}
+            onToggleSolution={handleToggleSolution}
+            historyStatus={
+                viewingSubmission
+                    ? (viewingSubmission.passed ? 'success' : 'error')
+                    : null
+            }
+                onExitView={handleBackToEditor}
+        />
+    )
+
     return (
         <div className={STUDENT_WORKSPACE_LAYOUT_CLASS}>
             <AppHeader
@@ -186,32 +207,17 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                         />
 
                         <div className={STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS}>
-                            <AssignmentFooter
-                                submitStatus={submit.isSubmitting ? 'waiting' : 'idle'}
-                                onSubmit={handleGlobalSubmit}
-                                isSubmitDisabled={submit.isRunning || submit.isSubmitting || submit.isSubmittingPredict}
-
-                                canRevealAnswer={hasSubmitted}
-                                isSolutionVisible={isSolutionVisible}
-                                isLoadingSolution={isLoadingSolution}
-                                onToggleSolution={handleToggleSolution}
-                                historyStatus={
-                                    viewingSubmission
-                                        ? (viewingSubmission.passed ? 'success' : 'error')
-                                        : null
-                                }
-                                viewStatusLabel={mode.viewStatusLabel}
-                                onExitView={handleBackToEditor}
-                            />
-                            {(activeAssignment.kind === 'code' || activeAssignment.kind === 'project') && (
+                            {activeAssignment.kind === 'code' || activeAssignment.kind === 'project' ? (
                                 <CodeFileTabs
                                     files={mode.tabFiles}
                                     activeIndex={mode.activeTabIndex}
                                     onSelectFile={mode.handleSelectFile}
                                     isRunning={submit.isRunning}
                                     onRun={submit.handleRunCode}
-                                    isReadOnly={mode.isReadOnly}
+                                    actions={assignmentActions}
                                 />
+                            ) : (
+                                assignmentActions
                             )}
                             <CodeEditor
                                 key={mode.editorRemountKey}

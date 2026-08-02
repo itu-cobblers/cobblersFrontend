@@ -1,7 +1,15 @@
 import { useEffect, useLayoutEffect, useRef } from 'react'
+import classNames from 'classnames'
 import Editor from '@monaco-editor/react'
 import type { CodeEditorProps } from './CodeEditor.types'
-import { CODE_EDITOR_CONTAINER_CLASS, EDITOR_OPTIONS, EDITOR_THEME } from './CodeEditor.constants'
+import {
+  CODE_EDITOR_CONTAINER_CLASS,
+  CODE_EDITOR_SURFACE_CLASS,
+  CODE_EDITOR_DIMMED_CLASS,
+  EDITOR_OPTIONS,
+  EDITOR_READ_ONLY_OPTIONS,
+  EDITOR_THEME,
+} from './CodeEditor.constants'
 import { useCodeEditorSetup } from './CodeEditor.hooks'
 
 /**
@@ -17,6 +25,7 @@ import { useCodeEditorSetup } from './CodeEditor.hooks'
  */
 export default function CodeEditor({ value, onChange, isReadOnly = false }: CodeEditorProps) {
   const { handleBeforeMount, handleMount } = useCodeEditorSetup()
+  const options = isReadOnly ? { ...EDITOR_OPTIONS, ...EDITOR_READ_ONLY_OPTIONS } : EDITOR_OPTIONS
   const skipOnChangeRef = useRef(false)
 
   // Arm before Monaco's useEffect value-sync (child effects run after parent layout).
@@ -39,16 +48,18 @@ export default function CodeEditor({ value, onChange, isReadOnly = false }: Code
 
   return (
     <div className={CODE_EDITOR_CONTAINER_CLASS}>
-      <Editor
-        height="100%"
-        language="java"
-        value={value}
-        onChange={handleChange}
-        theme={EDITOR_THEME}
-        beforeMount={handleBeforeMount}
-        onMount={handleMount}
-        options={{ ...EDITOR_OPTIONS, readOnly: isReadOnly }}
-      />
+      <div className={classNames(CODE_EDITOR_SURFACE_CLASS, { [CODE_EDITOR_DIMMED_CLASS]: isReadOnly })}>
+        <Editor
+          height="100%"
+          language="java"
+          value={value}
+          onChange={handleChange}
+          theme={EDITOR_THEME}
+          beforeMount={handleBeforeMount}
+          onMount={handleMount}
+          options={options}
+        />
+      </div>
     </div>
   )
 }

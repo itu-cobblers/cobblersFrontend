@@ -18,6 +18,5 @@ export interface AssignmentFooterProps {
   isLoadingSolution?: boolean;
   onToggleSolution?: () => void;
   historyStatus?: 'success' | 'error' | null;
-  viewStatusLabel?: string;
   onExitView?: () => void;
 }

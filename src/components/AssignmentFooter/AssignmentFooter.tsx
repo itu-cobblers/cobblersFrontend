@@ -18,7 +18,6 @@ export default function AssignmentFooter({
     isLoadingSolution = false,
     onToggleSolution,
     historyStatus = null,
-    viewStatusLabel,
     onExitView,
 }: AssignmentFooterProps) {
 
@@ -29,13 +28,6 @@ export default function AssignmentFooter({
 
     return (
         <div className={classNames(ASSIGNMENT_FOOTER_CLASS, 'justify-between items-center')}>
-            <div className="flex items-center">
-                {viewStatusLabel && (
-                    <span className="text-sm italic text-gray-400">
-                      {viewStatusLabel}
-                  </span>
-                )}
-            </div>
             <div className={ASSIGNMENT_FOOTER_RIGHT_CLASS}>
                 {isHistoryView && (
                     <StatusBadge
