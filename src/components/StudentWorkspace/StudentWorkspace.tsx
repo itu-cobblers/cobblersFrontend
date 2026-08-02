@@ -20,6 +20,7 @@ import {
     STUDENT_WORKSPACE_CLASS,
     STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS,
     STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS,
+    STUDENT_WORKSPACE_EDITOR_BODY_CLASS,
     WORKSPACE_SECTION_LABEL,
 } from './StudentWorkspace.constants'
 
@@ -230,6 +231,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                 onSelectFile={mode.handleSelectFile}
                                 actions={assignmentActions}
                             />
+                            <div className={STUDENT_WORKSPACE_EDITOR_BODY_CLASS}>
                             {viewingSubmission && (
                                 <SubmissionBanner
                                     number={getSubmissionNumber(
@@ -274,6 +276,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     hasSubmitted={hasSubmitted}
                                 />
                             )}
+                            </div>
                         </div>
                     </div>
                 </div>

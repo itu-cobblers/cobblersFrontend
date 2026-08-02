@@ -25,6 +25,7 @@ import {
   PANEL_TAB_COUNT_CLASS,
   PANEL_SUBMISSIONS_EMPTY_CLASS,
   PANEL_SUBMISSIONS_LIST_CLASS,
+  PANEL_CARD_BODY_CLASS,
 } from './AssignmentPanel.constants'
 import {SubmissionRow} from "@components/SubmissionRow";
 import { getSubmissionNumber } from '@components/SubmissionBanner'
@@ -76,6 +77,7 @@ export default function AssignmentPanel({
         ))}
       </div>
 
+      <div className={PANEL_CARD_BODY_CLASS}>
       {activeTab === 'description' ? (
         <div className={PANEL_SCROLL_CLASS}>
           <h2 className={PANEL_TITLE_CLASS}>{title}</h2>
@@ -144,6 +146,7 @@ export default function AssignmentPanel({
           )}
         </div>
       )}
+      </div>
     </section>
   )
 }

@@ -18,6 +18,7 @@ import {
   LIST_RAIL_TAB_LABEL_CLASS,
   LIST_HISTORY_LOADING_CLASS,
   LIST_ITEMS_CLASS,
+  LIST_CARD_BODY_CLASS,
   LIST_ITEM_BASE_CLASS,
   LIST_ITEM_ACTIVE_CLASS,
   LIST_ITEM_IDLE_CLASS,
@@ -103,6 +104,7 @@ export default function ProblemsList({
         </button>
       </div>
 
+      <div className={LIST_CARD_BODY_CLASS}>
       {activeTab === 'history' && isHistoryLoading ? (
         isOpen && <p className={LIST_HISTORY_LOADING_CLASS}>Loading your history…</p>
       ) : (
@@ -146,7 +148,7 @@ export default function ProblemsList({
           <StatusBadge status={'passed'} size="s" label='Passed' className="mr-2"/>
         </div>
       )}
-
+      </div>
     </aside>
   )
 }

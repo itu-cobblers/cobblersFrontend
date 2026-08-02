@@ -3,6 +3,13 @@ import type { AssignmentKind } from '@types'
 export const LIST_CLASS_BASE =
   'flex h-full shrink-0 flex-col overflow-hidden bg-card transition-all duration-200 ease-out'
 
+/**
+ * Carries the card's outline instead of the section, so the sides start at the
+ * tab row's rule rather than running up past it and exposing the seam.
+ */
+export const LIST_CARD_BODY_CLASS =
+  'flex min-h-0 flex-1 flex-col overflow-hidden rounded-b-md border-x border-b border-divider'
+
 export const LIST_CLASS_OPEN = 'w-64'
 
 export const LIST_CLASS_CLOSED = 'w-12'
@@ -30,7 +37,7 @@ export const LIST_TOGGLE_CLASS = 'rounded p-1 text-muted-foreground normal-case 
  * to sit. `items-stretch` lets the tab fill the row so its active underline
  * lands on the row's own bottom border.
  */
-export const LIST_RAIL_TABS_CLASS = 'flex h-10 shrink-0 items-stretch'
+export const LIST_RAIL_TABS_CLASS = 'flex h-10 shrink-0 items-stretch border-b border-divider'
 
 export const LIST_RAIL_TABS_OPEN_CLASS = 'pr-1'
 
@@ -41,9 +48,11 @@ export const LIST_RAIL_TOGGLE_CLASS = 'shrink-0 self-center'
 
 /** `text-sm` to match PANEL_TAB_BASE_CLASS — the rail and the panel read as one tab row. */
 export const LIST_RAIL_TAB_BASE_CLASS =
-  'relative flex flex-1 items-center justify-center gap-2 px-3 text-sm transition-colors'
+  'relative flex flex-1 items-center justify-center gap-2 rounded-t-md px-3 text-sm transition-colors'
 
-export const LIST_RAIL_TAB_ACTIVE_CLASS = 'text-foreground'
+/** Same three-part seam as the file tabs: rule on the row, tab pulled over it, opaque fill. */
+export const LIST_RAIL_TAB_ACTIVE_CLASS =
+  '-mb-px border border-b-0 border-divider bg-card text-foreground'
 
 export const LIST_RAIL_TAB_IDLE_CLASS = 'text-muted-foreground hover:text-foreground'
 

@@ -1,7 +1,12 @@
 // 4:6 split with the editor column (STUDENT_EDITOR_COLUMN_CLASS / PROJECT_PANEL_CLASS) — description gets 4, code gets 6.
-/** `border-divider`, not `border-border` — this is a region separation, not a control edge. */
-export const PANEL_CLASS =
-  'flex min-w-0 flex-[4] flex-col overflow-hidden border-r border-divider bg-card'
+export const PANEL_CLASS = 'flex min-w-0 flex-[4] flex-col overflow-hidden bg-card'
+
+/**
+ * Carries the card's outline instead of the section, so the sides start at the
+ * tab row's rule rather than running up past it and exposing the seam.
+ */
+export const PANEL_CARD_BODY_CLASS =
+  'flex min-h-0 flex-1 flex-col overflow-hidden rounded-b-md border-x border-b border-divider'
 
 export const PANEL_SCROLL_CLASS = 'flex-1 overflow-y-auto px-5 py-4'
 
@@ -44,8 +49,16 @@ export const PANEL_HINT_CODE_CLASS = 'font-mono text-[11px] text-foreground'
  */
 export const PANEL_TABS_CLASS = 'flex h-10 shrink-0 items-stretch gap-1 border-b border-divider px-3'
 
+/**
+ * No `h-full`. The seam depends on the tab being *stretched* by the row: a
+ * stretched item's height is `row content height - margins`, so `-mb-px` makes
+ * it 1px taller and it covers the rule. An explicit `height: 100%` opts out of
+ * stretch, pins the tab to the top at exactly the content height, and the
+ * negative margin then moves nothing — which is why this rule stayed visible
+ * while the file tabs' did not.
+ */
 export const PANEL_TAB_BASE_CLASS =
-  'relative flex h-full items-center rounded-t-md px-3 text-sm transition-colors'
+  'relative flex items-center rounded-t-md px-3 text-sm transition-colors'
 
 /** `bg-card` because that is the panel's surface — it has to match to hide the rule. */
 export const PANEL_TAB_ACTIVE_CLASS =
