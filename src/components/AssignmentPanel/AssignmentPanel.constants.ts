@@ -36,11 +36,20 @@ export const PANEL_HINT_BODY_CLASS = 'mt-1.5'
 
 export const PANEL_HINT_CODE_CLASS = 'font-mono text-[11px] text-foreground'
 
-export const PANEL_TABS_CLASS = 'flex h-10 shrink-0 items-stretch gap-1 px-3'
+/**
+ * Same manila-folder seam as the editor's tab rail: the row draws the rule,
+ * the active tab is pulled `-mb-px` over it and covers that pixel with its own
+ * opaque background. Nothing here may gain `overflow-hidden` — it clips the
+ * overlap and closes the seam.
+ */
+export const PANEL_TABS_CLASS = 'flex h-10 shrink-0 items-stretch gap-1 border-b border-divider px-3'
 
-export const PANEL_TAB_BASE_CLASS = 'relative flex h-full items-center px-3 text-sm transition-colors'
+export const PANEL_TAB_BASE_CLASS =
+  'relative flex h-full items-center rounded-t-md px-3 text-sm transition-colors'
 
-export const PANEL_TAB_ACTIVE_CLASS = 'text-foreground'
+/** `bg-card` because that is the panel's surface — it has to match to hide the rule. */
+export const PANEL_TAB_ACTIVE_CLASS =
+  '-mb-px border border-b-0 border-divider bg-card text-foreground'
 
 export const PANEL_TAB_IDLE_CLASS = 'text-muted-foreground hover:text-foreground'
 

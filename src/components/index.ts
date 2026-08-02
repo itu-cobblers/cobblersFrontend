@@ -94,3 +94,6 @@ export { AppHeader } from './AppHeader'
 export type { AppHeaderProps, AppHeaderVariant } from './AppHeader'
 
 export { AppFooter } from './AppFooter'
+
+export { SubmissionBanner } from './SubmissionBanner'
+export type { SubmissionBannerProps } from './SubmissionBanner'

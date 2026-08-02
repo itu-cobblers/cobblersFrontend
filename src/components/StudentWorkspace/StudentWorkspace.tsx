@@ -1,6 +1,9 @@
 import { useState } from 'react'
+import type { AssignmentPanelTab } from '@components/AssignmentPanel/AssignmentPanel.types'
+import { getSubmissionNumber } from '@components/SubmissionBanner'
 import {
     AppHeader,
+    SubmissionBanner,
     ProblemsList,
     TeacherFollowBanner,
     AssignmentPanel,
@@ -132,6 +135,17 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
         progress.assignmentPanelProps.onTabChange('description');
     }
 
+    // Going back to Description is the same intent as Back to Editor: leave the
+    // past submission behind. Without this the editor stays stuck on it while
+    // the panel shows the current assignment, which reads as a bug.
+    const handlePanelTabChange = (tab: AssignmentPanelTab) => {
+        if (tab === 'description' && viewingSubmission) {
+            handleBackToEditor()
+            return
+        }
+        progress.assignmentPanelProps.onTabChange(tab)
+    }
+
     // Fetch details when a history row is clicked
     const handleViewSubmission = async (item: SubmissionHistoryItem) => {
         if (isLoadingHistoryDetail) return
@@ -202,6 +216,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                     <div className={STUDENT_WORKSPACE_CLASS}>
                         <AssignmentPanel
                             {...progress.assignmentPanelProps}
+                            onTabChange={handlePanelTabChange}
                             onViewSubmission={handleViewSubmission}
                             viewingSubmissionId={viewingSubmission?.subId}
                         />
@@ -218,6 +233,17 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                 />
                             ) : (
                                 assignmentActions
+                            )}
+                            {viewingSubmission && (
+                                <SubmissionBanner
+                                    number={getSubmissionNumber(
+                                        props.submissionHistory,
+                                        activeAssignment.id,
+                                        viewingSubmission.subId,
+                                    )}
+                                    submittedAt={viewingSubmission.submittedAt}
+                                    passed={viewingSubmission.passed}
+                                />
                             )}
                             <CodeEditor
                                 key={mode.editorRemountKey}
