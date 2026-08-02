@@ -73,12 +73,8 @@ export type { AttendanceListProps, AttendanceStudent } from './AttendanceList'
 export { TeacherAssignmentPanel } from './TeacherAssignmentPanel'
 export type { TeacherAssignmentPanelProps, TeacherSubmissionItem } from './TeacherAssignmentPanel'
 
-export { TeacherCodeViewer } from './TeacherCodeViewer'
-export type { TeacherCodeViewerProps } from './TeacherCodeViewer'
-
 export { SubmitButton } from './SubmitButton'
 export type { SubmitButtonProps, SubmitButtonStatus } from './SubmitButton'
-
 
 export { ShowAnswerButton } from './ShowAnswerButton'
 export type { ShowAnswerButtonProps } from './ShowAnswerButton'

@@ -1,177 +1,193 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import {
     AttendanceList,
     TeacherAssignmentPanel,
-    TeacherCodeViewer,
     TeacherProblemsList,
-    type CodeFileTab, type TeacherSubmissionItem, type AttendanceStudent, type TeacherProblemItem,
-    type AssignmentPanelTab
+    CodeFileTabs,
+    CodeEditor,
+    OutputPanel,
+    PredictPanel,
 } from '@components'
-import { useLiveRoster } from './hooks/useLiveRoster'
-import type { TeacherWorkspaceProps } from './TeacherWorkspace.types'
-
-import { defaultStarter } from '@lib/defaultStarter'
+import {
+    TEACHER_WORKSPACE_MAIN_CLASS,
+    TEACHER_WORKSPACE_PANEL_COLUMN_CLASS,
+    TEACHER_WORKSPACE_EDITOR_COLUMN_CLASS,
+} from './TeacherWorkspace.constants'
 import { getProjectIdentity } from '@lib/projectIdentity'
-import {useTeacherUI} from "@components/TeacherWorkspace/hooks/useTesacherUI.ts";
-import {TEACHER_BODY_CLASS} from "@components/TeacherWorkspace/TeacherWorkspace.constants.ts";
 
-function starterFileTabs(files?: { name: string }[]): CodeFileTab[] {
-    return files?.map((file) => ({ name: file.name })) ?? [{ name: 'Main.java' }]
-}
+import { useTeacherHydration } from './hooks/useTeacherHydration'
+import { useTeacherLiveSession } from './hooks/useTeacherLiveSession'
+import { useTeacherSelection } from './hooks/useTeacherSelection'
+import { useTeacherSubmissionDetail } from './hooks/useTeacherSubmissionDetail'
+import { useTeacherSolution } from './hooks/useTeacherSolution'
+
+import type { TeacherWorkspaceProps } from './TeacherWorkspace.types'
+import { getEditorContent, getTabFiles } from "@components/TeacherWorkspace/TeacherWorkspace.utils.ts";
+import {TeacherAssignmentFooter} from "@components/TeacherAssignmentFooter";
 
 export default function TeacherWorkspace({ sessionCode, assignmentData, session }: TeacherWorkspaceProps) {
-    const roster = useLiveRoster(sessionCode, assignmentData.previewCount)
-    const ui = useTeacherUI(assignmentData.previewAssignmentIds)
-
     const [isRailOpen, setIsRailOpen] = useState(true)
-    const [activeTab, setActiveTab] = useState<AssignmentPanelTab>('description')
-    const [activeSubId, setActiveSubId] = useState<string | null>(null)
-    const [activeFileIndex, setActiveFileIndex] = useState(0)
 
-    const { assignments, previewTitle } = assignmentData
-    const { students, focusedAssignmentId, handleFocusAssignment } = roster
+    const { attendanceList, allSubmissions, addSubmission } = useTeacherHydration(sessionCode)
+
+    const { liveStudentIds, focusedAssignmentId, handleFocusAssignment } = useTeacherLiveSession({
+        sessionCode,
+        onSubmissionRecorded: addSubmission
+    })
+
     const {
         selectedAssignmentId,
+        activeAssignment,
         selectedStudentId,
+        activeTab,
+        setActiveTab,
+        activeSubId,
+        setActiveSubId,
+        activeFileIndex,
+        setActiveFileIndex,
+        problemItems,
+        attendanceStudents,
+        filteredSubmissions,
         handleSelectAssignment,
         handleSelectStudent,
-        handleClearStudentFilter,
-        solutionByAssignment,
-        loadingSolutionAssignmentId,
-        isSolutionVisibleByAssignment,
-        isAnswerVisibleByAssignment,
-        handleToggleSolution,
-        handleToggleAnswer,
-    } = ui
+        handleClearStudentFilter
+    } = useTeacherSelection({
+        assignments: assignmentData.assignments,
+        attendanceList,
+        allSubmissions,
+        liveStudentIds
+    })
+
+    const { submissionDetail, isLoadingDetail } = useTeacherSubmissionDetail(activeSubId)
+
     const {
-        minutes,
-        isStartingTimer,
-        timerEndsAt,
-        timerError,
-        isEndingSession,
-        setMinutes: handleMinutesChange,
-        handleStartTimer,
-    } = session
+        solutionData,
+        isLoadingSolution,
+        isSolutionVisible,
+        isAnswerVisible,
+        handleToggleSolution,
+        handleToggleAnswer
+    } = useTeacherSolution(selectedAssignmentId)
 
-    const problemItems: TeacherProblemItem[] =
-        assignments.map((item) => ({
-            id: item.id,
-            title: item.title,
-            kind: item.kind,
-            passedNum: 0,
-            totalNum: students.length,
-            studentStatus: selectedStudentId ? 'untried' : undefined,
-        })
-    )
+    const isCode = activeAssignment?.kind === 'code'
+    const isPredict = activeAssignment?.kind === 'predict'
+    const isProject = activeAssignment?.kind === 'project'
 
-    const attendanceStudents: AttendanceStudent[] = students.map((s) => ({
-        studentId: s.studentId,
-        displayName: s.displayName,
-        isActive: true,
-        assignmentStatus: selectedAssignmentId ? 'untried' : undefined,
-    }))
+    const tabFiles = useMemo(() => {
+        return getTabFiles(activeAssignment, submissionDetail, activeSubId, solutionData, isSolutionVisible)
+    }, [activeAssignment, submissionDetail, activeSubId, solutionData, isSolutionVisible])
 
-    const activeAssignment = assignments.find((a) => a.id === selectedAssignmentId)
-    const activeAssignmentItem = problemItems.find((p) => p.id === selectedAssignmentId) || problemItems[0]
-    const activeStudent = students.find((s) => s.studentId === selectedStudentId)
+    const editorValue = useMemo(() => {
+        return getEditorContent(activeAssignment, submissionDetail, tabFiles, activeFileIndex, solutionData, isSolutionVisible)
+    }, [activeAssignment, submissionDetail, tabFiles, activeFileIndex, solutionData, isSolutionVisible])
 
-    const submissions: TeacherSubmissionItem[] = []
-    const activeSubmission = submissions.find((s) => s.subId === activeSubId)
+    const currentFileName = isPredict
+        ? 'Snippet.java'
+        : (tabFiles[activeFileIndex]?.name ?? 'Main.java')
 
-    const starterTabs = activeAssignment?.kind === 'code' ? starterFileTabs(activeAssignment.starterFiles) : []
-    const starterCode =
-        activeAssignment?.kind === 'code'
-            ? activeAssignment.starterFiles?.[activeFileIndex]?.content ?? activeAssignment.starter ?? defaultStarter
-            : activeAssignment?.kind === 'predict'
-                ? activeAssignment.snippet
-                : ''
+    const modeString = isSolutionVisible ? 'solution' : activeSubId ? `sub-${activeSubId}` : 'starter'
 
-    const predictExpectedOutput = activeAssignment?.kind === 'predict' ? activeAssignment.expectedOutput : undefined
-    const projectIdentity = activeAssignment?.kind === 'project' ? getProjectIdentity(activeAssignment.title) : undefined
-    const editorKey = activeSubmission ? `sub-${activeSubmission.subId}` : `assignment-${selectedAssignmentId ?? 'none'}`
+    const editorRemountKey = `teacher-assignment-${selectedAssignmentId ?? 'none'}-${modeString}-${activeFileIndex}-${currentFileName}`
 
-    async function handleEndSession() {
-        await session.handleEndSession()
-    }
+    const activeSubmission = filteredSubmissions.find(s => s.subId === activeSubId)
+    const projectIdentity = isProject && activeAssignment ? getProjectIdentity(activeAssignment.title) : undefined
 
-    function handleSelectAssignmentAndResetFile(id: number) {
-        setActiveFileIndex(0)
-        setActiveSubId(null)
-        handleSelectAssignment(id)
-    }
+    const viewStatusLabel = isSolutionVisible
+        ? 'Viewing reference solution'
+        : activeSubmission
+            ? `Viewing: ${activeSubmission.studentName}'s submission from ${new Date(activeSubmission.submittedAt).toLocaleString()}`
+            : null
 
     return (
-        <div className={TEACHER_BODY_CLASS}>
+        <div className={TEACHER_WORKSPACE_MAIN_CLASS}>
             <TeacherProblemsList
                 sessionCode={sessionCode}
                 items={problemItems}
                 activeId={selectedAssignmentId}
-                onSelect={handleSelectAssignmentAndResetFile}
+                onSelect={handleSelectAssignment}
                 teacherFocusId={focusedAssignmentId}
                 isOpen={isRailOpen}
                 onToggleOpen={() => setIsRailOpen(!isRailOpen)}
-                minutes={minutes}
-                isStartingTimer={isStartingTimer}
-                timerEndsAt={timerEndsAt}
-                timerError={timerError}
-                onMinutesChange={handleMinutesChange}
-                onStartTimer={handleStartTimer}
-                onEndSession={handleEndSession}
-                isEndingSession={isEndingSession}
+                minutes={session.minutes}
+                isStartingTimer={session.isStartingTimer}
+                timerEndsAt={session.timerEndsAt}
+                timerError={session.timerError}
+                onMinutesChange={session.setMinutes}
+                onStartTimer={session.handleStartTimer}
+                onEndSession={session.handleEndSession}
+                isEndingSession={session.isEndingSession}
             />
 
             <AttendanceList
                 students={attendanceStudents}
                 activeStudentId={selectedStudentId}
                 onSelectStudent={handleSelectStudent}
-                selectedAssignmentTitle={activeAssignmentItem?.title}
+                selectedAssignmentTitle={activeAssignment?.title}
             />
 
-            <div className="flex flex-[4] min-w-0 flex-col overflow-hidden">
+            <div className={TEACHER_WORKSPACE_PANEL_COLUMN_CLASS}>
                 <TeacherAssignmentPanel
                     activeTab={activeTab}
                     onTabChange={setActiveTab}
-                    title={activeAssignment?.title || activeAssignmentItem?.title || previewTitle || 'Assignments'}
+                    title={activeAssignment?.title || assignmentData.previewTitle || 'Assignments'}
                     lesson={activeAssignment?.lesson}
                     description={activeAssignment?.description ?? ''}
                     projectIdentity={projectIdentity}
                     hint={activeAssignment?.hint}
                     onFocusClick={() => selectedAssignmentId != null && handleFocusAssignment(selectedAssignmentId)}
                     isFocused={selectedAssignmentId != null && selectedAssignmentId === focusedAssignmentId}
-                    selectedStudentName={activeStudent?.displayName}
+                    selectedStudentName={attendanceStudents.find(s => s.studentId === selectedStudentId)?.displayName}
                     onClearStudentFilter={handleClearStudentFilter}
-                    submissions={submissions}
+                    submissions={filteredSubmissions}
                     activeSubId={activeSubId}
                     onSelectSubmission={setActiveSubId}
                     onSelectStudentFilter={(studentId) => handleSelectStudent(studentId)}
                 />
             </div>
 
-            <TeacherCodeViewer
-                assignmentKind={activeAssignment?.kind ?? 'code'}
-                editorKey={editorKey}
-                hasSubmission={Boolean(activeSubmission)}
-                code={activeSubmission?.code ?? starterCode}
-                fileTabs={starterTabs}
-                activeFileIndex={activeFileIndex}
-                onSelectFile={setActiveFileIndex}
-                studentName={activeSubmission?.studentName}
-                assignmentTitle={activeSubmission?.assignmentTitle}
-                submittedAt={activeSubmission?.submittedAt}
-                passed={activeSubmission?.passed}
-                result={activeSubmission?.result}
-                predictExpectedOutput={predictExpectedOutput}
-                isAnswerVisible={selectedAssignmentId != null ? (isAnswerVisibleByAssignment[selectedAssignmentId] ?? false) : false}
-                onToggleAnswer={() => {
-                    if (selectedAssignmentId != null) handleToggleAnswer(selectedAssignmentId)
-                }}
-                solution={selectedAssignmentId != null ? solutionByAssignment[selectedAssignmentId] ?? null : null}
-                isLoadingSolution={loadingSolutionAssignmentId === selectedAssignmentId}
-                isSolutionVisible={selectedAssignmentId != null ? (isSolutionVisibleByAssignment[selectedAssignmentId] ?? false) : false}
-                onToggleSolution={() => {
-                    if (selectedAssignmentId != null) handleToggleSolution(selectedAssignmentId)
-                }}
-            />
+            <div className={TEACHER_WORKSPACE_EDITOR_COLUMN_CLASS}>
+                {(isCode || isProject) && tabFiles.length > 0 && (
+                    <CodeFileTabs
+                        files={tabFiles.map(f => ({ name: f.name }))}
+                        activeIndex={activeFileIndex}
+                        onSelectFile={setActiveFileIndex}
+                        isReadOnly={true}
+                    />
+                )}
+                <CodeEditor
+                    key={editorRemountKey}
+                    value={editorValue}
+                    onChange={() => {}}
+                    isReadOnly={true}
+                />
+                {isCode && (
+                    <OutputPanel
+                        output={activeSubId ? (submissionDetail?.result?.stdout || submissionDetail?.result?.stderr || '') : ''}
+                        status={activeSubId ? (submissionDetail?.result?.status ?? null) : null}
+                        placeHolder={activeSubId ? (isLoadingDetail ? 'Loading execution result...' : 'No output recorded.') : 'Select a submission to view output.'}
+                    />
+                )}
+                {isPredict && activeAssignment && (
+                    <PredictPanel
+                        answer={activeSubId ? (submissionDetail?.content ?? '') : ''}
+                        status={activeSubId ? (submissionDetail?.passed ? 'correct' : 'tried') : 'idle'}
+                        expectedOutput={activeAssignment.expectedOutput}
+                        isSolutionVisible={isAnswerVisible}
+                        onAnswerChange={() => {}}
+                    />
+                )}
+                <TeacherAssignmentFooter
+                    isPredict={isPredict}
+                    isCode={isCode}
+                    isProject={isProject}
+                    isAnswerVisible={isAnswerVisible}
+                    isSolutionVisible={isSolutionVisible}
+                    isLoadingSolution={isLoadingSolution}
+                    onToggleAnswer={handleToggleAnswer}
+                    onToggleSolution={handleToggleSolution}
+                    viewStatusLabel={viewStatusLabel}
+                />
+            </div>
         </div>
     )
 }
