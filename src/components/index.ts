@@ -91,3 +91,4 @@ export { ShowAnswerButton } from './ShowAnswerButton'
 export type { ShowAnswerButtonProps } from './ShowAnswerButton'
 
 export { AppHeader } from './AppHeader'
+export type { AppHeaderProps, AppHeaderVariant } from './AppHeader'

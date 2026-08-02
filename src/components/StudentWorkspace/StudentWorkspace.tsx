@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import {
+    AppHeader,
     ProblemsList,
     TeacherFollowBanner,
     AssignmentPanel,
@@ -16,6 +17,7 @@ import {
     STUDENT_WORKSPACE_CLASS,
     STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS,
     STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS,
+    WORKSPACE_SECTION_LABEL,
 } from './StudentWorkspace.constants'
 
 import { useWorkspaceProgress } from './hooks/useWorkspaceProgress'
@@ -157,14 +159,19 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
 
     return (
         <div className={STUDENT_WORKSPACE_LAYOUT_CLASS}>
+            <AppHeader
+                variant="bar"
+                section={WORKSPACE_SECTION_LABEL}
+                sessionLabel={props.sessionLabel}
+                displayName={props.displayName}
+                onLeaveSession={props.onLeaveSession}
+                leaveLabel={props.sessionActionLabel}
+            />
+
             <div className={STUDENT_WORKSPACE_MAIN_CLASS}>
 
                 <ProblemsList
                     {...progress.problemsListProps}
-                    sessionLabel={props.sessionLabel}
-                    displayName={props.displayName}
-                    onLeaveSession={props.onLeaveSession}
-                    leaveLabel={props.sessionActionLabel}
                     isHistoryLoading={props.isHistoryLoading}
                 />
 

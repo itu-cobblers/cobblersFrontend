@@ -7,20 +7,28 @@ export const LIST_CLASS_OPEN = 'w-64'
 
 export const LIST_CLASS_CLOSED = 'w-12'
 
+/**
+ * The rail's own header row is gone — the collapse toggle moved into the
+ * session row and the count onto the Session tab. These are kept because
+ * `TeacherProblemsList` still renders a header of its own.
+ */
 export const LIST_HEADER_CLASS =
   'flex h-10 shrink-0 items-center gap-2 border-b border-border px-2 text-[11px] uppercase tracking-[0.25em] text-muted-foreground'
 
 export const LIST_HEADER_RIGHT_CLASS = 'ml-auto flex items-center gap-1.5'
 
+/**
+ * Holds the collapse toggle alone — session identity moved to the AppHeader.
+ * Always renders, even collapsed: it carries the only control that can
+ * reopen the rail.
+ */
 export const LIST_SESSION_CLASS =
-  'flex flex-col gap-1 border-b border-border px-3 py-2 text-[11px] text-muted-foreground'
+  'flex shrink-0 items-start gap-2 border-b border-border py-2 text-[11px] text-muted-foreground'
 
-export const LIST_SESSION_LABEL_CLASS =
-  'w-fit rounded-md border px-2 py-0.5 text-[11px] font-semibold border-black/30 bg-black/10 text-muted-foreground'
+export const LIST_SESSION_OPEN_CLASS = 'justify-end px-3'
 
-export const LIST_SESSION_NAME_CLASS = 'truncate'
-
-export const LIST_SESSION_NAME_STRONG_CLASS = 'font-medium text-foreground'
+/** Collapsed, the toggle is all that's left, so it centres in the 48px rail. */
+export const LIST_SESSION_CLOSED_CLASS = 'justify-center px-1'
 
 export const LIST_COUNT_CLASS = 'rounded bg-muted px-1.5 py-0.5 text-[10px] normal-case tracking-normal'
 
@@ -42,6 +50,12 @@ export const LIST_RAIL_TAB_IDLE_CLASS = 'text-muted-foreground hover:text-foregr
 export const LIST_RAIL_TAB_UNDERLINE_CLASS = 'absolute inset-x-2 -bottom-px h-0.5 rounded-full bg-black'
 
 export const LIST_RAIL_TAB_LABEL_CLASS = 'truncate normal-case tracking-normal'
+
+/** Avoids the word "problems", which means nothing to a beginner. */
+export const LIST_TOGGLE_LABEL = {
+  collapse: 'Collapse assignment list',
+  expand: 'Expand assignment list',
+} as const
 
 export const LIST_HISTORY_LOADING_CLASS = 'px-3 py-4 text-center text-[12px] text-muted-foreground'
 
@@ -69,15 +83,6 @@ export const LIST_FOOTER_CLASS = 'flex items-center justify-center gap-3 border-
 
 // Footer action bar pinned to the bottom of the rail — just Leave/Exit now
 // that "My Progress" lives inline as the History tab above.
-export const LIST_TABS_CLASS = 'mt-auto flex items-stretch border-t border-border'
-
-export const LIST_TAB_BASE_CLASS =
-  'flex flex-1 items-center justify-center gap-2 px-2 py-2.5 text-xs transition-colors'
-
-export const LIST_TAB_IDLE_CLASS = 'text-muted-foreground hover:bg-black/5'
-
-export const LIST_TAB_LABEL_CLASS = 'truncate'
-
 export const LIST_STATUS_DOT_CLASS: Record<string, string> = {
   passed: 'mt-0.5 inline-flex h-2 w-2 items-center justify-center rounded-full bg-status-success text-status-success',
   tried: 'mt-0.5 inline-flex h-2 w-2 items-center justify-center rounded-full bg-status-warning text-status-warning',

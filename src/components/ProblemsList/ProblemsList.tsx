@@ -6,10 +6,9 @@ import {
   LIST_CLASS_BASE,
   LIST_CLASS_OPEN,
   LIST_CLASS_CLOSED,
-  LIST_HEADER_CLASS,
-  LIST_HEADER_RIGHT_CLASS,
   LIST_COUNT_CLASS,
   LIST_TOGGLE_CLASS,
+  LIST_TOGGLE_LABEL,
   LIST_RAIL_TABS_CLASS,
   LIST_RAIL_TAB_BASE_CLASS,
   LIST_RAIL_TAB_ACTIVE_CLASS,
@@ -18,9 +17,8 @@ import {
   LIST_RAIL_TAB_LABEL_CLASS,
   LIST_HISTORY_LOADING_CLASS,
   LIST_SESSION_CLASS,
-  LIST_SESSION_LABEL_CLASS,
-  LIST_SESSION_NAME_CLASS,
-  LIST_SESSION_NAME_STRONG_CLASS,
+  LIST_SESSION_OPEN_CLASS,
+  LIST_SESSION_CLOSED_CLASS,
   LIST_ITEMS_CLASS,
   LIST_ITEM_BASE_CLASS,
   LIST_ITEM_ACTIVE_CLASS,
@@ -31,10 +29,6 @@ import {
   LIST_ITEM_TITLE_CLASS,
   LIST_FOOTER_CLASS,
   LIST_ITEM_LIVE_CLASS,
-  LIST_TABS_CLASS,
-  LIST_TAB_BASE_CLASS,
-  LIST_TAB_IDLE_CLASS,
-  LIST_TAB_LABEL_CLASS,
   KIND_LABEL,
 } from './ProblemsList.constants'
 import {StatusBadge} from "@components/StatusBadge";
@@ -52,12 +46,11 @@ const RAIL_TAB_LABEL: Record<ProblemsListTab, string> = {
 const RAIL_TABS: ProblemsListTab[] = ['session', 'history']
 
 /**
- * The single left-hand rail: fold/unfold toggle, session identity ("Room: XXXX" /
- * "Solo practice" + "Signed in as …" — previously in the Toolbar), a Session/History
+ * The single left-hand rail: fold/unfold toggle, a Session/History
  * tab pair (this session's assignment list vs. this student's full cross-day
  * submission history — replacing the old separate "My Progress" modal), the
  * problems list itself (one row per assignment with a pass/fail/untried
- * indicator, shared between both tabs), and Leave/Exit pinned to the bottom.
+ * indicator, shared between both tabs). Leave/Exit lives in the AppHeader.
  * Clicking any row — from either tab — drives the exact same
  * description+submissions interaction in the assignment panel; only the tab
  * it came from changes whether a later Submit tags the current session.
@@ -73,41 +66,23 @@ export default function ProblemsList({
   teacherFocusId,
   isOpen,
   onToggleOpen,
-  sessionLabel,
-  displayName,
-  onLeaveSession,
-  leaveLabel,
 }: ProblemsListProps) {
   const items = activeTab === 'session' ? sessionItems : historyItems
 
   return (
     <aside className={classNames(LIST_CLASS_BASE, isOpen ? LIST_CLASS_OPEN : LIST_CLASS_CLOSED)}>
-      <div className={LIST_HEADER_CLASS}>
-        <Icon name="book" />
-        {isOpen && 'Problems'}
-        <span className={LIST_HEADER_RIGHT_CLASS}>
-          {isOpen && <span className={LIST_COUNT_CLASS}>{items.length}</span>}
-          <button
-            type="button"
-            onClick={onToggleOpen}
-            className={LIST_TOGGLE_CLASS}
-            aria-label={isOpen ? 'Collapse problems list' : 'Expand problems list'}
-          >
-            <Icon name={isOpen ? 'chevronsLeft' : 'chevronsRight'} />
-          </button>
-        </span>
+      <div
+        className={classNames(LIST_SESSION_CLASS, isOpen ? LIST_SESSION_OPEN_CLASS : LIST_SESSION_CLOSED_CLASS)}
+      >
+        <button
+          type="button"
+          onClick={onToggleOpen}
+          className={LIST_TOGGLE_CLASS}
+          aria-label={isOpen ? LIST_TOGGLE_LABEL.collapse : LIST_TOGGLE_LABEL.expand}
+        >
+          <Icon name={isOpen ? 'chevronsLeft' : 'chevronsRight'} />
+        </button>
       </div>
-
-      {isOpen && (sessionLabel || displayName) && (
-        <div className={LIST_SESSION_CLASS}>
-          {sessionLabel && <span className={LIST_SESSION_LABEL_CLASS}>{sessionLabel}</span>}
-          {displayName && (
-            <span className={LIST_SESSION_NAME_CLASS}>
-              Signed in as <span className={LIST_SESSION_NAME_STRONG_CLASS}>{displayName}</span>
-            </span>
-          )}
-        </div>
-      )}
 
       <div className={LIST_RAIL_TABS_CLASS}>
         {isOpen && RAIL_TABS.map((tab) => (
@@ -123,6 +98,9 @@ export default function ProblemsList({
           >
             <Icon name={RAIL_TAB_ICON[tab]} />
             {isOpen && <span className={LIST_RAIL_TAB_LABEL_CLASS}>{RAIL_TAB_LABEL[tab]}</span>}
+            {isOpen && tab === 'session' && (
+              <span className={LIST_COUNT_CLASS}>{sessionItems.length}</span>
+            )}
             {activeTab === tab && <span className={LIST_RAIL_TAB_UNDERLINE_CLASS} />}
           </button>
         ))}
@@ -173,17 +151,6 @@ export default function ProblemsList({
         </div>
       )}
 
-      <div className={LIST_TABS_CLASS}>
-        <button
-          type="button"
-          className={classNames(LIST_TAB_BASE_CLASS, LIST_TAB_IDLE_CLASS)}
-          title={leaveLabel}
-          onClick={onLeaveSession}
-        >
-          <Icon name="logout" />
-          {isOpen && <span className={LIST_TAB_LABEL_CLASS}>{leaveLabel}</span>}
-        </button>
-      </div>
     </aside>
   )
 }

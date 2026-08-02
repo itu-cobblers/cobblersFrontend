@@ -32,11 +32,4 @@ export interface ProblemsListProps {
   isOpen: boolean
   /** Toggles `isOpen` — the single fold/unfold control for the whole rail. */
   onToggleOpen: () => void
-  /** Current session status ("Room: XXXX" or "Solo practice"); omitted hides the strip. */
-  sessionLabel?: string
-  /** The student's display name — "Signed in as …". */
-  displayName?: string
-  onLeaveSession: () => void
-  /** "Leave" or "Exit" — mirrors the session status (join vs solo). */
-  leaveLabel: string
 }
