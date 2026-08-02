@@ -34,9 +34,15 @@ describe('ProblemsList', () => {
     expect(screen.getByText('Build a Tree')).toBeInTheDocument()
   })
 
-  it('tags the Session tab with the assignment count', () => {
+  it('tags the Assignments tab with passed-out-of-total', () => {
     render(createElement(ProblemsList, baseProps))
-    expect(screen.getByTitle('Session')).toHaveTextContent('3')
+    // one 'passed' among three items
+    expect(screen.getByTitle('Assignments')).toHaveTextContent('1/3')
+  })
+
+  it('counts the whole set, not just the active tab', () => {
+    render(createElement(ProblemsList, { ...baseProps, activeTab: 'history' }))
+    expect(screen.getByTitle('Assignments')).toHaveTextContent('1/3')
   })
 
   // The History tab is deliberately unrendered for now — but the view behind
@@ -58,10 +64,10 @@ describe('ProblemsList', () => {
     expect(screen.queryByText('Predict this')).not.toBeInTheDocument()
   })
 
-  it('fires onTabChange when the Session tab is clicked, so history can be left', () => {
+  it('fires onTabChange when the Assignments tab is clicked, so history can be left', () => {
     const onTabChange = vi.fn()
     render(createElement(ProblemsList, { ...baseProps, activeTab: 'history', onTabChange }))
-    fireEvent.click(screen.getByTitle('Session'))
+    fireEvent.click(screen.getByTitle('Assignments'))
     expect(onTabChange).toHaveBeenCalledWith('session')
   })
 

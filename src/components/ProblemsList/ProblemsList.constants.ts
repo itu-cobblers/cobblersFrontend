@@ -39,8 +39,9 @@ export const LIST_RAIL_TABS_CLOSED_CLASS = 'justify-center'
 
 export const LIST_RAIL_TOGGLE_CLASS = 'shrink-0 self-center'
 
+/** `text-sm` to match PANEL_TAB_BASE_CLASS — the rail and the panel read as one tab row. */
 export const LIST_RAIL_TAB_BASE_CLASS =
-  'relative flex flex-1 items-center justify-center gap-1.5 px-2 py-2.5 text-[11px] font-medium transition-colors'
+  'relative flex flex-1 items-center justify-center gap-2 px-3 text-sm transition-colors'
 
 export const LIST_RAIL_TAB_ACTIVE_CLASS = 'text-foreground'
 

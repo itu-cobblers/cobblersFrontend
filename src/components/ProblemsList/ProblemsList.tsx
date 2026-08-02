@@ -1,6 +1,5 @@
 import classNames from 'classnames'
 import { Icon } from '@components/Icon'
-import type { IconName } from '@components/Icon'
 import type { ProblemListItem, ProblemsListProps, ProblemsListTab } from './ProblemsList.types'
 import {
   LIST_CLASS_BASE,
@@ -32,14 +31,10 @@ import {
   KIND_LABEL,
 } from './ProblemsList.constants'
 import {StatusBadge} from "@components/StatusBadge";
-
-const RAIL_TAB_ICON: Record<ProblemsListTab, IconName> = {
-  session: 'book',
-  history: 'history',
-}
+import { formatPassedRatio } from './ProblemsList.utils'
 
 const RAIL_TAB_LABEL: Record<ProblemsListTab, string> = {
-  session: 'Session',
+  session: 'Assignments',
   history: 'History',
 }
 
@@ -93,10 +88,9 @@ export default function ProblemsList({
               activeTab === tab ? LIST_RAIL_TAB_ACTIVE_CLASS : LIST_RAIL_TAB_IDLE_CLASS,
             )}
           >
-            <Icon name={RAIL_TAB_ICON[tab]} />
             {isOpen && <span className={LIST_RAIL_TAB_LABEL_CLASS}>{RAIL_TAB_LABEL[tab]}</span>}
             {isOpen && tab === 'session' && (
-              <span className={LIST_COUNT_CLASS}>{sessionItems.length}</span>
+              <span className={LIST_COUNT_CLASS}>{formatPassedRatio(sessionItems)}</span>
             )}
             {activeTab === tab && <span className={LIST_RAIL_TAB_UNDERLINE_CLASS} />}
           </button>
