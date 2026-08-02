@@ -25,17 +25,8 @@ import { useLocalDrafts } from './hooks/useLocalDrafts'
 import { useAssignmentData } from './hooks/useAssignmentData.ts'
 import { useWorkspaceMode } from './hooks/useWorkspaceMode'
 import { useWorkspaceSubmit } from './hooks/useWorkspaceSubmit'
-import type { AssignmentSet, SubmissionHistoryItem, SubmissionDetails, SourceFile } from '@types'
+import type { AssignmentSet, SubmissionHistoryItem, SubmissionDetails } from '@types'
 import {fetchSubmissionDetailsById} from "@lib/submissionApi.ts";
-
-// Helper function to safely parse files from stringified content
-const safeParseFiles = (content: string): SourceFile[] => {
-    try {
-        return JSON.parse(content) as SourceFile[]
-    } catch {
-        return []
-    }
-}
 
 interface StudentWorkspaceProps {
     assignmentSet: AssignmentSet
@@ -149,6 +140,9 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
         try {
             const details = await fetchSubmissionDetailsById(item.subId)
             if (details) {
+                if (typeof details.content !== 'string') {
+                    details.content = JSON.stringify(details.content);
+                }
                 setViewingSubmission(details)
             }
         } catch (error) {
@@ -225,9 +219,9 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     onAnswerChange={(val) => drafts.updatePredict(activeAssignment.id, val)}
                                 />
                             )}
-                            {activeAssignment.kind === 'project' && (
+                            {activeAssignment.kind === 'project' && !viewingSubmission && !isSolutionVisible && (
                                 <ProjectPanel
-                                    files={viewingSubmission ? safeParseFiles(viewingSubmission.content) : (drafts.state.project[activeAssignment.id] ?? [])}
+                                    files={drafts.state.project[activeAssignment.id] ?? []}
                                     onFilesChange={(files) => drafts.updateProject(activeAssignment.id, files)}
                                     hasSubmitted={hasSubmitted}
                                 />
