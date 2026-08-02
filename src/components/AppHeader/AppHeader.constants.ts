@@ -35,7 +35,7 @@ export const APP_HEADER_BAR_CLASS =
   'absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-6 bg-black/70'
 
 export const APP_HEADER_BAR_SIZE_CLASS: Record<AppHeaderVariant, string> = {
-  hero: 'h-[74px] px-8',
+  hero: 'h-[70px] px-8',
   bar: 'h-full px-3',
 }
 

@@ -2,6 +2,7 @@ import { type ChangeEvent, type KeyboardEvent } from 'react'
 import { DISPLAY_NAME_MAX_LENGTH } from '@lib/identity'
 import { Icon } from '@components/Icon'
 import { AppHeader } from '@components/AppHeader'
+import { AppFooter } from '@components/AppFooter'
 import type { EntryPortalProps } from './EntryPortal.types.ts'
 import { useEntryPortal } from './EntryPortal.hooks.ts'
 import {
@@ -135,6 +136,7 @@ export default function EntryPortal({
         </div>
       </section>
 
+      <AppFooter />
     </main>
   )
 }
