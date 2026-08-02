@@ -3,7 +3,7 @@ import type { Assignment, SourceFile } from '@types'
 import { useExecutor } from '@hooks/useExecutor'
 import { useSubmission } from '@hooks/useSubmission'
 import { useAssignments } from '@hooks/useAssignments'
-import { submitAssignment } from '@lib/submissionApi'
+import { submitAssignment } from '@/api/submissionApi.ts'
 import type { PredictStatus } from '@components'
 
 interface SubmitOptions {

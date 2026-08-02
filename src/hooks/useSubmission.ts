@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { SourceFile, SubmissionResult } from '@types'
-import { submitAssignment } from '@lib/submissionApi'
+import { submitAssignment } from '@/api/submissionApi.ts'
 
 interface UseSubmissionOptions {
   /** Cross-cutting effects on a result (mirror in terminal, grade the assignment). */

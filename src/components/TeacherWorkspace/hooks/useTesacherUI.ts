@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { fetchAssignmentSolution } from '@lib/submissionApi'
+import { fetchAssignmentSolution } from '@/api/submissionApi.ts'
 import type { SourceFile } from '@types'
 
 export function useTeacherUI(previewAssignmentIds: number[]) {
