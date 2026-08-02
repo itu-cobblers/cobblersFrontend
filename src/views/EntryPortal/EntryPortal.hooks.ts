@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState, type SyntheticEvent } from 'react'
 import { getDisplayName, setDisplayName, sanitizeDisplayName, getStudentId } from '@lib/identity'
-import { fetchTodayLatestSession, getSession, type SessionInfo } from '@/api/sessionApi.ts'
+import { fetchTodayLatestSession, getSession } from '@/api/sessionApi.ts'
 import { upsertStudent } from '@/api/studentApi.ts'
 import { fetchSoloAssignmentSet, fetchAssignmentSet } from '@/api/assignmentSetApi.ts'
-import type { AssignmentSet } from '@types'
+import type {AssignmentSet, SessionInfo} from '@types'
 
 interface UseEntryPortalOptions {
   onJoinSuccess: (roomCode: string, displayName: string, set: AssignmentSet) => void

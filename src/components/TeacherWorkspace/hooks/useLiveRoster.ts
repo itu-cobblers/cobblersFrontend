@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
-import { observeSession, focusAssignment, type Student } from '@/api/sessionHub.ts'
+import { observeSession, focusAssignment } from '@/api/sessionHub.ts'
 import type { RosterEntry } from '@components'
+import type {Student} from "@types";
 
 export function useLiveRoster(sessionCode: string | null, previewCount: number) {
     const [students, setStudents] = useState<RosterEntry[]>([])

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import type { Assignment, SourceFile } from '@types'
+import type {Assignment, AssignmentSetSummary, SourceFile, Student} from '@types'
 import { createSession, getSession, startTimer, endSession } from '@/api/sessionApi.ts'
-import { fetchAssignmentSets, fetchAssignmentSet, type AssignmentSetSummary } from '@/api/assignmentSetApi.ts'
-import { observeSession, focusAssignment, type Student } from '@/api/sessionHub.ts'
+import { fetchAssignmentSets, fetchAssignmentSet } from '@/api/assignmentSetApi.ts'
+import { observeSession, focusAssignment } from '@/api/sessionHub.ts'
 import { revokeTeacher } from '@lib/teacherAuth'
 import { fetchAssignmentSolution } from '@/api/submissionApi.ts'
 import {

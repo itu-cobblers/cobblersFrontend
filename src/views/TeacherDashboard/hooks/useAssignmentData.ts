@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
-import { fetchAssignmentSets, fetchAssignmentSet, type AssignmentSetSummary } from '@/api/assignmentSetApi.ts'
-import type { Assignment } from '@types'
+import { fetchAssignmentSets, fetchAssignmentSet } from '@/api/assignmentSetApi.ts'
+import type {Assignment, AssignmentSetSummary} from '@types'
 
 export function useAssignmentData() {
     const [assignmentSets, setAssignmentSets] = useState<AssignmentSetSummary[]>([])

@@ -1,25 +1,8 @@
-/**
- * Teacher session + timer endpoints. The single seam between the teacher view
- * and the backend's session API (proxied via /api). The SignalR hub that will
- * broadcast the timer to a room is planned — see the api repo's CONTRACT.md.
- */
+// src/api/sessionApi.ts
 
-export interface Session {
-  code: string
-}
+import type {AttendanceStudentDto, SessionCreateResponseDto, SessionInfoDto, SessionSubmissionDto, TimerDto} from "@types";
 
-/** GET /api/sessions/:code — how a joining student resolves the room's assignment set. */
-export interface SessionInfo {
-  code: string
-  assignmentSetId: string | null
-}
-
-export interface Timer {
-  endsAt: string
-}
-
-/** POST /api/sessions → create a new room bound to an assignment set, return its join code. */
-export async function createSession(assignmentSetId: string): Promise<Session> {
+export async function createSession(assignmentSetId: string): Promise<SessionCreateResponseDto> {
   const res = await fetch('/api/sessions', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -29,15 +12,13 @@ export async function createSession(assignmentSetId: string): Promise<Session> {
   return res.json()
 }
 
-/** GET /api/sessions/:code → resolve a room's assignment set (404 ⇒ no such room). */
-export async function getSession(code: string): Promise<SessionInfo> {
+export async function getSession(code: string): Promise<SessionInfoDto> {
   const res = await fetch(`/api/sessions/${encodeURIComponent(code)}`)
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
   return res.json()
 }
 
-/** POST /api/sessions/:code/timer → start a countdown for the room. */
-export async function startTimer(sessionCode: string, durationMinutes: number): Promise<Timer> {
+export async function startTimer(sessionCode: string, durationMinutes: number): Promise<TimerDto> {
   const res = await fetch(`/api/sessions/${sessionCode}/timer`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -47,25 +28,12 @@ export async function startTimer(sessionCode: string, durationMinutes: number): 
   return res.json()
 }
 
-/**
- * `POST /api/sessions/:code/end` — the teacher's manual "End session" action.
- * Marks the room ended server-side and fans out a `SessionEnded` broadcast
- * (see `@lib/sessionHub`) so any still-connected students bounce back to the
- * entry screen instead of being left in a dead room.
- */
 export async function endSession(code: string): Promise<void> {
   const res = await fetch(`/api/sessions/${encodeURIComponent(code)}/end`, { method: 'POST' })
   if (!res.ok) throw new Error(`HTTP ${res.status}`)
 }
 
-/**
- * `GET /api/sessions/today-latest` — today's newest still-active room, so
- * the entry screen can offer a one-click "Join session (CODE)" instead of
- * making the student ask the teacher for, and type, a code. `null` when
- * there's no such room (nothing created today, or it's already ended) —
- * the entry screen shows a disabled "no current active session" button.
- */
-export async function fetchTodayLatestSession(): Promise<SessionInfo | null> {
+export async function fetchTodayLatestSession(): Promise<SessionInfoDto | null> {
   try {
     const res = await fetch('/api/sessions/today-latest')
     if (!res.ok) return null
@@ -73,4 +41,22 @@ export async function fetchTodayLatestSession(): Promise<SessionInfo | null> {
   } catch {
     return null
   }
+}
+
+export async function fetchSessionAttendance(code: string): Promise<AttendanceStudentDto[]> {
+  const res = await fetch(`/api/sessions/${encodeURIComponent(code)}/attendance`);
+  if (!res.ok) {
+    if (res.status === 404) return [];
+    throw new Error(`HTTP ${res.status}`);
+  }
+  return res.json();
+}
+
+export async function fetchSessionSubmissions(code: string): Promise<SessionSubmissionDto[]> {
+  const res = await fetch(`/api/sessions/${encodeURIComponent(code)}/submissions`);
+  if (!res.ok) {
+    if (res.status === 404) return [];
+    throw new Error(`HTTP ${res.status}`);
+  }
+  return res.json();
 }

@@ -1,38 +1,13 @@
-/**
- * assignmentSetApi.ts — the assignment-set data seam, backed by the real
- * backend (see the api repo's CONTRACT.md, "Assignments"). The contract is
- * unified on Assignment naming end to end — keep these URLs and field names
- * in lockstep with CONTRACT.md:
- *
- *   GET /api/assignmentsets                     → assignment-set picker summaries
- *   GET /api/assignmentsets/:id/assignments    → the set's assignments, sorted by position
- *
- * The wire shape is { id, kind, title, description, lesson?, hint?, content }
- * where `content` holds the kind-specific fields — `toAssignment()` flattens it
- * into the frontend's discriminated `Assignment` union. Grading rules live
- * server-side (`Assignment.GradingJson`); they are not sent to the client.
- */
-import type { Assignment, AssignmentKind, AssignmentSet, LessonBlock, SourceFile } from '@types'
+import type {
+  Assignment,
+  AssignmentSet,
+  AssignmentSetSummaryDto,
+  ApiAssignmentDto,
+  SourceFileDto,
+  LessonBlock
+} from '@types'
 
-/** The assignment set the solo cohort hardcodes (CONTRACT.md, "Assignments"). */
 export const SOLO_ASSIGNMENT_SET_ID = 'all-assignments-for-solo-2026'
-
-export interface AssignmentSetSummary {
-  assignmentSetId: string
-  displayTitle: string
-}
-
-/** Wire shape of one assignment from GET /api/assignmentsets/:id/assignments. */
-interface ApiAssignment {
-  id: number
-  kind: AssignmentKind
-  title: string
-  description: string
-  lesson?: LessonBlock[]
-  hint?: string
-  content: Record<string, unknown>
-  solution?: string | SourceFile[] | null
-}
 
 async function getJson<T>(url: string): Promise<T> {
   const res = await fetch(url)
@@ -41,23 +16,18 @@ async function getJson<T>(url: string): Promise<T> {
 }
 
 /** Flatten the wire assignment (kind-specific payload in `content`) into an `Assignment`. */
-function toAssignment(dto: ApiAssignment): Assignment {
+function toAssignment(dto: ApiAssignmentDto): Assignment {
   const base = {
     id: dto.id,
     title: dto.title,
     description: dto.description,
-    lesson: dto.lesson,
+    lesson: dto.lesson as LessonBlock[] | undefined,
     hint: dto.hint,
     solution: dto.solution,
   }
   switch (dto.kind) {
     case 'code': {
-      const content = dto.content as {
-        starter?: string
-        stdin?: string
-        starterFiles?: SourceFile[]
-        entryClass?: string
-      }
+      const content = dto.content as { starter?: string; stdin?: string; starterFiles?: SourceFileDto[]; entryClass?: string }
       return { ...base, kind: 'code', ...content }
     }
     case 'predict': {
@@ -71,20 +41,14 @@ function toAssignment(dto: ApiAssignment): Assignment {
   }
 }
 
-/** `GET /api/assignmentsets` — the teacher's session-creation picker. */
-export async function fetchAssignmentSets(): Promise<AssignmentSetSummary[]> {
-  return getJson<AssignmentSetSummary[]>('/api/assignmentsets')
+export async function fetchAssignmentSets(): Promise<AssignmentSetSummaryDto[]> {
+  return getJson<AssignmentSetSummaryDto[]>('/api/assignmentsets')
 }
 
-/**
- * A full assignment set (summary + assignments). The assignments endpoint
- * doesn't return the display title, so it's resolved from the summaries list
- * in parallel.
- */
 export async function fetchAssignmentSet(assignmentSetId: string): Promise<AssignmentSet> {
   const [summaries, apiAssignments] = await Promise.all([
-    getJson<AssignmentSetSummary[]>('/api/assignmentsets'),
-    getJson<ApiAssignment[]>(`/api/assignmentsets/${encodeURIComponent(assignmentSetId)}/assignments`),
+    getJson<AssignmentSetSummaryDto[]>('/api/assignmentsets'),
+    getJson<ApiAssignmentDto[]>(`/api/assignmentsets/${encodeURIComponent(assignmentSetId)}/assignments`),
   ])
   return {
     assignmentSetId,
@@ -93,7 +57,6 @@ export async function fetchAssignmentSet(assignmentSetId: string): Promise<Assig
   }
 }
 
-/** The solo cohort's assignment set (the room cohort resolves its id via GET /api/sessions/:code). */
 export async function fetchSoloAssignmentSet(): Promise<AssignmentSet> {
   return fetchAssignmentSet(SOLO_ASSIGNMENT_SET_ID)
 }
@@ -107,6 +70,6 @@ export async function fetchAssignmentsByIds(ids: number[], includeSolution = tru
     params.append('includeSolution', 'true')
   }
 
-  const dtos = await getJson<ApiAssignment[]>(`/api/assignments?${params.toString()}`)
+  const dtos = await getJson<ApiAssignmentDto[]>(`/api/assignments?${params.toString()}`)
   return dtos.map(toAssignment)
 }

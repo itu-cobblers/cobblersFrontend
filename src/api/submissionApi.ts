@@ -1,27 +1,16 @@
-import type { SourceFile, SubmissionResult, SubmissionHistoryItem, SolutionResult, SubmissionDetails } from '@types'
+import type { SourceFileDto, SubmissionRequestDto, SubmissionResponseDto, SubmissionHistoryDto, SolutionResponseDto, SubmissionDetailDto } from '@types'
 import { getStudentId } from '@lib/identity.ts'
 
-/**
- * Submits a finished assignment attempt to the teacher. The single seam to
- * POST /api/submission.
- *
- * ⚠️ The submission contract is still an OPEN DECISION in the api repo's
- * CONTRACT.md. This is the frontend's working assumption — reconcile the exact
- * shape with the backend member before launch:
- *
- *   request:  { studentId, assignmentId, content }
- *   response: { status, stdout, stderr, accepted, message }
- */
 export async function submitAssignment({
-  assignmentId,
-  content,
-  sessionCode,
-}: {
+                                         assignmentId,
+                                         content,
+                                         sessionCode,
+                                       }: {
   assignmentId: number
-  content: string | SourceFile[]
+  content: string | SourceFileDto[]
   sessionCode?: string
-}): Promise<SubmissionResult> {
-  const body: { studentId: string; sessionId?: string; content: string | SourceFile[] } = {
+}): Promise<SubmissionResponseDto> {
+  const body: SubmissionRequestDto = {
     studentId: getStudentId(),
     content,
   }
@@ -36,23 +25,17 @@ export async function submitAssignment({
   return await res.json()
 }
 
-/**
- * `GET /api/students/{studentId}/submissions` (CONTRACT.md "Submission
- * history") — every submission this student has ever made, across all 3 days
- * and both solo/room modes. Drives the "My Progress" review panel and the
- * cross-reload/cross-day completed-assignment state.
- */
-export async function fetchSubmissionHistory(studentId: string): Promise<SubmissionHistoryItem[]> {
+export async function fetchSubmissionHistory(studentId: string): Promise<SubmissionHistoryDto[]> {
   try {
     const res = await fetch(`/api/students/${encodeURIComponent(studentId)}/submissions`)
     if (!res.ok) return []
-    return (await res.json()) as SubmissionHistoryItem[]
+    return (await res.json()) as SubmissionHistoryDto[]
   } catch {
     return []
   }
 }
 
-export async function fetchSubmissionDetailsById(submissionId: string): Promise<SubmissionDetails | null> {
+export async function fetchSubmissionDetailsById(submissionId: string): Promise<SubmissionDetailDto | null> {
   const res = await fetch(`/api/submissions/${submissionId}`)
   if (res.status === 404) {
     return null;
@@ -60,21 +43,14 @@ export async function fetchSubmissionDetailsById(submissionId: string): Promise<
   if (!res.ok) {
     throw new Error(`API returned ${res.status}`)
   }
-  return (await res.json()) as SubmissionDetails
+  return (await res.json()) as SubmissionDetailDto
 }
 
-/**
- * `GET /api/assignments/{assignmentId}/solution` (CONTRACT.md "Solution") —
- * returns a code/project assignment's reference solution from
- * `SampleSolutionJson`. Reveal gating (submit first) is enforced in the view
- * layer, not here. Degrades to `{ solution: null }` on any failure so the
- * reveal button simply shows nothing instead of breaking the app.
- */
-export async function fetchAssignmentSolution(assignmentId: number): Promise<SolutionResult> {
+export async function fetchAssignmentSolution(assignmentId: number): Promise<SolutionResponseDto> {
   try {
     const res = await fetch(`/api/assignments/${assignmentId}/solution`)
     if (!res.ok) return { solution: null }
-    return (await res.json()) as SolutionResult
+    return (await res.json()) as SolutionResponseDto
   } catch {
     return { solution: null }
   }
