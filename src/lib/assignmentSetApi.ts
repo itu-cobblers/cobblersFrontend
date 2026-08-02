@@ -31,6 +31,7 @@ interface ApiAssignment {
   lesson?: LessonBlock[]
   hint?: string
   content: Record<string, unknown>
+  solution?: string | SourceFile[] | null
 }
 
 async function getJson<T>(url: string): Promise<T> {
@@ -47,6 +48,7 @@ function toAssignment(dto: ApiAssignment): Assignment {
     description: dto.description,
     lesson: dto.lesson,
     hint: dto.hint,
+    solution: dto.solution,
   }
   switch (dto.kind) {
     case 'code': {
@@ -94,4 +96,17 @@ export async function fetchAssignmentSet(assignmentSetId: string): Promise<Assig
 /** The solo cohort's assignment set (the room cohort resolves its id via GET /api/sessions/:code). */
 export async function fetchSoloAssignmentSet(): Promise<AssignmentSet> {
   return fetchAssignmentSet(SOLO_ASSIGNMENT_SET_ID)
+}
+
+export async function fetchAssignmentsByIds(ids: number[], includeSolution = true): Promise<Assignment[]> {
+  if (ids.length === 0) return []
+
+  const params = new URLSearchParams()
+  ids.forEach(id => params.append('ids', id.toString()))
+  if (includeSolution) {
+    params.append('includeSolution', 'true')
+  }
+
+  const dtos = await getJson<ApiAssignment[]>(`/api/assignments?${params.toString()}`)
+  return dtos.map(toAssignment)
 }

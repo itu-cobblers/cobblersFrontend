@@ -1,12 +1,14 @@
 import { useState, useMemo, useRef, useEffect, useLayoutEffect } from 'react'
-import type { Assignment, SourceFile } from '@types'
+import type { Assignment, SourceFile, SubmissionDetails } from '@types'
 import type { CodeFileTab } from '@components'
 import { projectUploadStarter, defaultStarter } from '@lib/defaultStarter'
 
 interface ModeOptions {
     activeAssignment: Assignment
     drafts: ReturnType<typeof import('./useLocalDrafts').useLocalDrafts>
-    solutions: ReturnType<typeof import('./useAssignmentSolutions').useAssignmentSolutions>
+    solutions: ReturnType<typeof import('./useAssignmentData.ts').useAssignmentData>
+    viewingSubmission?: SubmissionDetails | null
+    onExitHistoryView?: () => void
 }
 
 type WriteKind = 'none' | 'code' | 'multi' | 'project'
@@ -24,7 +26,7 @@ function classNameFromJava(source: string): string | null {
     return match?.[1] ?? null
 }
 
-export function useWorkspaceMode({ activeAssignment, drafts, solutions }: ModeOptions) {
+export function useWorkspaceMode({ activeAssignment, drafts, solutions, viewingSubmission, onExitHistoryView }: ModeOptions) {
     const assignmentId = activeAssignment.id
     const hideSolutionRef = useRef(solutions.hideSolution)
 
@@ -39,28 +41,48 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions }: ModeOp
     const [activeStudentIndexByAssignment, setActiveStudentIndexByAssignment] = useState<Record<number, number>>({})
     const [activeSolutionIndexByAssignment, setActiveSolutionIndexByAssignment] = useState<Record<number, number>>({})
 
-    // Leaving a problem must exit its solution view, otherwise bouncing the
-    // problem list resurfaces reference code and looks like a draft overwrite.
     const prevAssignmentIdRef = useRef(assignmentId)
+
+    // Clear solution or history view when changing assignments
     useEffect(() => {
         const prev = prevAssignmentIdRef.current
         if (prev !== assignmentId) {
             hideSolutionRef.current(prev)
+            if (onExitHistoryView) onExitHistoryView()
             prevAssignmentIdRef.current = assignmentId
         }
-    }, [assignmentId])
+    }, [assignmentId, onExitHistoryView])
 
     const isVisible = solutions.isSolutionVisible[assignmentId] ?? false
+    const isHistoryView = !!viewingSubmission
     const solutionFiles = solutions.solutions[assignmentId]
 
     const studentFiles: SourceFile[] = useMemo(() => {
+        // Return files from historical submission if viewing history
+        if (isHistoryView && viewingSubmission) {
+            if (activeAssignment.kind === 'project' || (activeAssignment.kind === 'code' && activeAssignment.starterFiles)) {
+                try {
+                    // Multi-file and project submissions store files as a JSON string
+                    return JSON.parse(viewingSubmission.content) as SourceFile[]
+                } catch {
+                    return []
+                }
+            }
+            if (activeAssignment.kind === 'code') {
+                // Single-file code submissions store code directly as a string
+                return [{ name: 'Main.java', content: viewingSubmission.content }]
+            }
+            return []
+        }
+
+        // Default draft files
         if (activeAssignment.kind === 'project') return drafts.state.project[assignmentId] ?? []
         if (activeAssignment.kind === 'code') {
             if (activeAssignment.starterFiles) return drafts.state.multiFiles[assignmentId] ?? []
             return [{ name: 'Main.java', content: drafts.state.code[assignmentId] ?? defaultStarter }]
         }
         return []
-    }, [activeAssignment, drafts.state, assignmentId])
+    }, [activeAssignment, drafts.state, assignmentId, isHistoryView, viewingSubmission])
 
     const rawStudentIndex = activeStudentIndexByAssignment[assignmentId] ?? 0
     const rawSolutionIndex = activeSolutionIndexByAssignment[assignmentId] ?? 0
@@ -76,14 +98,13 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions }: ModeOp
 
     const activeTabIndex = isVisible ? safeSolutionIndex : safeStudentIndex
 
-    // Predict keeps a read-only snippet in the editor; solution reveal lives in PredictPanel.
     const activeContent = activeAssignment.kind === 'predict'
         ? (activeAssignment.snippet ?? '')
         : isVisible
             ? (solutionFiles?.[safeSolutionIndex]?.content ?? '')
             : (studentFiles[safeStudentIndex]?.content ?? projectUploadStarter)
 
-    const modeString = isVisible ? 'solution' : 'student'
+    const modeString = isVisible ? 'solution' : isHistoryView ? 'history' : 'student'
     const currentFile = isVisible ? solutionFiles?.[safeSolutionIndex] : studentFiles[safeStudentIndex]
     const currentFileName = activeAssignment.kind === 'predict'
         ? 'Snippet.java'
@@ -93,15 +114,12 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions }: ModeOp
     const editorPath = `assignment-${assignmentId}-${modeString}-${currentIndex}-${currentFileName}`
 
     let writeKind: WriteKind = 'none'
-    if (!isVisible && activeAssignment.kind !== 'predict') {
+    if (!isVisible && !isHistoryView && activeAssignment.kind !== 'predict') {
         if (activeAssignment.kind === 'project') writeKind = 'project'
         else if (activeAssignment.kind === 'code' && activeAssignment.starterFiles) writeKind = 'multi'
         else if (activeAssignment.kind === 'code') writeKind = 'code'
     }
 
-    // Must run in layout phase (not useEffect): Monaco applies model/value changes
-    // in useEffect, which is after layout. Parent layout still runs before child
-    // useEffect, so stale onChange callbacks already see the new write gate.
     useLayoutEffect(() => {
         hideSolutionRef.current = solutions.hideSolution
         writeGateRef.current = {
@@ -125,7 +143,6 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions }: ModeOp
         const gate = writeGateRef.current
         if (!gate.canWrite) return
 
-        // Reject cross-file ghosts: e.g. Main body arriving while FlightTicket is active.
         const declared = classNameFromJava(value)
         const expectedClass = gate.expectedFileName.replace(/\.java$/i, '')
         if (declared != null && declared !== expectedClass) return
@@ -140,8 +157,15 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions }: ModeOp
     }
 
     let viewStatusLabel = undefined
+    let onExitView = undefined
+
     if (isVisible) {
         viewStatusLabel = 'Viewing reference solution'
+        onExitView = () => solutions.hideSolution(assignmentId)
+    } else if (isHistoryView && viewingSubmission) {
+        const formattedDate = new Date(viewingSubmission.submittedAt).toLocaleString()
+        viewStatusLabel = `Viewing historical submission from ${formattedDate}`
+        onExitView = onExitHistoryView
     }
 
     return {
@@ -150,16 +174,16 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions }: ModeOp
         handleSelectFile,
         editorValue: activeContent,
         editorPath,
-        // Remount on every file/mode/assignment switch — no shared Monaco models.
         editorRemountKey: editorPath,
         isReadOnly:
             activeAssignment.kind === 'predict' ||
             isVisible ||
+            isHistoryView || // Lock editor in history view
             (activeAssignment.kind === 'project' && studentFiles.length === 0),
         handleEditorChange,
         currentContent: activeContent,
         currentStudentFiles: studentFiles,
         viewStatusLabel,
-        onExitView: () => solutions.hideSolution(assignmentId),
+        onExitView,
     }
 }

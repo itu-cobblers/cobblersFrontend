@@ -11,6 +11,5 @@ export interface CodeFileTabsProps {
   onSelectFile: (index: number) => void
   isRunning?: boolean
   onRun?: () => void
-  viewStatusLabel?: string
-  onExitView?: () => void
+  isReadOnly: boolean
 }

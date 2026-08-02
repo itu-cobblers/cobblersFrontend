@@ -48,7 +48,7 @@ export const LIST_HISTORY_LOADING_CLASS = 'px-3 py-4 text-center text-[12px] tex
 export const LIST_ITEMS_CLASS = 'min-h-0 flex-1 overflow-y-auto scrollbar-hide py-2'
 
 export const LIST_ITEM_BASE_CLASS =
-  'group relative flex w-full items-start gap-2.5 px-3 py-2 text-left text-sm transition-colors'
+  'group relative flex w-full items-center gap-2.5 px-3 py-2 text-left text-sm transition-colors'
 
 export const LIST_ITEM_ACTIVE_CLASS = 'bg-white/[0.06] text-foreground'
 
@@ -65,11 +65,7 @@ export const LIST_ITEM_TITLE_CLASS = 'mt-0.5 truncate text-[13px] leading-tight'
 
 export const LIST_ITEM_LIVE_CLASS = 'ml-auto text-[9px] uppercase tracking-widest bg-accent text-white px-2 rounded-md'
 
-// Same "live" pill as LIST_ITEM_LIVE_CLASS but without `ml-auto` — for stacking
-// under a sibling (e.g. TeacherProblemsList's passed-count) instead of sharing its row.
-export const LIST_ITEM_LIVE_BADGE_CLASS = 'text-[9px] uppercase tracking-widest bg-accent text-white px-2 rounded-md'
-
-export const LIST_FOOTER_CLASS = 'flex items-center gap-3 border-t border-border px-4 py-2 text-[10px] uppercase tracking-widest text-foreground/30'
+export const LIST_FOOTER_CLASS = 'flex items-center justify-center gap-3 border-t border-border px-4 py-2 text-[10px]'
 
 // Footer action bar pinned to the bottom of the rail — just Leave/Exit now
 // that "My Progress" lives inline as the History tab above.

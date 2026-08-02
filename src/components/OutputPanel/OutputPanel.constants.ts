@@ -1,7 +1,7 @@
 import type { ExecuteStatus } from '@types'
 
 export const OUTPUT_STATUS_LABEL: Record<ExecuteStatus, string> = {
-  success: 'Success',
+  success: 'Executed',
   compile_error: 'Compile error',
   runtime_error: 'Runtime error',
 }

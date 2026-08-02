@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import {
     ProblemsList,
     TeacherFollowBanner,
@@ -6,7 +7,8 @@ import {
     CodeEditor,
     OutputPanel,
     PredictPanel,
-    ProjectPanel
+    ProjectPanel,
+    AssignmentFooter
 } from '@components'
 import {
     STUDENT_WORKSPACE_LAYOUT_CLASS,
@@ -20,10 +22,11 @@ import {
 
 import { useWorkspaceProgress } from './hooks/useWorkspaceProgress'
 import { useLocalDrafts } from './hooks/useLocalDrafts'
-import { useAssignmentSolutions } from './hooks/useAssignmentSolutions'
+import { useAssignmentData } from './hooks/useAssignmentData.ts'
 import { useWorkspaceMode } from './hooks/useWorkspaceMode'
 import { useWorkspaceSubmit } from './hooks/useWorkspaceSubmit'
-import type { AssignmentSet, SubmissionHistoryItem } from '@types'
+import type { AssignmentSet, SubmissionHistoryItem, SubmissionDetails } from '@types'
+import {fetchSubmissionDetailsById} from "@lib/submissionApi.ts";
 
 interface StudentWorkspaceProps {
     assignmentSet: AssignmentSet
@@ -39,39 +42,120 @@ interface StudentWorkspaceProps {
 }
 
 export default function StudentWorkspace(props: StudentWorkspaceProps) {
+    const [viewingSubmission, setViewingSubmission] = useState<SubmissionDetails | null>(null)
+    const [isLoadingHistoryDetail, setIsLoadingHistoryDetail] = useState(false)
+
+    const assignmentData = useAssignmentData(
+        props.assignmentSet,
+        props.submissionHistory
+    )
+
     const progress = useWorkspaceProgress({
         assignmentSet: props.assignmentSet,
         submissionHistory: props.submissionHistory,
-        teacherFocusedAssignmentId: props.teacherFocusedAssignmentId
+        teacherFocusedAssignmentId: props.teacherFocusedAssignmentId,
+        getAssignment: assignmentData.getAssignment
     })
-    const activeAssignment = progress.activeAssignment
 
+    const activeAssignment = progress.activeAssignment
     const drafts = useLocalDrafts(props.assignmentSet.assignments)
-    const solutions = useAssignmentSolutions()
 
     const mode = useWorkspaceMode({
         activeAssignment,
         drafts,
-        solutions
+        solutions: assignmentData,
+        viewingSubmission,
+        onExitHistoryView: () => setViewingSubmission(null)
     })
+
+    const actualContent = activeAssignment.kind === 'predict'
+        ? drafts.state.predict[activeAssignment.id] ?? ''
+        : (activeAssignment.kind === 'project' || (activeAssignment.kind === 'code' && activeAssignment.starterFiles))
+            ? mode.currentStudentFiles
+            : mode.currentContent
 
     const submit = useWorkspaceSubmit({
         activeAssignment,
         sessionCode: props.sessionCode,
-        currentContent: mode.currentContent,
+        currentContent: actualContent,
         assignmentProgress: progress.assignmentProgress,
-        solutions: solutions,
-        onSubmissionMade: props.onSubmissionMade
+        solutions: assignmentData,
+        onSubmissionMade: props.onSubmissionMade,
+        viewingSubmissionId: viewingSubmission?.subId
     })
 
-    const isCompleted = progress.assignmentProgress.completedAssignments.has(activeAssignment.id)
-    const hasSubmitted = props.submissionHistory.some(item => item.assignmentId === activeAssignment.id)
-    const isSolutionVisible = solutions.isSolutionVisible[activeAssignment.id] ?? false
-    const isLoadingSolution = solutions.loadingId === activeAssignment.id
+    const handleToggleSolution = () => {
+        if (viewingSubmission) {
+            setViewingSubmission(null);
+        }
+        assignmentData.toggleSolution(activeAssignment.id, activeAssignment.kind);
+    }
 
-    const canRevealAnswer = hasSubmitted && !isCompleted
-    const canMarkAsDone = isSolutionVisible && !isCompleted
-    const submitStatus = submit.isSubmitting ? 'waiting' : submit.submitFlash ? (submit.submitFlash.passed ? 'success' : 'error') : 'idle'
+    const handleGlobalSubmit = async () => {
+        let submitResult = null;
+
+        try {
+            if (activeAssignment.kind === 'code') {
+                submitResult = await submit.handleSubmitCode();
+            } else if (activeAssignment.kind === 'predict') {
+                submitResult = await submit.handlePredictSubmit();
+            } else if (activeAssignment.kind === 'project') {
+                submitResult = await submit.handleProjectSubmit();
+            }
+        } catch (error) {
+            console.error("Submit failed:", error);
+            return;
+        }
+
+        if (submitResult && submitResult.subId) {
+            props.onSubmissionMade();
+            progress.assignmentPanelProps.onTabChange('submissions');
+            setViewingSubmission({
+                sessionId: props.sessionCode ?? "",
+                studentId: localStorage.getItem('bootit.studentId') ?? "",
+                subId: submitResult.subId,
+                assignmentId: activeAssignment.id,
+                passed: submitResult.passed,
+                result: submitResult.result,
+                content: activeAssignment.kind === 'predict'
+                    ? drafts.state.predict[activeAssignment.id] ?? ''
+                    : (activeAssignment.kind === 'project' || (activeAssignment.kind === 'code' && activeAssignment.starterFiles))
+                        ? JSON.stringify(mode.currentStudentFiles)
+                        : mode.currentContent,
+                submittedAt: submitResult.submittedAt
+        });
+        }
+    }
+
+    const handleBackToEditor = () => {
+        if(mode.onExitView) mode.onExitView();
+        progress.assignmentPanelProps.onTabChange('description');
+    }
+
+    // Fetch details when a history row is clicked
+    const handleViewSubmission = async (item: SubmissionHistoryItem) => {
+        if (isLoadingHistoryDetail) return
+
+        setIsLoadingHistoryDetail(true)
+        try {
+            const details = await fetchSubmissionDetailsById(item.subId)
+            if (details) {
+                if (typeof details.content !== 'string') {
+                    details.content = JSON.stringify(details.content);
+                }
+                setViewingSubmission(details)
+            }
+        } catch (error) {
+            console.error('Failed to fetch submission details', error)
+        } finally {
+            setIsLoadingHistoryDetail(false)
+        }
+    }
+
+    const hasSubmitted = props.submissionHistory.some(item => item.assignmentId === activeAssignment.id)
+
+    const isSolutionVisible = assignmentData.isSolutionVisible[activeAssignment.id] ?? false
+    const isLoadingSolution = assignmentData.loadingId === activeAssignment.id
 
     return (
         <div className={STUDENT_WORKSPACE_LAYOUT_CLASS}>
@@ -94,7 +178,8 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                     <div className={STUDENT_WORKSPACE_CLASS}>
                         <AssignmentPanel
                             {...progress.assignmentPanelProps}
-                            feedback={submit.feedback ?? undefined}
+                            onViewSubmission={handleViewSubmission}
+                            viewingSubmissionId={viewingSubmission?.subId}
                         />
 
                         <div className={STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS}>
@@ -105,67 +190,59 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     onSelectFile={mode.handleSelectFile}
                                     isRunning={submit.isRunning}
                                     onRun={submit.handleRunCode}
-                                    viewStatusLabel={mode.viewStatusLabel}
-                                    onExitView={mode.onExitView}
-                                />
-                            )}
-                            {(activeAssignment.kind === 'code' ||
-                                activeAssignment.kind === 'project' ||
-                                activeAssignment.kind === 'predict') && (
-                                <CodeEditor
-                                    key={mode.editorRemountKey}
-                                    value={mode.editorValue}
-                                    onChange={mode.handleEditorChange}
                                     isReadOnly={mode.isReadOnly}
                                 />
                             )}
+                            <CodeEditor
+                                key={mode.editorRemountKey}
+                                value={mode.editorValue}
+                                onChange={mode.handleEditorChange}
+                                isReadOnly={mode.isReadOnly}
+                            />
                             {activeAssignment.kind === 'code' && (
                                 <OutputPanel
-                                    output={submit.outputState.output}
-                                    status={submit.outputState.status}
-                                    footer={{
-                                        submitStatus,
-                                        onSubmit: submit.handleSubmitCode,
-                                        canRevealAnswer,
-                                        isSolutionVisible,
-                                        isLoadingSolution,
-                                        onToggleSolution: () => solutions.toggleSolution(activeAssignment.id, activeAssignment.kind),
-                                        canMarkAsDone,
-                                        isMarkingDone: submit.isMarkingDone,
-                                        onMarkAsDone: submit.handleMarkAsDone
-                                    }}
+                                    output={
+                                        viewingSubmission
+                                            ? (viewingSubmission.result?.stdout?.trim() || viewingSubmission.result?.stderr || '')
+                                            : submit.outputState.output
+                                    }
+                                    status={viewingSubmission ? (viewingSubmission.result?.status ?? null ) : submit.outputState.status}
+                                    placeHolder={mode.isReadOnly ? 'Back to Editor to run your code…' : 'Press Run to see your output…'}
                                 />
                             )}
                             {activeAssignment.kind === 'predict' && (
                                 <PredictPanel
-                                    answer={drafts.state.predict[activeAssignment.id] ?? ''}
-                                    status={submit.predictStatus}
-                                    isSubmitting={submit.isSubmittingPredict}
-                                    isMarkingDone={submit.isMarkingDone}
-                                    lastAnswerCorrect={submit.submitFlash?.passed ?? null}
+                                    answer={viewingSubmission ? viewingSubmission.content : (drafts.state.predict[activeAssignment.id] ?? '')}
+                                    status={viewingSubmission ? (viewingSubmission.passed ? 'correct' : 'tried' ) : submit.predictStatus}
                                     expectedOutput={activeAssignment.expectedOutput}
-                                    canRevealAnswer={canRevealAnswer}
                                     isSolutionVisible={isSolutionVisible}
-                                    onToggleSolution={() => solutions.toggleSolution(activeAssignment.id, activeAssignment.kind)}
-                                    canMarkAsDone={canMarkAsDone}
-                                    onMarkAsDone={submit.handleMarkAsDone}
                                     onAnswerChange={(val) => drafts.updatePredict(activeAssignment.id, val)}
-                                    onSubmit={submit.handlePredictSubmit}
                                 />
                             )}
-                            {activeAssignment.kind === 'project' && (
+                            {activeAssignment.kind === 'project' && !viewingSubmission && !isSolutionVisible && (
                                 <ProjectPanel
                                     files={drafts.state.project[activeAssignment.id] ?? []}
                                     onFilesChange={(files) => drafts.updateProject(activeAssignment.id, files)}
                                     hasSubmitted={hasSubmitted}
-                                    isSubmitting={submit.isSubmitting}
-                                    lastSubmitPassed={submit.submitFlash?.passed ?? null}
-                                    onSubmit={submit.handleProjectSubmit}
-                                    isLoadingSolution={isLoadingSolution}
-                                    isSolutionVisible={isSolutionVisible}
-                                    onToggleSolution={() => solutions.toggleSolution(activeAssignment.id, activeAssignment.kind)}
                                 />
                             )}
+                            <AssignmentFooter
+                                submitStatus={submit.isSubmitting ? 'waiting' : 'idle'}
+                                onSubmit={handleGlobalSubmit}
+                                isSubmitDisabled={submit.isRunning || submit.isSubmitting || submit.isSubmittingPredict}
+
+                                canRevealAnswer={hasSubmitted}
+                                isSolutionVisible={isSolutionVisible}
+                                isLoadingSolution={isLoadingSolution}
+                                onToggleSolution={handleToggleSolution}
+                                historyStatus={
+                                    viewingSubmission
+                                        ? (viewingSubmission.passed ? 'success' : 'error')
+                                        : null
+                                }
+                                viewStatusLabel={mode.viewStatusLabel}
+                                onExitView={handleBackToEditor}
+                            />
                         </div>
                     </div>
                 </div>
