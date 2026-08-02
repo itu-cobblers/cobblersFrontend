@@ -37,12 +37,13 @@ export const ITEM_META_ROW_CLASS = 'flex items-center justify-between gap-1.5 te
 
 export const ITEM_STATS_GROUP_CLASS = 'flex items-center gap-1.5'
 
-export const ITEM_PASSED_COUNT_CLASS = 'font-mono text-[10px] font-semibold text-emerald-400/90'
+export const ITEM_PASSED_COUNT_CLASS = 'font-mono text-[10px] font-semibold text-status-success'
 
 export const ITEM_LIVE_BADGE_CLASS = 'rounded-md bg-accent px-2 text-[9px] uppercase leading-4 tracking-widest text-white'
 
 // Shown instead of the pass/fail dot when no per-student status applies yet.
-export const ITEM_NUMBER_BADGE_CLASS = 'mt-0.5 inline-flex h-4 w-4 items-center justify-center text-xs font-bold text-muted-foreground'
+export const ITEM_NUMBER_BADGE_CLASS =
+  'mt-0.5 inline-flex h-4 w-4 items-center justify-center font-mono text-[11px] text-foreground/40'
 
 export const FOOTER_CLASS = 'mt-auto flex items-stretch border-t border-border'
 

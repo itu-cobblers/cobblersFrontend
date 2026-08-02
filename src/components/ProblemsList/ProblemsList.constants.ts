@@ -19,8 +19,13 @@ export const LIST_CLASS_CLOSED = 'w-12'
  * session row and the count onto the Session tab. These are kept because
  * `TeacherProblemsList` still renders a header of its own.
  */
+/**
+ * Teacher-only (the student rail has tabs instead). Matches
+ * LIST_RAIL_TAB_BASE_CLASS's `text-sm` in normal case — the letter-spaced
+ * caps this used to carry were the loudest mismatch between the two views.
+ */
 export const LIST_HEADER_CLASS =
-  'flex h-10 shrink-0 items-center gap-2 border-b border-border px-2 text-[11px] uppercase tracking-[0.25em] text-muted-foreground'
+  'flex h-10 shrink-0 items-center gap-2 border-b border-divider px-3 text-sm text-foreground'
 
 export const LIST_HEADER_RIGHT_CLASS = 'ml-auto flex items-center gap-1.5'
 

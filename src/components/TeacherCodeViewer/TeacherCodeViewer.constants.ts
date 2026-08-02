@@ -21,11 +21,12 @@ export const HEADER_BADGE_FAILED_CLASS = 'bg-status-error/20 text-status-error b
 export const TABS_CLASS = 'flex h-10 shrink-0 items-stretch gap-2 border-b border-divider bg-card px-2'
 export const TABS_LIST_CLASS = 'flex items-stretch gap-1'
 export const TAB_BASE_CLASS =
-  'relative flex items-center gap-1.5 rounded-t-md px-3 font-mono text-[11px] transition-colors'
+  'relative flex items-center gap-1.5 rounded-t-md px-3 font-mono text-[13px] transition-colors'
 export const TAB_ACTIVE_CLASS =
   '-mb-px border border-b-0 border-divider bg-card text-foreground'
 export const TAB_IDLE_CLASS = 'text-muted-foreground hover:text-foreground'
-export const TABS_LABEL_CLASS = 'ml-auto shrink-0 self-center text-[10px] uppercase tracking-wider text-muted-foreground/60'
+export const TABS_LABEL_CLASS =
+  'ml-auto shrink-0 self-center text-[10px] uppercase tracking-[0.8px] text-muted-foreground/60'
 
 // ── project reference solution (mirrors ProjectPanel's reveal area/footer) ──
 
@@ -52,7 +53,7 @@ export const ANSWER_FOOTER_CLASS = 'flex shrink-0 items-center justify-end gap-2
 export const RESULT_PANEL_CLASS =
   'flex h-[35%] shrink-0 flex-col overflow-hidden border-t border-divider bg-terminal font-mono text-xs text-term-ink'
 export const RESULT_HEADER_CLASS =
-  'flex h-8 shrink-0 items-center justify-between border-b border-divider px-4 text-[11px] uppercase tracking-wider text-muted-foreground'
+  'flex h-8 shrink-0 items-center justify-between border-b border-divider px-4 text-[11px] uppercase tracking-[0.8px] text-terminal-muted'
 /** Matches OUTPUT_HEADER_LEFT_CLASS on the student terminal. */
 export const RESULT_HEADER_LEFT_CLASS = 'flex items-center gap-2'
 
