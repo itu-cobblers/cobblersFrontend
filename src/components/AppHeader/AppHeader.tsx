@@ -18,8 +18,7 @@ import {
   APP_HEADER_SEPARATOR_CLASS,
   APP_HEADER_SECTION_NAME_CLASS,
   APP_HEADER_NAV_CLASS,
-  APP_HEADER_SESSION_CLASS,
-  APP_HEADER_SESSION_CODE_CLASS,
+  APP_HEADER_CHIP_CLASS,
   APP_HEADER_SESSION_NAME_CLASS,
   APP_HEADER_SESSION_NAME_STRONG_CLASS,
   APP_HEADER_ACTION_CLASS,
@@ -74,18 +73,18 @@ export default function AppHeader({
         </div>
 
         <nav className={APP_HEADER_NAV_CLASS} aria-label="Main">
-          {(sessionLabel || displayName) && (
-            <span className={APP_HEADER_SESSION_CLASS}>
-              {sessionLabel && <span className={APP_HEADER_SESSION_CODE_CLASS}>{sessionLabel}</span>}
-              {displayName && (
-                <span className={APP_HEADER_SESSION_NAME_CLASS}>
-                  Signed in as <span className={APP_HEADER_SESSION_NAME_STRONG_CLASS}>{displayName}</span>
-                </span>
-              )}
+          {sessionLabel && <span className={APP_HEADER_CHIP_CLASS}>{sessionLabel}</span>}
+          {displayName && (
+            <span className={classNames(APP_HEADER_CHIP_CLASS, APP_HEADER_SESSION_NAME_CLASS)}>
+              Signed in as <span className={APP_HEADER_SESSION_NAME_STRONG_CLASS}>{displayName}</span>
             </span>
           )}
           {onLeaveSession && (
-            <button type="button" onClick={onLeaveSession} className={APP_HEADER_ACTION_CLASS}>
+            <button
+              type="button"
+              onClick={onLeaveSession}
+              className={classNames(APP_HEADER_CHIP_CLASS, APP_HEADER_ACTION_CLASS)}
+            >
               <Icon name="logout" />
               <span>{leaveLabel}</span>
             </button>

@@ -70,26 +70,27 @@ export const APP_HEADER_SEPARATOR_CLASS = 'text-background/40'
 export const APP_HEADER_SECTION_NAME_CLASS = 'truncate'
 
 /** The right-hand action strip. */
-export const APP_HEADER_NAV_CLASS = 'flex min-w-0 shrink items-center gap-4'
+export const APP_HEADER_NAV_CLASS = 'flex min-w-0 shrink items-center gap-[2px]'
 
 /**
- * Session identity, to the left of the actions. Inverted against the rail's
- * version — these sit on the dark bar, so the pill is a light wash on dark
- * rather than the reverse.
+ * The action strip, after the ITU Student nav: a row of solid black boxes with
+ * white text, square corners and hairline gaps — the same language as the
+ * lockup, so the two ends of the bar read as one system.
  */
-export const APP_HEADER_SESSION_CLASS =
-  'flex min-w-0 items-center gap-3 text-[11px] text-background/70'
+export const APP_HEADER_CHIP_CLASS =
+  'flex h-6 shrink-0 items-center gap-1.5 bg-foreground px-2.5 text-[12px] leading-none text-background'
 
-export const APP_HEADER_SESSION_CODE_CLASS =
-  'shrink-0 rounded-md border border-background/30 bg-background/10 px-2 py-0.5 font-semibold text-background'
-
-export const APP_HEADER_SESSION_NAME_CLASS = 'truncate'
-
-export const APP_HEADER_SESSION_NAME_STRONG_CLASS = 'font-medium text-background'
-
-/** Sits on the translucent bar, so it reads in `--background` ink, not `--foreground`. */
+/**
+ * Only the interactive box reacts to the pointer — the identity boxes are
+ * labels wearing the same shape, and shouldn't imply they can be clicked.
+ * Hover inverts, the way the ITU nav marks its active tab.
+ */
 export const APP_HEADER_ACTION_CLASS =
-  'inline-flex shrink-0 cursor-pointer items-center gap-1.5 rounded px-2 py-1 text-[11px] font-medium text-background/80 transition-colors hover:bg-white/10 hover:text-background'
+  'cursor-pointer transition-colors hover:bg-background hover:text-foreground'
+
+export const APP_HEADER_SESSION_NAME_CLASS = 'min-w-0'
+
+export const APP_HEADER_SESSION_NAME_STRONG_CLASS = 'truncate font-semibold'
 
 export const APP_HEADER_BRAND_PREFIX = 'ITU'
 
