@@ -10,7 +10,15 @@ export const PANEL_CARD_BODY_CLASS =
 
 export const PANEL_SCROLL_CLASS = 'flex-1 overflow-y-auto px-5 py-4'
 
-export const PANEL_TITLE_CLASS = 'mb-3 text-[19px] font-semibold tracking-tight text-foreground'
+/**
+ * The title's type, with no spacing of its own — for rows that pair it with an
+ * action. The `mb-3` below belongs to the title only when it stands alone; in a
+ * flex row `items-center` centres margin boxes, so a bottom margin on the
+ * heading pushes its text up and the button appears to sag.
+ */
+export const PANEL_TITLE_BARE_CLASS = 'text-[19px] font-semibold tracking-tight text-foreground'
+
+export const PANEL_TITLE_CLASS = `mb-3 ${PANEL_TITLE_BARE_CLASS}`
 
 export const PANEL_LESSON_TEXT_CLASS = 'mb-3 whitespace-pre-wrap text-[15px] leading-relaxed text-muted-foreground'
 

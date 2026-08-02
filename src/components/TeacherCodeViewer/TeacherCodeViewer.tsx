@@ -5,6 +5,7 @@ import { ShowAnswerButton } from '@components/ShowAnswerButton'
 import type { TeacherCodeViewerProps } from './TeacherCodeViewer.types'
 import {
   VIEWER_CLASS,
+  VIEWER_BODY_CLASS,
   HEADER_CLASS,
   HEADER_LEFT_CLASS,
   HEADER_STUDENT_NAME_CLASS,
@@ -17,7 +18,6 @@ import {
   TAB_BASE_CLASS,
   TAB_ACTIVE_CLASS,
   TAB_IDLE_CLASS,
-  TAB_UNDERLINE_CLASS,
   TABS_LABEL_CLASS,
   SOLUTION_WRAP_CLASS,
   SOLUTION_BODY_CLASS,
@@ -107,7 +107,6 @@ export default function TeacherCodeViewer({
                 >
                   <Icon name="book" />
                   {file.name}
-                  {index === activeFileIndex && <span className={TAB_UNDERLINE_CLASS} />}
                 </button>
               ))}
             </div>
@@ -116,6 +115,7 @@ export default function TeacherCodeViewer({
         )
       )}
 
+      <div className={VIEWER_BODY_CLASS}>
       {/* Main area: readonly Monaco editor for code/predict; project's brief now
           renders in TeacherAssignmentPanel (matching the student view) — this
           column instead mirrors ProjectPanel's reference-solution reveal. */}
@@ -226,6 +226,7 @@ export default function TeacherCodeViewer({
           </div>
         </div>
       )}
+      </div>
     </div>
   )
 }

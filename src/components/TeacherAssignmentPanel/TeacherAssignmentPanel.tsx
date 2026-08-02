@@ -8,7 +8,7 @@ import { useHintDisclosure } from '@components/AssignmentPanel/AssignmentPanel.h
 import {
   PANEL_CLASS,
   PANEL_SCROLL_CLASS,
-  PANEL_TITLE_CLASS,
+  PANEL_TITLE_BARE_CLASS,
   PANEL_LESSON_TEXT_CLASS,
   PANEL_LESSON_CODE_CLASS,
   PANEL_TASK_LABEL_CLASS,
@@ -39,6 +39,7 @@ import {
   FOCUS_BUTTON_IDLE_CLASS,
   SUBMISSIONS_EMPTY_TITLE_CLASS,
   SUBMISSIONS_EMPTY_SUBTITLE_CLASS,
+  TITLE_ROW_CLASS,
 } from './TeacherAssignmentPanel.constants'
 import {SubmissionRow} from "@components/SubmissionRow";
 
@@ -114,8 +115,8 @@ export default function TeacherAssignmentPanel({
       <div className={PANEL_CARD_BODY_CLASS}>
       {activeTab === 'description' ? (
         <div className={PANEL_SCROLL_CLASS}>
-          <div className="flex items-center justify-between gap-3">
-            <h2 className={PANEL_TITLE_CLASS}>{title}</h2>
+          <div className={TITLE_ROW_CLASS}>
+            <h2 className={PANEL_TITLE_BARE_CLASS}>{title}</h2>
             {isBroadcastable && onFocusClick && (
               <button
                 type="button"

@@ -18,3 +18,6 @@ export const SUBMISSION_ROW_INTERACTIVE_CLASS = 'cursor-pointer transition-color
 export const SUBMISSION_ROW_ACTIVE_CLASS = 'bg-black/[0.08] border-l-2 border-l-accent'
 export const SUBMISSION_ROW_IDLE_CLASS = 'hover:bg-black/[0.03]'
 export const SUBMISSION_FILTER_LINK_CLASS = 'text-[11px] text-accent hover:underline shrink-0 font-medium'
+
+/** Title + Focus on one baseline; the margin lives here, not on the heading. */
+export const TITLE_ROW_CLASS = 'mb-3 flex items-center justify-between gap-3'
