@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import type { Assignment, SourceFile } from '@types'
-import { createSession, getSession, startTimer, endSession } from '@lib/sessionApi'
-import { fetchAssignmentSets, fetchAssignmentSet, type AssignmentSetSummary } from '@lib/assignmentSetApi'
-import { groupAssignments } from '@lib/assignmentSet'
-import { observeSession, focusAssignment, type Student } from '@lib/sessionHub'
+import { createSession, getSession, startTimer, endSession } from '@/api/sessionApi.ts'
+import { fetchAssignmentSets, fetchAssignmentSet, type AssignmentSetSummary } from '@/api/assignmentSetApi.ts'
+import { observeSession, focusAssignment, type Student } from '@/api/sessionHub.ts'
 import { revokeTeacher } from '@lib/teacherAuth'
-import { fetchAssignmentSolution } from '@lib/submissionApi'
+import { fetchAssignmentSolution } from '@/api/submissionApi.ts'
 import {
   getPersistedTeacherSession,
   setPersistedTeacherSession,

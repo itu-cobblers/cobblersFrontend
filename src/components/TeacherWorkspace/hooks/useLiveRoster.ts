@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { observeSession, focusAssignment, type Student } from '@lib/sessionHub'
+import { observeSession, focusAssignment, type Student } from '@/api/sessionHub.ts'
 import type { RosterEntry } from '@components'
 
 export function useLiveRoster(sessionCode: string | null, previewCount: number) {

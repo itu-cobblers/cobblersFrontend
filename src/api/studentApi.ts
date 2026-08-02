@@ -1,4 +1,4 @@
-import { getStudentId } from './identity'
+import { getStudentId } from '@lib/identity.ts'
 
 /**
  * `PUT /api/students/{studentId}` — upserts the student's display name

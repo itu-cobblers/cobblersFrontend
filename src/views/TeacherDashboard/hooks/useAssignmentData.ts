@@ -1,6 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { fetchAssignmentSets, fetchAssignmentSet, type AssignmentSetSummary } from '@lib/assignmentSetApi.ts'
-import { groupAssignments } from '@lib/assignmentSet.ts'
+import { fetchAssignmentSets, fetchAssignmentSet, type AssignmentSetSummary } from '@/api/assignmentSetApi.ts'
 import type { Assignment } from '@types'
 import type { AssignmentSetPreviewGroup } from '@components'
 

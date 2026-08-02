@@ -1,5 +1,5 @@
 import type { SourceFile, SubmissionResult, SubmissionHistoryItem, SolutionResult, SubmissionDetails } from '@types'
-import { getStudentId } from './identity'
+import { getStudentId } from '@lib/identity.ts'
 
 /**
  * Submits a finished assignment attempt to the teacher. The single seam to
