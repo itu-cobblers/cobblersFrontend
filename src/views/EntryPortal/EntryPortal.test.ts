@@ -45,6 +45,48 @@ describe('EntryPortal', () => {
     )
   })
 
+  it('joins the class when Enter is pressed in the name field', () => {
+    const onJoinToday = vi.fn()
+    vi.mocked(useEntryPortal).mockReturnValue({
+      ...defaultUseEntryPortalMock,
+      name: 'Maria',
+      todayLatestSessionCode: 'P4FN',
+      onJoinToday,
+    })
+    render(createElement(EntryPortal, baseProps))
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'Your name' }), { key: 'Enter' })
+    expect(onJoinToday).toHaveBeenCalledOnce()
+  })
+
+  it('does nothing on Enter when there is no session to join, leaving solo practice a deliberate choice', () => {
+    const onJoinToday = vi.fn()
+    const onStartSolo = vi.fn()
+    vi.mocked(useEntryPortal).mockReturnValue({
+      ...defaultUseEntryPortalMock,
+      name: 'Maria',
+      todayLatestSessionCode: null,
+      onJoinToday,
+      onStartSolo,
+    })
+    render(createElement(EntryPortal, baseProps))
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'Your name' }), { key: 'Enter' })
+    expect(onJoinToday).not.toHaveBeenCalled()
+    expect(onStartSolo).not.toHaveBeenCalled()
+  })
+
+  it('does not join on Enter before a name has been typed', () => {
+    const onJoinToday = vi.fn()
+    vi.mocked(useEntryPortal).mockReturnValue({
+      ...defaultUseEntryPortalMock,
+      name: '   ',
+      todayLatestSessionCode: 'P4FN',
+      onJoinToday,
+    })
+    render(createElement(EntryPortal, baseProps))
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'Your name' }), { key: 'Enter' })
+    expect(onJoinToday).not.toHaveBeenCalled()
+  })
+
   it('disables the join button and shows a checking label while the today-latest lookup is in flight', () => {
     vi.mocked(useEntryPortal).mockReturnValue({
       ...defaultUseEntryPortalMock,

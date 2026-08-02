@@ -1,4 +1,4 @@
-import { type ChangeEvent } from 'react'
+import { type ChangeEvent, type KeyboardEvent } from 'react'
 import { DISPLAY_NAME_MAX_LENGTH } from '@lib/identity'
 import { Icon } from '@components/Icon'
 import { AppHeader } from '@components/AppHeader'
@@ -50,6 +50,18 @@ export default function EntryPortal({
     onNameChange(event.target.value)
   }
 
+  /**
+   * Enter joins the class, on the same condition the Join button is enabled
+   * under — so with no session to join it does nothing, and picking Solo
+   * Practice stays a deliberate act. `isComposing` keeps the Enter that
+   * commits an IME candidate from submitting the name mid-word.
+   */
+  function handleNameKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key !== 'Enter' || event.nativeEvent.isComposing) return
+    if (!canJoinToday) return
+    onJoinToday()
+  }
+
   return (
     <main className={ENTRY_PORTAL_SCREEN_CLASS}>
       <div className={ENTRY_PORTAL_SCRIM_CLASS} />
@@ -68,6 +80,7 @@ export default function EntryPortal({
               type="text"
               value={name}
               onChange={handleNameInputChange}
+              onKeyDown={handleNameKeyDown}
               aria-label="Your name"
               placeholder={ENTRY_PORTAL_NAME_PLACEHOLDER}
               maxLength={DISPLAY_NAME_MAX_LENGTH}

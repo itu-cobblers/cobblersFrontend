@@ -21,15 +21,15 @@ export const APP_HEADER_BAR_CLASS =
   'absolute inset-x-0 top-0 z-20 flex h-[74px] items-center justify-between gap-6 bg-black/70 px-8'
 
 /**
- * Two solid boxes reading "ITU | BootIT". `divide-x` draws the hairline
- * between them the way the ITU lockup does, rather than a gap.
+ * Two genuinely separate boxes reading "ITU | BootIT", as on the ITU lockup —
+ * the divider is a 2px gap that the bar shows through, not a drawn line. The
+ * fill therefore belongs on each box, never on this container.
  */
-export const APP_HEADER_BRAND_CLASS =
-  'inline-flex shrink-0 divide-x divide-background/70 bg-foreground text-background'
+export const APP_HEADER_BRAND_CLASS = 'inline-flex shrink-0 gap-[2px]'
 
 /** ~40px tall, matching the 236x40 lockup the ITU header ships. */
 export const APP_HEADER_BRAND_BOX_CLASS =
-  'flex h-10 items-center px-5 text-[22px] uppercase leading-none tracking-tight'
+  'flex h-10 items-center bg-foreground px-5 text-[22px] uppercase leading-none tracking-tight text-background'
 
 /** Only the institution half is bold, as on the ITU lockup. */
 export const APP_HEADER_BRAND_PREFIX_CLASS = 'font-bold'
