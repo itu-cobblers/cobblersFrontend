@@ -31,19 +31,18 @@ describe('EntryPortal', () => {
     vi.mocked(useEntryPortal).mockReturnValue(defaultUseEntryPortalMock)
   })
 
-  it('shows "Welcome to BootIT" for a first-time student', () => {
+  it('shows the BootCode title and the joining instructions', () => {
     render(createElement(EntryPortal, baseProps))
-    expect(screen.getByText('Welcome to BootIT')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'BootCode' })).toBeInTheDocument()
+    expect(screen.getByText(/refresh this page when your teacher has made a classroom/)).toBeInTheDocument()
   })
 
-  it('shows "Welcome to BootIT, {name}" for a returning student', () => {
-    vi.mocked(useEntryPortal).mockReturnValue({
-      ...defaultUseEntryPortalMock,
-      name: 'Maria',
-      isReturningStudent: true,
-    })
+  it('prompts for a nickname in the name field', () => {
     render(createElement(EntryPortal, baseProps))
-    expect(screen.getByText('Welcome to BootIT, Maria')).toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: 'Your name' })).toHaveAttribute(
+      'placeholder',
+      'Type your nickname here',
+    )
   })
 
   it('disables the join button and shows a checking label while the today-latest lookup is in flight', () => {

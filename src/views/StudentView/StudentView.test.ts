@@ -86,7 +86,7 @@ describe('StudentView', () => {
 
   it('shows the entry screen first, not the IDE', () => {
     render(createElement(StudentView))
-    expect(screen.getByText('Welcome to BootIT')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'BootCode' })).toBeInTheDocument()
     expect(screen.queryByTestId('editor')).not.toBeInTheDocument()
     expect(screen.queryByRole('navigation', { name: 'Assignments' })).not.toBeInTheDocument()
   })
@@ -148,7 +148,7 @@ describe('StudentView', () => {
 
     capturedJoinCallbacks?.onSessionEnded?.()
 
-    expect(await screen.findByText('Welcome to BootIT')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'BootCode' })).toBeInTheDocument()
     expect(screen.getByText('This session has ended — ask your teacher for the new code.')).toBeInTheDocument()
     expect(localStorage.getItem('bootit.studentSession')).toBeNull()
   })
@@ -160,7 +160,7 @@ describe('StudentView', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Exit' }))
 
-    expect(screen.getByText('Welcome to BootIT')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'BootCode' })).toBeInTheDocument()
     expect(localStorage.getItem('bootit.studentSession')).toBeNull()
   })
 })

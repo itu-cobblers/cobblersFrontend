@@ -89,3 +89,5 @@ export type { SubmitButtonProps, SubmitButtonStatus } from './SubmitButton'
 
 export { ShowAnswerButton } from './ShowAnswerButton'
 export type { ShowAnswerButtonProps } from './ShowAnswerButton'
+
+export { AppHeader } from './AppHeader'
