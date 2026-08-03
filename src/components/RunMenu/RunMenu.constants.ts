@@ -11,7 +11,7 @@ export const RUN_MENU_SHELL_CLASS =
   'inline-flex items-stretch gap-px overflow-hidden rounded-md bg-primary text-primary-foreground'
 
 export const RUN_MENU_PLAY_CLASS =
-  `flex ${BUTTON_HEIGHT_CLASS} w-10 cursor-pointer items-center justify-center bg-primary transition-colors enabled:hover:bg-primary/85 disabled:cursor-not-allowed disabled:opacity-40`
+  `flex ${BUTTON_HEIGHT_CLASS} w-10 cursor-pointer items-center justify-center bg-primary transition-colors enabled:hover:bg-primary/85 disabled:cursor-not-allowed`
 
 export const RUN_MENU_CHEVRON_CLASS =
   `flex ${BUTTON_HEIGHT_CLASS} w-7 cursor-pointer items-center justify-center bg-primary transition-colors hover:bg-primary/85`

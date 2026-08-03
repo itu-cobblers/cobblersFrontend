@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
     AttendanceList,
     TeacherAssignmentPanel,
@@ -24,9 +24,10 @@ import { useTeacherSolution } from './hooks/useTeacherSolution'
 import type { TeacherWorkspaceProps } from './TeacherWorkspace.types'
 import { getEditorContent, getTabFiles } from "@components/TeacherWorkspace/TeacherWorkspace.utils.ts";
 import {TeacherAssignmentFooter} from "@components/TeacherAssignmentFooter";
+import { getPersistedTeacherWorkspaceUI, setPersistedTeacherWorkspaceUI } from '@lib/teacherWorkspaceUI'
 
 export default function TeacherWorkspace({ sessionCode, assignmentData, session }: TeacherWorkspaceProps) {
-    const [isRailOpen, setIsRailOpen] = useState(true)
+    const [isRailOpen, setIsRailOpen] = useState(() => getPersistedTeacherWorkspaceUI()?.isRailOpen ?? true)
 
     const { attendanceList, allSubmissions, addSubmission, mergeLiveStudents } = useTeacherHydration(sessionCode)
 
@@ -49,6 +50,7 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
         problemItems,
         attendanceStudents,
         filteredSubmissions,
+        assignmentBreakdown,
         handleSelectAssignment,
         handleSelectStudent,
         handleClearStudentFilter
@@ -56,8 +58,13 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
         assignments: assignmentData.assignments,
         attendanceList,
         allSubmissions,
-        liveStudentIds
+        liveStudentIds,
+        initialAssignmentId: getPersistedTeacherWorkspaceUI()?.selectedAssignmentId
     })
+
+    useEffect(() => {
+        setPersistedTeacherWorkspaceUI({ isRailOpen, selectedAssignmentId })
+    }, [isRailOpen, selectedAssignmentId])
 
     const { submissionDetail, isLoadingDetail } = useTeacherSubmissionDetail(activeSubId)
 
@@ -134,6 +141,7 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
                     hint={activeAssignment?.hint}
                     onFocusClick={() => selectedAssignmentId != null && handleFocusAssignment(selectedAssignmentId)}
                     isFocused={selectedAssignmentId != null && selectedAssignmentId === focusedAssignmentId}
+                    assignmentBreakdown={assignmentBreakdown}
                     selectedStudentName={attendanceStudents.find(s => s.studentId === selectedStudentId)?.displayName}
                     onClearStudentFilter={handleClearStudentFilter}
                     submissions={filteredSubmissions}

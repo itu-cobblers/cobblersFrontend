@@ -1,7 +1,7 @@
 import { Icon } from '@components/Icon'
 import { RunMenu } from '@components/RunMenu'
 import { SubmitButton } from '@components/SubmitButton'
-import type { AssignmentFooterProps } from './AssignmentFooter.types'
+import type { AssignmentFooterProps } from '@/components'
 import {
     ASSIGNMENT_FOOTER_CLASS,
     ASSIGNMENT_FOOTER_RIGHT_CLASS,

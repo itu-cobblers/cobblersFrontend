@@ -1,5 +1,5 @@
 import classNames from 'classnames'
-import type { SpinnerProps } from './Spinner.types'
+import type { SpinnerProps } from '@/components'
 import { SPINNER_BASE_CLASS, SPINNER_VARIANT_CLASS } from './Spinner.constants'
 
 export default function Spinner({ variant = 'solid' }: SpinnerProps) {

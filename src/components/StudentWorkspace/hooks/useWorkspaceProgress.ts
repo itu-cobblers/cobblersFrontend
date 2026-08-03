@@ -1,8 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import type { Assignment, AssignmentSet, SubmissionHistoryItem, AssignmentKind } from '@types'
 import type { ProblemsListTab, AssignmentPanelTab, ProblemStatus } from '@components'
 import { useAssignments } from '@hooks/useAssignments'
 import { getProjectIdentity } from '@lib/projectIdentity'
+import { getPersistedWorkspaceUI, setPersistedWorkspaceUI } from '@lib/studentWorkspaceUI'
 
 interface ProgressOptions {
     assignmentSet: AssignmentSet
@@ -17,12 +18,18 @@ export function useWorkspaceProgress({
     teacherFocusedAssignmentId,
     getAssignment
 }: ProgressOptions) {
-    const [isRailOpen, setIsRailOpen] = useState(true)
-    const [railTab, setRailTab] = useState<ProblemsListTab>('session')
-    const [panelTab, setPanelTab] = useState<AssignmentPanelTab>('description')
-    const [selectionSource, setSelectionSource] = useState<ProblemsListTab>('session')
+    // Read once — only the value on first render matters, since every state
+    // below seeds itself from this via a lazy initializer.
+    const persistedUI = getPersistedWorkspaceUI()
 
-    const [historySelectedId, setHistorySelectedId] = useState<number | null>(null)
+    const [isRailOpen, setIsRailOpen] = useState(persistedUI?.isRailOpen ?? true)
+    const [railTab, setRailTab] = useState<ProblemsListTab>(persistedUI?.railTab ?? 'session')
+    const [panelTab, setPanelTab] = useState<AssignmentPanelTab>('description')
+    const [selectionSource, setSelectionSource] = useState<ProblemsListTab>(persistedUI?.railTab ?? 'session')
+
+    const [historySelectedId, setHistorySelectedId] = useState<number | null>(
+        persistedUI?.railTab === 'history' ? persistedUI.selectedAssignmentId : null
+    )
 
     const latestHistoryAssignmentId = submissionHistory[0]?.assignmentId
     const { attemptedIds, passedIds } = useMemo(() => {
@@ -39,7 +46,14 @@ export function useWorkspaceProgress({
         return { attemptedIds: attempted, passedIds: passed }
     }, [submissionHistory, getAssignment])
 
-    const assignmentProgress = useAssignments(assignmentSet.assignments, Array.from(passedIds))
+    const initialSessionIndex = persistedUI?.railTab === 'session' && persistedUI.selectedAssignmentId != null
+        ? assignmentSet.assignments.findIndex((a) => a.id === persistedUI.selectedAssignmentId)
+        : -1
+    const assignmentProgress = useAssignments(
+        assignmentSet.assignments,
+        Array.from(passedIds),
+        initialSessionIndex >= 0 ? initialSessionIndex : 0
+    )
     const defaultSessionAssignment = assignmentSet.assignments[0]
 
     const activeAssignment = useMemo(() => {
@@ -62,6 +76,14 @@ export function useWorkspaceProgress({
         assignmentProgress.activeAssignment,
         defaultSessionAssignment
     ])
+
+    useEffect(() => {
+        setPersistedWorkspaceUI({
+            isRailOpen,
+            railTab,
+            selectedAssignmentId: activeAssignment?.id ?? null,
+        })
+    }, [isRailOpen, railTab, activeAssignment?.id])
 
     const handleRailTabChange = (newTab: ProblemsListTab) => {
         setRailTab(newTab)

@@ -46,17 +46,25 @@ describe('ProblemsList', () => {
     expect(screen.getByTitle('Assignments')).toHaveTextContent('1/3')
   })
 
-  // The History tab is deliberately unrendered for now — but the view behind
-  // it still works, driven by activeTab from wherever we surface it next.
-  it('renders no History tab', () => {
+  // History gave up its half of the tab row for a compact icon-toggle instead
+  // (it wasn't earning that much space) — but it still needs a way in.
+  it('renders a History icon-toggle', () => {
     render(createElement(ProblemsList, baseProps))
-    expect(screen.queryByTitle('History')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('View submission history')).toBeInTheDocument()
   })
 
-  it('still renders history items when activeTab is history, with no tab to reach it', () => {
-    render(createElement(ProblemsList, { ...baseProps, activeTab: 'history' }))
-    expect(screen.getByText('Yesterday quiz')).toBeInTheDocument()
-    expect(screen.queryByTitle('History')).not.toBeInTheDocument()
+  it('switches to history when the History toggle is clicked', () => {
+    const onTabChange = vi.fn()
+    render(createElement(ProblemsList, { ...baseProps, onTabChange }))
+    fireEvent.click(screen.getByLabelText('View submission history'))
+    expect(onTabChange).toHaveBeenCalledWith('history')
+  })
+
+  it('switches back to session when the History toggle is clicked while active', () => {
+    const onTabChange = vi.fn()
+    render(createElement(ProblemsList, { ...baseProps, activeTab: 'history', onTabChange }))
+    fireEvent.click(screen.getByLabelText('View submission history'))
+    expect(onTabChange).toHaveBeenCalledWith('session')
   })
 
   it('renders history items instead when the History tab is active', () => {

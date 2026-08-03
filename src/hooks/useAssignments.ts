@@ -21,9 +21,13 @@ export interface UseAssignments {
  * day still shows yesterday's passes as done. It's merged in via `useMemo`,
  * not copied into state on mount, because it's fetched async and may resolve
  * *after* this hook's first render — a one-time seed would miss it.
+ *
+ * `initialActiveIndex` seeds which assignment starts selected (e.g. restoring
+ * a persisted selection after a refresh) — read once via `useState`'s lazy
+ * initializer, same as any other mount-time seed.
  */
-export function useAssignments(assignments: Assignment[], initiallyCompleted: number[] = []): UseAssignments {
-  const [activeAssignment, setActiveAssignment] = useState(0)
+export function useAssignments(assignments: Assignment[], initiallyCompleted: number[] = [], initialActiveIndex = 0): UseAssignments {
+  const [activeAssignment, setActiveAssignment] = useState(initialActiveIndex)
   const [locallyCompleted, setLocallyCompleted] = useState<Set<number>>(new Set())
 
   const completedAssignments = useMemo(() => {

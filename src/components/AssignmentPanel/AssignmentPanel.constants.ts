@@ -18,7 +18,8 @@ export const PANEL_SCROLL_CLASS = 'flex-1 overflow-y-auto px-5 py-4'
  */
 export const PANEL_TITLE_BARE_CLASS = 'text-[19px] font-semibold tracking-tight text-foreground'
 
-export const PANEL_TITLE_CLASS = `mb-3 ${PANEL_TITLE_BARE_CLASS}`
+/** Same row shape as TeacherAssignmentPanel's TITLE_ROW_CLASS. */
+export const PANEL_TITLE_ROW_CLASS = 'mb-3 flex items-center justify-between gap-3'
 
 export const PANEL_LESSON_TEXT_CLASS = 'mb-3 whitespace-pre-wrap text-[15px] leading-relaxed text-muted-foreground'
 

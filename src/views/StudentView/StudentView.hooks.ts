@@ -26,6 +26,7 @@ export function useStudentApp() {
   const [mode, setMode] = useState<JoinMode>('join')
   const [code, setCode] = useState('')
   const [teacherFocusedAssignmentId, setTeacherFocusedAssignmentId] = useState<number | null>(null)
+  const [timerEndsAt, setTimerEndsAt] = useState<string | null>(null)
 
   const [toast, setToast] = useState<ToastState | null>(null)
   const [submissionHistory, setSubmissionHistory] = useState<SubmissionHistoryItem[]>([])
@@ -36,6 +37,7 @@ export function useStudentApp() {
     setAssignmentSet(null)
     setCode('')
     setTeacherFocusedAssignmentId(null)
+    setTimerEndsAt(null)
   }
 
   function connectToRoom(roomCode: string, displayName: string) {
@@ -44,6 +46,7 @@ export function useStudentApp() {
         { code: roomCode, studentId, displayName },
         {
           onAssignmentFocused: setTeacherFocusedAssignmentId,
+          onTimerStarted: (timer) => setTimerEndsAt(timer.endsAt),
           onSessionEnded: () => {
             handleLeaveSession()
             setToast({ message: 'This session has ended — ask your teacher for the new code.', tone: 'error' })
@@ -140,6 +143,7 @@ export function useStudentApp() {
       onLeave: handleLeaveSession,
       displayName: getDisplayName(),
       teacherFocusedAssignmentId: mode === 'join' ? teacherFocusedAssignmentId : null,
+      timerEndsAt: mode === 'join' ? timerEndsAt : null,
     },
     progress: {
       isLoading: isHistoryLoading,

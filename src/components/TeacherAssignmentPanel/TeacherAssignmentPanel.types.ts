@@ -32,6 +32,8 @@ export interface TeacherAssignmentPanelProps {
   onFocusClick?: () => void
   isFocused?: boolean
   isBroadcastable?: boolean
+  /** Passed/tried/untried across every student who's joined, for this assignment — shown here instead of on the rail row. */
+  assignmentBreakdown?: { passed: number; tried: number; untried: number }
   // Selection filter state (student-only — the assignment side can never be
   // empty, so it's shown via the title row above, not a clearable pill)
   selectedStudentName?: string | null

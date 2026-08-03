@@ -36,3 +36,17 @@ export function formatAttemptTime(iso: string): string {
 export function describeSource(sessionId: string | null | undefined): string {
   return sessionId ? `Room ${sessionId}` : 'Solo'
 }
+
+/** "Ends 14:30" while a timer runs — 24-hour, matching the submission stamps. Used by the teacher rail. */
+export function formatTimerEnds(endsAt: string): string {
+  const end = new Date(endsAt)
+  if (Number.isNaN(end.getTime())) return endsAt
+  return `Ends ${end.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })}`
+}
+
+/** "Move to next at 14:30" — the student rail's footer prompt while a timer runs; a session-wide nudge, not tied to any one assignment. */
+export function formatMoveToNext(endsAt: string): string {
+  const end = new Date(endsAt)
+  if (Number.isNaN(end.getTime())) return endsAt
+  return `Move to next at ${end.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', hour12: false })}`
+}

@@ -1,8 +1,7 @@
 import { type ChangeEvent } from 'react'
 import classNames from 'classnames'
-import { StatusBadge } from '@components/StatusBadge'
 import { Icon } from '@components/Icon'
-import { formatTimerEnds } from '@components/ProblemsList'
+import { formatTimerEnds, ProblemsListRow } from '@components/ProblemsList'
 
 import type { TeacherProblemsListProps, TeacherProblemItem } from './TeacherProblemsList.types'
 import {
@@ -14,24 +13,10 @@ import {
   LIST_COUNT_CLASS,
   LIST_TOGGLE_CLASS,
   LIST_ITEMS_CLASS,
-  LIST_ITEM_BASE_CLASS,
-  LIST_ITEM_ACTIVE_CLASS,
-  LIST_ITEM_IDLE_CLASS,
-  LIST_ITEM_ACCENT_BAR_CLASS,
-  LIST_ITEM_KIND_BADGE_CLASS,
-  LIST_ITEM_TITLE_CLASS,
-  KIND_LABEL,
+  LIST_CARD_BODY_CLASS,
 } from '@components/ProblemsList/ProblemsList.constants'
 import {
-  ITEM_CONTENT_CLASS,
-  ITEM_META_ROW_CLASS,
-  ITEM_STATS_GROUP_CLASS,
-  ITEM_PASSED_COUNT_CLASS,
-  ITEM_LIVE_BADGE_CLASS,
-  ITEM_NUMBER_BADGE_CLASS,
-  TEACHER_LIST_CARD_CLASS,
   TIMER_SECTION_CLASS,
-  TIMER_SECTION_COLLAPSED_CLASS,
   TIMER_LABEL_ROW_CLASS,
   TIMER_LABEL_CLASS,
   TIMER_ENDS_BADGE_CLASS,
@@ -62,8 +47,8 @@ export default function TeacherProblemsList({
   }
 
   return (
-    <aside className={classNames(LIST_CLASS_BASE, TEACHER_LIST_CARD_CLASS, isOpen ? LIST_CLASS_OPEN : LIST_CLASS_CLOSED)}>
-      {/* Header */}
+    <aside className={classNames(LIST_CLASS_BASE, isOpen ? LIST_CLASS_OPEN : LIST_CLASS_CLOSED)}>
+      {/* Header — no rounding/border of its own, same flat-top treatment as the student rail's tab row above LIST_CARD_BODY_CLASS. */}
       <div className={LIST_HEADER_CLASS}>
         {isOpen && 'Assignments'}
         <span className={LIST_HEADER_RIGHT_CLASS}>
@@ -79,88 +64,56 @@ export default function TeacherProblemsList({
         </span>
       </div>
 
-      {/* Assignment Items */}
-      <ul className={LIST_ITEMS_CLASS}>
-        {items.map((item: TeacherProblemItem) => {
-          const isActive = item.id === activeId
-          const isTeacherFocus = item.id === teacherFocusId
-          return (
-            <li key={item.id}>
+      <div className={LIST_CARD_BODY_CLASS}>
+        <ul className={LIST_ITEMS_CLASS}>
+          {items.map((item: TeacherProblemItem) => (
+            <ProblemsListRow
+              key={item.id}
+              id={item.id}
+              title={item.title}
+              kind={item.kind}
+              status={item.status}
+              isActive={item.id === activeId}
+              isLive={item.id === teacherFocusId}
+              isOpen={isOpen}
+              onSelect={() => onSelect(item.id)}
+            />
+          ))}
+        </ul>
+
+        {isOpen && (
+          <div className={TIMER_SECTION_CLASS}>
+            <div className={TIMER_LABEL_ROW_CLASS}>
+              <span className={TIMER_LABEL_CLASS}>
+                <Icon name="history" />
+                Timer
+              </span>
+              {timerEndsAt && <span className={TIMER_ENDS_BADGE_CLASS}>{formatTimerEnds(timerEndsAt)}</span>}
+            </div>
+            <div className={TIMER_INPUT_ROW_CLASS}>
+              <input
+                type="number"
+                min={1}
+                max={120}
+                value={timerMinutes}
+                onChange={handleTimerMinutesInput}
+                aria-label="Timer minutes"
+                className={TIMER_INPUT_CLASS}
+              />
+              <span className={TIMER_UNIT_LABEL_CLASS}>min</span>
               <button
                 type="button"
-                onClick={() => onSelect(item.id)}
-                title={item.title}
-                className={classNames(
-                  LIST_ITEM_BASE_CLASS,
-                  isActive ? LIST_ITEM_ACTIVE_CLASS : LIST_ITEM_IDLE_CLASS,
-                )}
+                onClick={onStartTimer}
+                disabled={isStartingTimer}
+                className={TIMER_START_CLASS}
               >
-                {isActive && <span className={LIST_ITEM_ACCENT_BAR_CLASS} />}
-
-                {item.studentStatus ? (
-                  <StatusBadge status={item.studentStatus} />
-                ) : (
-                  <span className={ITEM_NUMBER_BADGE_CLASS}>#{item.id}</span>
-                )}
-
-                {isOpen && (
-                  <div className={ITEM_CONTENT_CLASS}>
-                    <div className={ITEM_META_ROW_CLASS}>
-                      <span className={LIST_ITEM_KIND_BADGE_CLASS}>{KIND_LABEL[item.kind]}</span>
-                      {item.passedNum !== undefined && item.totalNum !== undefined && (
-                        <div className={ITEM_STATS_GROUP_CLASS}>
-                          <span className={ITEM_PASSED_COUNT_CLASS}>
-                            {item.passedNum}/{item.totalNum} passed
-                          </span>
-                          {isTeacherFocus && <span className={ITEM_LIVE_BADGE_CLASS}>live</span>}
-                        </div>
-                      )}
-                    </div>
-                    <div className={LIST_ITEM_TITLE_CLASS}>{item.title}</div>
-                  </div>
-                )}
+                {isStartingTimer ? 'Starting…' : 'Start'}
               </button>
-            </li>
-          )
-        })}
-      </ul>
-
-      {isOpen ? (
-        <div className={TIMER_SECTION_CLASS}>
-          <div className={TIMER_LABEL_ROW_CLASS}>
-            <span className={TIMER_LABEL_CLASS}>
-              <Icon name="history" />
-              Timer
-            </span>
-            {timerEndsAt && <span className={TIMER_ENDS_BADGE_CLASS}>{formatTimerEnds(timerEndsAt)}</span>}
+            </div>
+            {timerError && <p className={TIMER_ERROR_CLASS}>{timerError}</p>}
           </div>
-          <div className={TIMER_INPUT_ROW_CLASS}>
-            <input
-              type="number"
-              min={1}
-              max={120}
-              value={timerMinutes}
-              onChange={handleTimerMinutesInput}
-              aria-label="Timer minutes"
-              className={TIMER_INPUT_CLASS}
-            />
-            <span className={TIMER_UNIT_LABEL_CLASS}>min</span>
-            <button
-              type="button"
-              onClick={onStartTimer}
-              disabled={isStartingTimer}
-              className={TIMER_START_CLASS}
-            >
-              {isStartingTimer ? 'Starting…' : 'Start'}
-            </button>
-          </div>
-          {timerError && <p className={TIMER_ERROR_CLASS}>{timerError}</p>}
-        </div>
-      ) : (
-        <div className={TIMER_SECTION_COLLAPSED_CLASS} title={timerEndsAt ? formatTimerEnds(timerEndsAt) : 'Timer'}>
-          <Icon name="history" />
-        </div>
-      )}
+        )}
+      </div>
     </aside>
   )
 }

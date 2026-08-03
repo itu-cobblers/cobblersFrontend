@@ -41,6 +41,7 @@ interface StudentWorkspaceProps {
     sessionCode?: string
     displayName: string
     teacherFocusedAssignmentId: number | null
+    timerEndsAt: string | null
     submissionHistory: SubmissionHistoryItem[]
     isHistoryLoading: boolean
     onSubmissionMade: () => void
@@ -212,6 +213,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                 <ProblemsList
                     {...progress.problemsListProps}
                     isHistoryLoading={props.isHistoryLoading}
+                    timerEndsAt={props.timerEndsAt}
                 />
 
                 <div className={STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS}>

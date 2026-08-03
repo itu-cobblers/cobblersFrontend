@@ -3,7 +3,7 @@ import { Icon } from "@/components";
 import type { StatusBadgeProps } from "@components/StatusBadge/StatusBadge.types.ts";
 import classNames from 'classnames';
 
-export default function StatusBadge({ status, size = 'm', label, className }: StatusBadgeProps) {
+export default function StatusBadge({ status, size = 's', label, className }: StatusBadgeProps) {
   const iconName = STATUS_ICON[status];
   const badgeElement = (
       <span

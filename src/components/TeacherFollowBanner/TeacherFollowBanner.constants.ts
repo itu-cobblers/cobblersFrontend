@@ -1,5 +1,5 @@
 export const FOLLOW_BANNER_CLASS =
-  'flex h-10 shrink-0 items-center justify-between gap-3 bg-accent/10 px-4 text-xs'
+  'flex h-10 shrink-0 items-center justify-between gap-3 bg-accent/10 px-4 text-xs mb-3'
 
 export const FOLLOW_BANNER_TEXT_CLASS = 'flex min-w-0 flex-1 items-center gap-2 truncate text-accent'
 

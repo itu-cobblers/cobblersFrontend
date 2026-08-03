@@ -10,7 +10,7 @@ vi.mock('@monaco-editor/react', () => ({
 
 // The assignment set now comes from the backend; stub the seam so the solo flow
 // works without a running API.
-vi.mock('@lib/assignmentSetApi', () => ({
+vi.mock('@/api/assignmentSetApi.ts', () => ({
   SOLO_ASSIGNMENT_SET_ID: 'all-assignments-for-solo-2026',
   fetchAssignmentSets: vi.fn(),
   fetchAssignmentSet: vi.fn().mockResolvedValue({
@@ -33,7 +33,7 @@ vi.mock('@lib/assignmentSetApi', () => ({
       },
     ],
   }),
-  fetchStudentAssignmentSet: vi.fn().mockResolvedValue({
+  fetchSoloAssignmentSet: vi.fn().mockResolvedValue({
     assignmentSetId: 'all-assignments-for-solo-2026',
     displayTitle: 'BootIT — All Assignments (Solo) 2026',
     assignments: [
@@ -52,25 +52,26 @@ vi.mock('@lib/assignmentSetApi', () => ({
   }),
 }))
 
-vi.mock('@lib/sessionApi', () => ({
+vi.mock('@/api/sessionApi.ts', () => ({
   getSession: vi.fn().mockResolvedValue({ code: 'ABCD1234', assignmentSetId: 'set-1' }),
   fetchTodayLatestSession: vi.fn().mockResolvedValue(null),
 }))
 
-vi.mock('@lib/submissionApi', () => ({
+vi.mock('@/api/submissionApi.ts', () => ({
   fetchSubmissionHistory: vi.fn().mockResolvedValue([]),
 }))
 
-vi.mock('@lib/studentApi', () => ({
+vi.mock('@/api/studentApi.ts', () => ({
   upsertStudent: vi.fn().mockResolvedValue(undefined),
 }))
 
 interface JoinSessionCallbacks {
   onAssignmentFocused?: (id: number) => void
+  onTimerStarted?: (timer: { endsAt: string }) => void
   onSessionEnded?: () => void
 }
 let capturedJoinCallbacks: JoinSessionCallbacks | null = null
-vi.mock('@lib/sessionHub', () => ({
+vi.mock('@/api/sessionHub.ts', () => ({
   joinSession: vi.fn((_args: unknown, callbacks: JoinSessionCallbacks) => {
     capturedJoinCallbacks = callbacks
     return Promise.resolve(undefined)
@@ -88,7 +89,7 @@ describe('StudentView', () => {
     render(createElement(StudentView))
     expect(screen.getByRole('heading', { name: 'BootCode' })).toBeInTheDocument()
     expect(screen.queryByTestId('editor')).not.toBeInTheDocument()
-    expect(screen.queryByRole('navigation', { name: 'Assignments' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Terminal')).not.toBeInTheDocument()
   })
 
   it('reveals the workspace chrome after starting solo practice', async () => {
@@ -96,7 +97,7 @@ describe('StudentView', () => {
     fireEvent.change(screen.getByRole('textbox', { name: 'Your name' }), { target: { value: 'Maria' } })
     fireEvent.click(screen.getByRole('button', { name: 'Solo Practice' }))
 
-    expect(await screen.findByRole('navigation', { name: 'Assignments' })).toBeInTheDocument()
+    expect(await screen.findByText('Terminal')).toBeInTheDocument()
     expect(screen.getByText('Terminal')).toBeInTheDocument()
     expect(screen.getByTestId('editor')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Main\.java/ })).toBeInTheDocument()
@@ -111,7 +112,7 @@ describe('StudentView', () => {
 
     render(createElement(StudentView))
 
-    expect(await screen.findByRole('navigation', { name: 'Assignments' })).toBeInTheDocument()
+    expect(await screen.findByText('Terminal')).toBeInTheDocument()
     expect(screen.getByText('Room: ABCD1234')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Leave' })).toBeInTheDocument()
   })
@@ -121,7 +122,7 @@ describe('StudentView', () => {
 
     render(createElement(StudentView))
 
-    expect(await screen.findByRole('navigation', { name: 'Assignments' })).toBeInTheDocument()
+    expect(await screen.findByText('Terminal')).toBeInTheDocument()
     expect(screen.getByText('Solo practice')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Exit' })).toBeInTheDocument()
   })
@@ -129,7 +130,7 @@ describe('StudentView', () => {
   it('shows a follow banner when the teacher moves to a different assignment, and follows on click', async () => {
     localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'join', code: 'ABCD1234' }))
     render(createElement(StudentView))
-    await screen.findByRole('navigation', { name: 'Assignments' })
+    await screen.findByText('Terminal')
     expect(screen.getByRole('heading', { name: 'Hello, World!' })).toBeInTheDocument()
 
     capturedJoinCallbacks?.onAssignmentFocused?.(2)
@@ -144,7 +145,7 @@ describe('StudentView', () => {
   it('bounces back to the entry screen when the teacher ends the session', async () => {
     localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'join', code: 'ABCD1234' }))
     render(createElement(StudentView))
-    await screen.findByRole('navigation', { name: 'Assignments' })
+    await screen.findByText('Terminal')
 
     capturedJoinCallbacks?.onSessionEnded?.()
 
@@ -156,7 +157,7 @@ describe('StudentView', () => {
   it('leaving the session clears storage and returns to the entry screen', async () => {
     localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'solo' }))
     render(createElement(StudentView))
-    await screen.findByRole('navigation', { name: 'Assignments' })
+    await screen.findByText('Terminal')
 
     fireEvent.click(screen.getByRole('button', { name: 'Exit' }))
 

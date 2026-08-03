@@ -16,7 +16,7 @@ import {
  * VS Code's split run control: the play half runs the code, the chevron opens
  * Run and Submit.
  *
- * Only for assignments that can actually execute. Predict and project have
+ * Only for assignments that can actually be executed. Predict and project have
  * nothing to run, so they keep the plain SubmitButton rather than hiding
  * Submit behind a play icon that would do nothing.
  */
@@ -65,7 +65,7 @@ export default function RunMenu({
           aria-label={primary.label}
           className={RUN_MENU_PLAY_CLASS}
         >
-          {isBusy ? <Spinner /> : <Icon name="play" />}
+          {isBusy ? <Spinner variant='white'/> : <Icon name="play" />}
         </button>
         <button
           type="button"

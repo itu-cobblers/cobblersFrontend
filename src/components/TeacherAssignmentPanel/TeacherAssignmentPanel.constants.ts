@@ -21,3 +21,12 @@ export const SUBMISSION_FILTER_LINK_CLASS = 'text-[11px] text-accent hover:under
 
 /** Title + Focus on one baseline; the margin lives here, not on the heading. */
 export const TITLE_ROW_CLASS = 'mb-3 flex items-center justify-between gap-3'
+
+/** Passed/Tried/Untried breakdown, under the title — replaces the rail row's old "x/x passed" label. */
+export const BREAKDOWN_ROW_CLASS = 'mb-4 flex items-center gap-3 text-[12px] font-medium'
+
+export const BREAKDOWN_ITEM_CLASS: Record<'passed' | 'tried' | 'untried', string> = {
+  passed: 'text-status-success',
+  tried: 'text-status-warning',
+  untried: 'text-muted-foreground',
+}

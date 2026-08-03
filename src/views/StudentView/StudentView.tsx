@@ -39,6 +39,7 @@ export default function StudentView() {
                 sessionCode={session.code}
                 displayName={session.displayName}
                 teacherFocusedAssignmentId={session.teacherFocusedAssignmentId}
+                timerEndsAt={session.timerEndsAt}
 
                 submissionHistory={progress.history}
                 isHistoryLoading={progress.isLoading}

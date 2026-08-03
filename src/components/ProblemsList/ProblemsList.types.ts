@@ -32,4 +32,18 @@ export interface ProblemsListProps {
   isOpen: boolean
   /** Toggles `isOpen` — the single fold/unfold control for the whole rail. */
   onToggleOpen: () => void
+  /** ISO string while the teacher's session timer runs; null/omitted shows nothing. A session-wide countdown, not tied to any one assignment. */
+  timerEndsAt?: string | null
+}
+
+export interface ProblemsListRowProps {
+  id: number
+  title: string
+  kind: AssignmentKind
+  status: ProblemStatus
+  isActive: boolean
+  /** Broadcasting a "live" label + highlight — shared by the student and teacher rails. */
+  isLive: boolean
+  isOpen: boolean
+  onSelect: () => void
 }

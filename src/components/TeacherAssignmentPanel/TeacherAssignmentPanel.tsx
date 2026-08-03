@@ -40,6 +40,8 @@ import {
   SUBMISSIONS_EMPTY_TITLE_CLASS,
   SUBMISSIONS_EMPTY_SUBTITLE_CLASS,
   TITLE_ROW_CLASS,
+  BREAKDOWN_ROW_CLASS,
+  BREAKDOWN_ITEM_CLASS,
 } from './TeacherAssignmentPanel.constants'
 import {SubmissionRow} from "@components/SubmissionRow";
 
@@ -62,6 +64,7 @@ export default function TeacherAssignmentPanel({
   onFocusClick,
   isFocused,
   isBroadcastable = true,
+  assignmentBreakdown,
   selectedStudentName,
   onClearStudentFilter,
   submissions,
@@ -132,6 +135,13 @@ export default function TeacherAssignmentPanel({
               </button>
             )}
           </div>
+          {assignmentBreakdown && (
+            <div className={BREAKDOWN_ROW_CLASS}>
+              <span className={BREAKDOWN_ITEM_CLASS.passed}>Passed: {assignmentBreakdown.passed}</span>
+              <span className={BREAKDOWN_ITEM_CLASS.tried}>Tried: {assignmentBreakdown.tried}</span>
+              <span className={BREAKDOWN_ITEM_CLASS.untried}>Untried: {assignmentBreakdown.untried}</span>
+            </div>
+          )}
           {lesson?.map((block, index) =>
             block.kind === 'code' ? (
               <pre key={index} className={PANEL_LESSON_CODE_CLASS}>

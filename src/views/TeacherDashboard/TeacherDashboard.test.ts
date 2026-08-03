@@ -2,20 +2,23 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createElement } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 
-vi.mock('@lib/assignmentSetApi', () => ({
+vi.mock('@/api/assignmentSetApi.ts', () => ({
   fetchAssignmentSets: vi.fn().mockResolvedValue([{ assignmentSetId: 'set-1', displayTitle: 'Day 1' }]),
   fetchAssignmentSet: vi.fn().mockResolvedValue({ assignmentSetId: 'set-1', displayTitle: 'Day 1', assignments: [] }),
 }))
 
-vi.mock('@lib/sessionApi', () => ({
+vi.mock('@/api/sessionApi.ts', () => ({
   createSession: vi.fn().mockResolvedValue({ code: 'ABCD1234' }),
   getSession: vi.fn().mockResolvedValue({ code: 'WXYZ5678', assignmentSetId: 'set-1' }),
   startTimer: vi.fn().mockResolvedValue({ endsAt: '2026-07-21T12:00:00.000Z' }),
   endSession: vi.fn().mockResolvedValue(undefined),
+  fetchSessionAttendance: vi.fn().mockResolvedValue([]),
+  fetchSessionSubmissions: vi.fn().mockResolvedValue([]),
 }))
 
-vi.mock('@lib/sessionHub', () => ({
+vi.mock('@/api/sessionHub.ts', () => ({
   observeSession: vi.fn().mockResolvedValue(undefined),
+  focusAssignment: vi.fn().mockResolvedValue(undefined),
 }))
 
 const { default: TeacherDashboard } = await import('./TeacherDashboard')

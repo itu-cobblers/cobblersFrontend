@@ -6,7 +6,6 @@ import { useHintDisclosure } from './AssignmentPanel.hooks'
 import {
   PANEL_CLASS,
   PANEL_SCROLL_CLASS,
-  PANEL_TITLE_CLASS,
   PANEL_LESSON_TEXT_CLASS,
   PANEL_LESSON_CODE_CLASS,
   PANEL_TASK_LABEL_CLASS,
@@ -26,6 +25,8 @@ import {
   PANEL_SUBMISSIONS_EMPTY_CLASS,
   PANEL_SUBMISSIONS_LIST_CLASS,
   PANEL_CARD_BODY_CLASS,
+  PANEL_TITLE_ROW_CLASS,
+  PANEL_TITLE_BARE_CLASS,
 } from './AssignmentPanel.constants'
 import {SubmissionRow} from "@components/SubmissionRow";
 import { getSubmissionNumber } from '@components/SubmissionBanner'
@@ -55,7 +56,7 @@ export default function AssignmentPanel({
   projectIdentity,
   hint,
   onViewSubmission,
-  viewingSubmissionId
+  viewingSubmissionId,
 }: AssignmentPanelProps) {
   const [isHintExpanded, handleHintToggle] = useHintDisclosure(hint)
 
@@ -80,7 +81,9 @@ export default function AssignmentPanel({
       <div className={PANEL_CARD_BODY_CLASS}>
       {activeTab === 'description' ? (
         <div className={PANEL_SCROLL_CLASS}>
-          <h2 className={PANEL_TITLE_CLASS}>{title}</h2>
+          <div className={PANEL_TITLE_ROW_CLASS}>
+            <h2 className={PANEL_TITLE_BARE_CLASS}>{title}</h2>
+          </div>
           {lesson?.map((block, index) =>
             block.kind === 'code' ? (
               <pre key={index} className={PANEL_LESSON_CODE_CLASS}>

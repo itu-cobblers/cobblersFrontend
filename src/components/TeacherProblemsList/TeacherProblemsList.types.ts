@@ -5,12 +5,8 @@ export interface TeacherProblemItem {
   id: number
   title: string
   kind: AssignmentKind
-  /** Calculated passed count among active students for this assignment */
-  passedNum?: number
-  /** Total active student count */
-  totalNum?: number
-  /** When a student is selected in Col 2, this item shows that student's specific status for this assignment */
-  studentStatus?: ProblemStatus
+  /** That student's status for this assignment when one's selected in Col 2; 'untried' (the same grey default every unattempted row gets) otherwise. */
+  status: ProblemStatus
 }
 
 export interface TeacherProblemsListProps {

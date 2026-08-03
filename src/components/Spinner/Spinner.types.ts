@@ -1,4 +1,4 @@
-export type SpinnerVariant = 'solid' | 'accent' | 'action'
+export type SpinnerVariant = 'solid' | 'accent' | 'action' | 'white'
 
 export interface SpinnerProps {
   /** `solid` = white on filled buttons; `action` = blue on outline/icon buttons; `accent` = purple on accent UI. */

@@ -55,4 +55,13 @@ describe('RunMenu', () => {
     fireEvent.click(screen.getByRole('button', { name: 'More actions' }))
     expect(screen.getByRole('menuitem', { name: 'Submit' })).toBeDisabled()
   })
+
+  // Regression: the play button used to fade to 40% opacity whenever it was
+  // disabled, which happens exactly when it's busy — fading the spinner that
+  // replaces the play icon down to nearly invisible.
+  it('keeps the play button fully visible (not faded) while running', () => {
+    render(createElement(RunMenu, { ...base, isRunning: true }))
+    const button = screen.getByRole('button', { name: 'Run' })
+    expect(button.className).not.toMatch(/opacity-40/)
+  })
 })

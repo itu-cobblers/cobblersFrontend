@@ -105,7 +105,7 @@ export function useTeacherSession() {
   }, [selectedAssignmentSetId])
 
   function observe(code: string) {
-    // Best-effort: if the hub is unreachable the dashboard still works (mock roster below).
+    // Best-effort: if the hub is unreachable, the dashboard still works (mock roster below).
     observeSession(code, {
       onRoster: (roster) => mergeLiveRoster(roster),
       onStudentJoined: (student) => mergeLiveRoster([student]),
