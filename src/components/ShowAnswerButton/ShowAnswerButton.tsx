@@ -1,4 +1,5 @@
 import { Button } from '@components/Button'
+import { BUTTON_HEIGHT_CLASS } from '@components/Button/Button.constants'
 import type { ShowAnswerButtonProps } from './ShowAnswerButton.types'
 
 /**
@@ -8,7 +9,7 @@ import type { ShowAnswerButtonProps } from './ShowAnswerButton.types'
  */
 export default function ShowAnswerButton({ onClick, isDisabled = false, label = 'Show answer' }: ShowAnswerButtonProps) {
   return (
-    <Button variant="ghost" onClick={onClick} isDisabled={isDisabled}>
+    <Button variant="ghost" onClick={onClick} isDisabled={isDisabled} className={BUTTON_HEIGHT_CLASS}>
       {label}
     </Button>
   )

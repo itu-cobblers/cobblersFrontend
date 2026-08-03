@@ -7,14 +7,18 @@ This repo is the **React frontend**. The backend lives in the sibling repo [`cob
 ## Tech stack
 
 - React 19 + Vite 8 + TypeScript (strict)
-- Tailwind CSS v4
-- @monaco-editor/react (code editor), three (3D scene)
+- Tailwind CSS v4 — the whole design system is `src/index.css`
+- @monaco-editor/react (code editor); three (the café 3D scene, currently switched off)
 - Vitest + Testing Library
+
+> `package.json` also carries the full shadcn/ui + Radix dependency set from an earlier
+> direction. None of it is imported — components are hand-rolled and styled with
+> `classnames`. See [CLAUDE.md](CLAUDE.md#stack).
 
 ## Prerequisites
 
 - **Node.js 20.19+ or 22.12+** (Vite 8 requirement) and npm
-- The **backend running locally** for real data — see [First-time setup](#first-time-setup) step 3. Without it, the app still boots: `execute`/`submission` fall back to canned mock responses (`src/lib/mockApi.ts`), but assignment lists come from the backend and will fail.
+- The **backend running locally** — see [First-time setup](#first-time-setup) step 3. There is no mock fallback any more (`mockApi.ts` was deleted in #15): without a backend the app boots to the entry screen and every data call fails visibly.
 
 ## First-time setup
 
@@ -62,7 +66,7 @@ The proxy targets live in [vite.config.ts](vite.config.ts). `5046` is the backen
 ### Verify it works
 
 1. `npm run dev` and open http://localhost:5173.
-2. Click **Run** on the starter code — you should see real program output in the terminal panel. If you instead see rotating canned outputs (success, then compile error, then runtime error on identical code), the backend isn't reachable and you're on the mock fallback: check the backend is running on 5046.
+2. Click **Run** on the starter code — you should see real program output in the terminal panel. Nothing at all means the backend (or Piston behind it) isn't reachable: check it's running on 5046.
 3. The sidebar should list assignments loaded from `GET /api/assignmentsets` — an error there also means the backend (or its database seed) isn't up.
 
 ## Commands
@@ -78,7 +82,7 @@ npm run test       # vitest run
 
 ## Troubleshooting
 
-- **Every Run returns fake-looking, rotating results** → backend not reachable; the mock fallback is answering. Start the backend (`dotnet run --project cobblersBackend` in `../cobblersBackend`) and make sure it's on port 5046 (or update `vite.config.ts`).
+- **Run does nothing / errors** → backend not reachable, or Piston isn't up behind it. Start the backend (`dotnet run --project cobblersBackend` in `../cobblersBackend`) and make sure it's on port 5046 (or update `vite.config.ts`).
 - **Assignments don't load** → backend is up but its database is empty; run the migrations + seed script (see the backend README's first-time setup).
 - **Teacher code rejected at `/teacher`** → `.env.local` missing or `VITE_TEACHER_CODE` changed without restarting the dev server.
 - **`ECONNREFUSED` in the Vite terminal** → same as the first point: nothing is listening on the proxy target port.

@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+
 export type CodeFileTabVariant = 'student' | 'solution'
 
 export interface CodeFileTab {
@@ -9,7 +11,6 @@ export interface CodeFileTabsProps {
   files: CodeFileTab[]
   activeIndex: number
   onSelectFile: (index: number) => void
-  isRunning?: boolean
-  onRun?: () => void
-  isReadOnly: boolean
+  /** Rendered on the right of the rail: Show Answer / Submit and friends. */
+  actions?: ReactNode
 }

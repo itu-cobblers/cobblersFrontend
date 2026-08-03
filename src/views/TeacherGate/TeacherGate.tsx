@@ -1,17 +1,17 @@
+import classNames from 'classnames'
 import { Button, TextField } from '@components'
+import { PortalShell } from '@components/PortalShell'
 import { TeacherDashboard } from '@views/TeacherDashboard'
 import { useTeacherAuth } from './TeacherGate.hooks'
+import { PORTAL_HEADING_CLASS, PORTAL_FIELD_ROW_CLASS } from '@components/PortalShell/PortalShell.constants'
 import {
-  GATE_SCREEN_CLASS,
-  GATE_GRID_CLASS,
-  GATE_GLOW_CLASS,
-  GATE_SCANLINE_CLASS,
-  GATE_VIGNETTE_CLASS,
-  GATE_CARD_CLASS,
-  GATE_HEADER_CLASS,
   GATE_TITLE_CLASS,
-  GATE_SUBTITLE_CLASS,
+  GATE_SUBHEAD_CLASS,
   GATE_ERROR_CLASS,
+  GATE_CTA_ROW_CLASS,
+  GATE_TITLE,
+  GATE_SUBHEAD,
+  GATE_PLACEHOLDER,
 } from './TeacherGate.constants'
 
 export default function TeacherGate() {
@@ -20,33 +20,27 @@ export default function TeacherGate() {
   if (isAuthed) return <TeacherDashboard />
 
   return (
-    <div className={GATE_SCREEN_CLASS}>
-      <div className={GATE_GRID_CLASS} />
-      <div className={GATE_GLOW_CLASS} />
-      <div className={GATE_SCANLINE_CLASS} />
-      <div className={GATE_VIGNETTE_CLASS} />
+    <PortalShell>
+      <form onSubmit={handleSubmit}>
+        <h1 className={GATE_TITLE_CLASS}>{GATE_TITLE}</h1>
+        <h2 className={classNames(PORTAL_HEADING_CLASS, GATE_SUBHEAD_CLASS)}>{GATE_SUBHEAD}</h2>
 
-      <form className={GATE_CARD_CLASS} onSubmit={handleSubmit}>
-        <div className={GATE_HEADER_CLASS}>
-          <h1 className={GATE_TITLE_CLASS}>BootIT</h1>
-          <p className={GATE_SUBTITLE_CLASS}>Teacher access</p>
-        </div>
-
-        <div className="flex flex-col gap-2">
+        <div className={PORTAL_FIELD_ROW_CLASS}>
           <TextField
             type="password"
             value={code}
             onChange={handleCodeChange}
-            placeholder="Enter teacher code"
+            placeholder={GATE_PLACEHOLDER}
             hasError={hasError}
             autoFocus
           />
           {hasError && <p className={GATE_ERROR_CLASS}>Incorrect code — try again.</p>}
         </div>
 
-        <Button type="submit">Enter</Button>
+        <div className={GATE_CTA_ROW_CLASS}>
+          <Button type="submit">Enter</Button>
+        </div>
       </form>
-    </div>
+    </PortalShell>
   )
 }
-

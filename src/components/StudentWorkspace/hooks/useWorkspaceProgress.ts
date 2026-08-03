@@ -1,45 +1,85 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import type { Assignment, AssignmentSet, SubmissionHistoryItem, AssignmentKind } from '@types'
 import type { ProblemsListTab, AssignmentPanelTab, ProblemStatus } from '@components'
 import { useAssignments } from '@hooks/useAssignments'
 import { getProjectIdentity } from '@lib/projectIdentity'
+import { getPersistedWorkspaceUI, setPersistedWorkspaceUI } from '@lib/studentWorkspaceUI'
 
 interface ProgressOptions {
     assignmentSet: AssignmentSet
     submissionHistory: SubmissionHistoryItem[]
     teacherFocusedAssignmentId: number | null
     getAssignment: (id: number) => Assignment | undefined
+    /** Current room's code, if any — scopes the "Session" tab's statuses to this room only. */
+    sessionCode?: string
+}
+
+function collectStatusSets(items: SubmissionHistoryItem[], getAssignment: (id: number) => Assignment | undefined) {
+    const attempted = new Set<number>()
+    const passed = new Set<number>()
+
+    items.forEach(item => {
+        attempted.add(item.assignmentId)
+        const assignment = getAssignment(item.assignmentId)
+        if (assignment?.kind === 'project' || item.passed === true) {
+            passed.add(item.assignmentId)
+        }
+    })
+    return { attempted, passed }
 }
 
 export function useWorkspaceProgress({
     assignmentSet,
     submissionHistory,
     teacherFocusedAssignmentId,
-    getAssignment
+    getAssignment,
+    sessionCode
 }: ProgressOptions) {
-    const [isRailOpen, setIsRailOpen] = useState(true)
-    const [railTab, setRailTab] = useState<ProblemsListTab>('session')
-    const [panelTab, setPanelTab] = useState<AssignmentPanelTab>('description')
-    const [selectionSource, setSelectionSource] = useState<ProblemsListTab>('session')
+    // Read once — only the value on first render matters, since every state
+    // below seeds itself from this via a lazy initializer.
+    const persistedUI = getPersistedWorkspaceUI()
 
-    const [historySelectedId, setHistorySelectedId] = useState<number | null>(null)
+    const [isRailOpen, setIsRailOpen] = useState(persistedUI?.isRailOpen ?? true)
+    const [railTab, setRailTab] = useState<ProblemsListTab>(persistedUI?.railTab ?? 'session')
+    const [panelTab, setPanelTab] = useState<AssignmentPanelTab>('description')
+    const [selectionSource, setSelectionSource] = useState<ProblemsListTab>(persistedUI?.railTab ?? 'session')
+
+    const [historySelectedId, setHistorySelectedId] = useState<number | null>(
+        persistedUI?.railTab === 'history' ? persistedUI.selectedAssignmentId : null
+    )
 
     const latestHistoryAssignmentId = submissionHistory[0]?.assignmentId
-    const { attemptedIds, passedIds } = useMemo(() => {
-        const attempted = new Set<number>()
-        const passed = new Set<number>()
 
-        submissionHistory.forEach(item => {
-            attempted.add(item.assignmentId)
-            const assignment = getAssignment(item.assignmentId)
-            if (assignment?.kind === 'project' || item.passed === true) {
-                passed.add(item.assignmentId)
-            }
-        })
-        return { attemptedIds: attempted, passedIds: passed }
-    }, [submissionHistory, getAssignment])
+    // Global — every room the student has ever submitted in. Feeds the History tab only.
+    const { attemptedIds, passedIds } = useMemo(
+        () => {
+            const { attempted, passed } = collectStatusSets(submissionHistory, getAssignment)
+            return { attemptedIds: attempted, passedIds: passed }
+        },
+        [submissionHistory, getAssignment]
+    )
 
-    const assignmentProgress = useAssignments(assignmentSet.assignments, Array.from(passedIds))
+    // Scoped to the current room — feeds the Session tab, so a pass in another room/day
+    // doesn't leak into today's status. Solo (no `sessionCode`) matches un-roomed submissions.
+    const { attemptedIds: sessionAttemptedIds, passedIds: sessionPassedIds } = useMemo(
+        () => {
+            const sessionOnly = submissionHistory.filter((item) =>
+                sessionCode ? item.sessionId === sessionCode : !item.sessionId
+            )
+            const { attempted, passed } = collectStatusSets(sessionOnly, getAssignment)
+            return { attemptedIds: attempted, passedIds: passed }
+        },
+        [submissionHistory, getAssignment, sessionCode]
+    )
+
+    const initialSessionIndex = persistedUI?.railTab === 'session' && persistedUI.selectedAssignmentId != null
+        ? assignmentSet.assignments.findIndex((a) => a.id === persistedUI.selectedAssignmentId)
+        : -1
+    const assignmentProgress = useAssignments(
+        assignmentSet.assignments,
+        Array.from(sessionPassedIds),
+        initialSessionIndex >= 0 ? initialSessionIndex : 0
+    )
     const defaultSessionAssignment = assignmentSet.assignments[0]
 
     const activeAssignment = useMemo(() => {
@@ -62,6 +102,14 @@ export function useWorkspaceProgress({
         assignmentProgress.activeAssignment,
         defaultSessionAssignment
     ])
+
+    useEffect(() => {
+        setPersistedWorkspaceUI({
+            isRailOpen,
+            railTab,
+            selectedAssignmentId: activeAssignment?.id ?? null,
+        })
+    }, [isRailOpen, railTab, activeAssignment?.id])
 
     const handleRailTabChange = (newTab: ProblemsListTab) => {
         setRailTab(newTab)
@@ -86,11 +134,11 @@ export function useWorkspaceProgress({
         }
     }
 
-    const getStatus = (id: number): ProblemStatus => {
-        if (passedIds.has(id) || assignmentProgress.completedAssignments.has(id)) {
+    const getStatus = (id: number, attempted: Set<number>, passed: Set<number>): ProblemStatus => {
+        if (passed.has(id) || assignmentProgress.completedAssignments.has(id)) {
             return 'passed'
         }
-        if (attemptedIds.has(id)) {
+        if (attempted.has(id)) {
             return 'tried'
         }
         return 'untried'
@@ -100,7 +148,7 @@ export function useWorkspaceProgress({
         id: a.id,
         title: a.title,
         kind: a.kind,
-        status: getStatus(a.id),
+        status: getStatus(a.id, sessionAttemptedIds, sessionPassedIds),
     }))
 
     const historyProblems = useMemo(() => {
@@ -111,7 +159,7 @@ export function useWorkspaceProgress({
                 id: assignment.id,
                 title: assignment.title,
                 kind: assignment.kind,
-                status: getStatus(id)
+                status: getStatus(id, attemptedIds, passedIds)
             }
         }).filter(Boolean) as { id: number, title: string, kind: AssignmentKind, status: ProblemStatus }[]
     }, [attemptedIds, getAssignment, passedIds, assignmentProgress.completedAssignments])

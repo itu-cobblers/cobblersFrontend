@@ -19,6 +19,6 @@ export const FILE_INPUT_HIDDEN_CLASS = 'hidden'
 export const FILE_LIST_CLASS = 'flex shrink-0 flex-wrap gap-1.5'
 
 export const FILE_CHIP_CLASS =
-  'rounded border border-terminal-line bg-black/20 px-2 py-0.5 font-mono text-[11px] text-terminal-ink'
+  'rounded bg-black/20 px-2 py-0.5 font-mono text-[11px] text-terminal-ink'
 
 export const FILE_EMPTY_CLASS = 'shrink-0 font-mono text-[11px] text-terminal-muted'

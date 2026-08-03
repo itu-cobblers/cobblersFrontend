@@ -1,7 +1,23 @@
 import classNames from 'classnames'
 import { Icon } from '@components/Icon'
+import { StatusBadge } from '@components/StatusBadge'
+import { LIST_COUNT_CLASS } from '@components/ProblemsList/ProblemsList.constants'
 import type { AttendanceListProps, AttendanceStudent } from './AttendanceList.types'
-import {StatusBadge} from "@/components";
+import {
+  ROSTER_CLASS,
+  ROSTER_HEADER_CLASS,
+  ROSTER_HEADER_LEFT_CLASS,
+  ROSTER_SUBHEADER_CLASS,
+  ROSTER_ITEMS_CLASS,
+  ROSTER_EMPTY_CLASS,
+  ROSTER_ITEM_BASE_CLASS,
+  ROSTER_ITEM_ACTIVE_CLASS,
+  ROSTER_ITEM_IDLE_CLASS,
+  ROSTER_ITEM_LEFT_CLASS,
+  ROSTER_ONLINE_DOT_CLASS,
+  ROSTER_OFFLINE_DOT_CLASS,
+  ROSTER_ITEM_NAME_CLASS,
+} from './AttendanceList.constants'
 
 export default function AttendanceList({
   students,
@@ -10,55 +26,44 @@ export default function AttendanceList({
   selectedAssignmentTitle,
 }: AttendanceListProps) {
   return (
-    <aside className="flex h-full w-64 shrink-0 flex-col overflow-hidden border-r border-border bg-card/40 backdrop-blur">
-      {/* Header */}
-      <div className="flex h-10 shrink-0 items-center justify-between border-b border-border px-3 text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
-        <span className="flex items-center gap-1.5 font-bold">
-          <Icon name="book" /> Students
+    <aside className={ROSTER_CLASS}>
+      <div className={ROSTER_HEADER_CLASS}>
+        <span className={ROSTER_HEADER_LEFT_CLASS}>
+          <Icon name="users" />
+          Students
         </span>
-        <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-foreground/70">
-          {students.length}
-        </span>
+        <span className={LIST_COUNT_CLASS}>{students.length}</span>
       </div>
 
-      {/* Subheader / contextual status */}
       {selectedAssignmentTitle && (
-        <div className="border-b border-border bg-accent/10 px-3 py-1.5 text-[11px] text-accent font-medium truncate">
-          Status for: {selectedAssignmentTitle}
-        </div>
+        <div className={ROSTER_SUBHEADER_CLASS}>Status for: {selectedAssignmentTitle}</div>
       )}
 
-      {/* Student List */}
-      <ul className="min-h-0 flex-1 overflow-y-auto py-2 scrollbar-hide">
+      <ul className={ROSTER_ITEMS_CLASS}>
         {students.length === 0 ? (
-          <li className="px-4 py-8 text-center text-xs text-muted-foreground">
-            No active students in room.
-          </li>
+          <li className={ROSTER_EMPTY_CLASS}>No active students in room.</li>
         ) : (
           students.map((student: AttendanceStudent) => {
-            const isActive = student.studentId === activeStudentId
+            const isSelected = student.studentId === activeStudentId
             return (
               <li key={student.studentId}>
                 <button
                   type="button"
-                  onClick={() => onSelectStudent(isActive ? null : student.studentId)}
+                  onClick={() => onSelectStudent(isSelected ? null : student.studentId)}
                   className={classNames(
-                    'group relative flex w-full items-center justify-between gap-2 px-3 py-2 text-left text-sm transition-colors',
-                    isActive ? 'bg-white/[0.08] text-foreground' : 'text-muted-foreground hover:bg-white/[0.04] hover:text-foreground',
+                    ROSTER_ITEM_BASE_CLASS,
+                    isSelected ? ROSTER_ITEM_ACTIVE_CLASS : ROSTER_ITEM_IDLE_CLASS,
                   )}
                 >
-                  {isActive && <span className="absolute inset-y-1 left-0 w-0.5 rounded-r bg-accent" />}
-
-                  <div className="flex items-center gap-2 min-w-0 flex-1">
-                    <span className="inline-block h-2 w-2 rounded-full bg-emerald-400" title="Active student" />
-                    <span className="truncate text-[13px] font-medium text-foreground">
-                      {student.displayName}
-                    </span>
+                  <div className={ROSTER_ITEM_LEFT_CLASS}>
+                    <span
+                      className={student.isActive ? ROSTER_ONLINE_DOT_CLASS : ROSTER_OFFLINE_DOT_CLASS}
+                      title={student.isActive ? 'Online' : 'Offline'}
+                    />
+                    <span className={ROSTER_ITEM_NAME_CLASS}>{student.displayName}</span>
                   </div>
 
-                  {student.assignmentStatus && (
-                    <StatusBadge status={student.assignmentStatus} />
-                  )}
+                  {student.assignmentStatus && <StatusBadge status={student.assignmentStatus} />}
                 </button>
               </li>
             )

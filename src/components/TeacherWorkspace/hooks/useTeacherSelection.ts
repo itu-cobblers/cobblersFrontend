@@ -13,6 +13,8 @@ interface UseTeacherSelectionProps {
     attendanceList: AttendanceStudentDto[]
     allSubmissions: SessionSubmissionDto[]
     liveStudentIds: Set<string>
+    /** Seeds the selected assignment (e.g. restoring a persisted selection after a refresh). */
+    initialAssignmentId?: number | null
 }
 
 function getStudentAssignmentStatus(studentSubs: SessionSubmissionDto[]): ProblemStatus {
@@ -25,9 +27,10 @@ export function useTeacherSelection({
                                         assignments,
                                         attendanceList,
                                         allSubmissions,
-                                        liveStudentIds
+                                        liveStudentIds,
+                                        initialAssignmentId = null
                                     }: UseTeacherSelectionProps) {
-    const [selectedAssignmentIdRaw, setSelectedAssignmentIdRaw] = useState<number | null>(null)
+    const [selectedAssignmentIdRaw, setSelectedAssignmentIdRaw] = useState<number | null>(initialAssignmentId)
     const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null)
 
     const [activeTab, setActiveTab] = useState<AssignmentPanelTab>('description')
@@ -43,28 +46,40 @@ export function useTeacherSelection({
 
     const problemItems: TeacherProblemItem[] = useMemo(() => {
         return assignments.map(assignment => {
-            const subsForAssignment = allSubmissions.filter(s => s.assignmentId === assignment.id);
-
-            const passedStudentIds = new Set(
-                subsForAssignment.filter(s => s.passed === true).map(s => s.studentId)
-            );
-
-            let studentStatus: ProblemStatus | undefined = undefined;
+            let status: ProblemStatus = 'untried';
             if (selectedStudentId) {
-                const studentSubs = subsForAssignment.filter(s => s.studentId === selectedStudentId);
-                studentStatus = getStudentAssignmentStatus(studentSubs);
+                const studentSubs = allSubmissions.filter(s => s.assignmentId === assignment.id && s.studentId === selectedStudentId);
+                status = getStudentAssignmentStatus(studentSubs);
             }
 
             return {
                 id: assignment.id,
                 title: assignment.title,
                 kind: assignment.kind,
-                totalNum: attendanceList.length,
-                passedNum: passedStudentIds.size,
-                studentStatus
+                status
             }
         })
-    }, [assignments, allSubmissions, attendanceList.length, selectedStudentId]);
+    }, [assignments, allSubmissions, selectedStudentId]);
+
+    // Passed/tried/untried across every student who's ever joined, for the
+    // currently-selected assignment only — shown in the panel once you click
+    // into an assignment, not on every row in the rail.
+    const assignmentBreakdown = useMemo(() => {
+        if (selectedAssignmentId == null) return { passed: 0, tried: 0, untried: 0 }
+
+        let passed = 0
+        let tried = 0
+        attendanceList.forEach(student => {
+            const studentSubs = allSubmissions.filter(
+                s => s.assignmentId === selectedAssignmentId && s.studentId === student.studentId
+            )
+            const status = getStudentAssignmentStatus(studentSubs)
+            if (status === 'passed') passed++
+            else if (status === 'tried') tried++
+        })
+
+        return { passed, tried, untried: attendanceList.length - passed - tried }
+    }, [attendanceList, allSubmissions, selectedAssignmentId]);
 
     const attendanceStudents: AttendanceStudent[] = useMemo(() => {
         return attendanceList.map(student => {
@@ -138,6 +153,7 @@ export function useTeacherSelection({
         problemItems,
         attendanceStudents,
         filteredSubmissions,
+        assignmentBreakdown,
 
         handleSelectAssignment: handleSelectAssignmentAndReset,
         handleSelectStudent,

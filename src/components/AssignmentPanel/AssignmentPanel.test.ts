@@ -30,7 +30,7 @@ describe('AssignmentPanel', () => {
 
   it('expands the hint on click, and re-folds when the hint changes', () => {
     const { rerender } = render(createElement(AssignmentPanel, baseProps))
-    fireEvent.click(screen.getByText('💡 Hint'))
+    fireEvent.click(screen.getByText('Hint'))
     expect(screen.getByText('System.out.println("Hello ITU!");')).toBeInTheDocument()
     rerender(createElement(AssignmentPanel, { ...baseProps, hint: 'System.out.println("Bye!");' }))
     expect(screen.queryByText('System.out.println("Bye!");')).not.toBeInTheDocument()

@@ -1,4 +1,4 @@
-import type { TeacherFollowBannerProps } from './TeacherFollowBanner.types'
+import type { TeacherFollowBannerProps } from '@/components'
 import {
   FOLLOW_BANNER_CLASS,
   FOLLOW_BANNER_TEXT_CLASS,

@@ -4,29 +4,21 @@ import { revokeTeacher } from '@lib/teacherAuth'
 import { clearPersistedTeacherSession } from '@lib/teacherSession'
 import type { TeacherSessionCreatorProps } from './TeacherSessionCreator.types'
 import {
-    TEACHER_ASSIGNMENT_SET_ROW_CLASS,
-    TEACHER_BROWSE_ACTIONS_CLASS,
-    TEACHER_BROWSE_CLASS,
-    TEACHER_BROWSE_HEAD_CLASS,
-    TEACHER_BROWSE_SUBTITLE_CLASS,
-    TEACHER_BROWSE_TITLE_CLASS,
-    TEACHER_ASSIGNMENT_SET_LABEL_CLASS,
-    TEACHER_ASSIGNMENT_SET_SELECT_CLASS,
-    TEACHER_ERROR_CLASS
-} from "@components/TeacherSessionCreator/TeacherSessionCreator.constants.ts";
+    PORTAL_HEADING_CLASS,
+    PORTAL_FIELD_CLASS,
+} from '@components/PortalShell/PortalShell.constants'
+import {
+    CREATOR_COLUMN_CLASS,
+    CREATOR_FIELD_ROW_CLASS,
+    CREATOR_LABEL_CLASS,
+    CREATOR_ERROR_CLASS,
+    CREATOR_CTA_ROW_CLASS,
+    CREATOR_TITLE,
+} from './TeacherSessionCreator.constants'
 
 export default function TeacherSessionCreator({ assignmentData, session }: TeacherSessionCreatorProps) {
-    const {
-        assignmentSets,
-        selectedAssignmentSetId,
-        setSelectedAssignmentSetId
-    } = assignmentData
-
-    const {
-        isCreatingSession,
-        sessionError,
-        handleCreateSession: baseHandleCreateSession
-    } = session
+    const { assignmentSets, selectedAssignmentSetId, setSelectedAssignmentSetId } = assignmentData
+    const { isCreatingSession, sessionError, handleCreateSession: baseHandleCreateSession } = session
 
     const createLabel = isCreatingSession ? 'Creating…' : 'Create session'
 
@@ -41,51 +33,44 @@ export default function TeacherSessionCreator({ assignmentData, session }: Teach
     }
 
     return (
-        <div className="relative z-10 flex flex-1 flex-col overflow-hidden">
-            <header className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-card/60 px-6 backdrop-blur-md">
-                <span className="text-sm font-bold text-foreground">BootIT Teacher Portal</span>
+        <>
+            <div className={CREATOR_COLUMN_CLASS}>
+                <h2 className={PORTAL_HEADING_CLASS}>{CREATOR_TITLE}</h2>
+
+                <div className={CREATOR_FIELD_ROW_CLASS}>
+                <label className={CREATOR_LABEL_CLASS} htmlFor="teacher-assignmentSet-select">
+                    Assignment set
+                </label>
+                <select
+                    id="teacher-assignmentSet-select"
+                    className={PORTAL_FIELD_CLASS}
+                    value={selectedAssignmentSetId}
+                    onChange={(event) => setSelectedAssignmentSetId(event.target.value)}
+                >
+                    {assignmentSets.length === 0 && <option value="">Loading assignment sets…</option>}
+                    {assignmentSets.map((assignmentSet) => (
+                        <option key={assignmentSet.assignmentSetId} value={assignmentSet.assignmentSetId}>
+                            {assignmentSet.displayTitle}
+                        </option>
+                    ))}
+                </select>
+                </div>
+            </div>
+
+            {sessionError && <p className={CREATOR_ERROR_CLASS}>{sessionError}</p>}
+
+            <div className={CREATOR_CTA_ROW_CLASS}>
                 <Button variant="ghost" onClick={handleLogout}>
                     Sign out
                 </Button>
-            </header>
-
-            <div className={TEACHER_BROWSE_CLASS}>
-                <div className={TEACHER_BROWSE_HEAD_CLASS}>
-                    <h1 className={TEACHER_BROWSE_TITLE_CLASS}>Start a session</h1>
-                    <p className={TEACHER_BROWSE_SUBTITLE_CLASS}>
-                        Select an assignment set below to preview tasks, then create a session room for your students.
-                    </p>
-                </div>
-
-                <div className={TEACHER_BROWSE_ACTIONS_CLASS}>
-                    <div className={TEACHER_ASSIGNMENT_SET_ROW_CLASS}>
-                        <label className={TEACHER_ASSIGNMENT_SET_LABEL_CLASS} htmlFor="teacher-assignmentSet-select">
-                            Assignment set
-                        </label>
-                        <select
-                            id="teacher-assignmentSet-select"
-                            className={TEACHER_ASSIGNMENT_SET_SELECT_CLASS}
-                            value={selectedAssignmentSetId}
-                            onChange={(event) => setSelectedAssignmentSetId(event.target.value)}
-                        >
-                            {assignmentSets.length === 0 && <option value="">Loading assignment sets…</option>}
-                            {assignmentSets.map((assignmentSet) => (
-                                <option key={assignmentSet.assignmentSetId} value={assignmentSet.assignmentSetId}>
-                                    {assignmentSet.displayTitle}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <Button
-                        onClick={handleCreateSession}
-                        isLoading={isCreatingSession}
-                        isDisabled={!selectedAssignmentSetId}
-                    >
-                        {createLabel}
-                    </Button>
-                </div>
-                {sessionError && <p className={TEACHER_ERROR_CLASS}>{sessionError}</p>}
+                <Button
+                    onClick={handleCreateSession}
+                    isLoading={isCreatingSession}
+                    isDisabled={!selectedAssignmentSetId}
+                >
+                    {createLabel}
+                </Button>
             </div>
-        </div>
+        </>
     )
 }

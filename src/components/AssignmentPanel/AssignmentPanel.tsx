@@ -6,7 +6,6 @@ import { useHintDisclosure } from './AssignmentPanel.hooks'
 import {
   PANEL_CLASS,
   PANEL_SCROLL_CLASS,
-  PANEL_TITLE_CLASS,
   PANEL_LESSON_TEXT_CLASS,
   PANEL_LESSON_CODE_CLASS,
   PANEL_TASK_LABEL_CLASS,
@@ -22,12 +21,16 @@ import {
   PANEL_TAB_BASE_CLASS,
   PANEL_TAB_ACTIVE_CLASS,
   PANEL_TAB_IDLE_CLASS,
-  PANEL_TAB_UNDERLINE_CLASS,
   PANEL_TAB_COUNT_CLASS,
   PANEL_SUBMISSIONS_EMPTY_CLASS,
   PANEL_SUBMISSIONS_LIST_CLASS,
+  PANEL_CARD_BODY_CLASS,
+  PANEL_TITLE_ROW_CLASS,
+  PANEL_TITLE_BARE_CLASS,
 } from './AssignmentPanel.constants'
 import {SubmissionRow} from "@components/SubmissionRow";
+import { getSubmissionNumber } from '@components/SubmissionBanner'
+import { formatSubmittedAt } from '@components/ProblemsList'
 
 const TABS: AssignmentPanelTab[] = ['description', 'submissions']
 
@@ -53,7 +56,7 @@ export default function AssignmentPanel({
   projectIdentity,
   hint,
   onViewSubmission,
-  viewingSubmissionId
+  viewingSubmissionId,
 }: AssignmentPanelProps) {
   const [isHintExpanded, handleHintToggle] = useHintDisclosure(hint)
 
@@ -71,14 +74,16 @@ export default function AssignmentPanel({
             {tab === 'submissions' && submissions.length > 0 && (
               <span className={PANEL_TAB_COUNT_CLASS}>{submissions.length}</span>
             )}
-            {activeTab === tab && <span className={PANEL_TAB_UNDERLINE_CLASS} />}
           </button>
         ))}
       </div>
 
+      <div className={PANEL_CARD_BODY_CLASS}>
       {activeTab === 'description' ? (
         <div className={PANEL_SCROLL_CLASS}>
-          <h2 className={PANEL_TITLE_CLASS}>{title}</h2>
+          <div className={PANEL_TITLE_ROW_CLASS}>
+            <h2 className={PANEL_TITLE_BARE_CLASS}>{title}</h2>
+          </div>
           {lesson?.map((block, index) =>
             block.kind === 'code' ? (
               <pre key={index} className={PANEL_LESSON_CODE_CLASS}>
@@ -104,7 +109,7 @@ export default function AssignmentPanel({
           {hint && (
             <div className={PANEL_HINT_CLASS}>
               <button type="button" onClick={handleHintToggle} className={PANEL_HINT_TOGGLE_CLASS}>
-                💡 Hint
+                Hint
                 <span
                   className={classNames(PANEL_HINT_ARROW_CLASS, { [PANEL_HINT_ARROW_EXPANDED_CLASS]: isHintExpanded })}
                 >
@@ -133,8 +138,8 @@ export default function AssignmentPanel({
                     <SubmissionRow
                         key={submission.subId}
                         submission={submission}
-                        title="Submission"
-                        meta={submission.submittedAt}
+                        title={`Submission #${getSubmissionNumber(submissions, submission.assignmentId, submission.subId)}`}
+                        meta={formatSubmittedAt(submission.submittedAt)}
                         isActive={viewingSubmissionId === submission.subId}
                         onClick={() => onViewSubmission?.(submission)}
                     />
@@ -144,6 +149,7 @@ export default function AssignmentPanel({
           )}
         </div>
       )}
+      </div>
     </section>
   )
 }

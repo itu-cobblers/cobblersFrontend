@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { AttendanceStudentDto, SessionSubmissionDto } from '@types'
+import type { AttendanceStudentDto, SessionSubmissionDto, StudentDto } from '@types'
 import { fetchSessionAttendance, fetchSessionSubmissions } from "@/api/sessionApi.ts";
 
 export function useTeacherHydration(sessionCode: string | null) {
@@ -37,10 +37,19 @@ export function useTeacherHydration(sessionCode: string | null) {
         setAllSubmissions(prev => [newSub, ...prev])
     }, [])
 
+    const mergeLiveStudents = useCallback((students: StudentDto[]) => {
+        setAttendanceList(prev => {
+            const seen = new Set(prev.map((s) => s.studentId))
+            const additions = students.filter((s) => !seen.has(s.studentId))
+            return additions.length > 0 ? [...prev, ...additions] : prev
+        })
+    }, [])
+
     return {
         attendanceList,
         allSubmissions,
         isHydrating,
-        addSubmission
+        addSubmission,
+        mergeLiveStudents
     }
 }

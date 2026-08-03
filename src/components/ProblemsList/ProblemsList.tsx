@@ -1,67 +1,72 @@
 import classNames from 'classnames'
 import { Icon } from '@components/Icon'
-import type { IconName } from '@components/Icon'
-import type { ProblemListItem, ProblemsListProps, ProblemsListTab } from './ProblemsList.types'
+import type {ProblemListItem, ProblemsListProps, ProblemsListRowProps} from './ProblemsList.types'
 import {
   LIST_CLASS_BASE,
   LIST_CLASS_OPEN,
   LIST_CLASS_CLOSED,
   LIST_HEADER_CLASS,
   LIST_HEADER_RIGHT_CLASS,
-  LIST_COUNT_CLASS,
   LIST_TOGGLE_CLASS,
-  LIST_RAIL_TABS_CLASS,
-  LIST_RAIL_TAB_BASE_CLASS,
-  LIST_RAIL_TAB_ACTIVE_CLASS,
-  LIST_RAIL_TAB_IDLE_CLASS,
-  LIST_RAIL_TAB_UNDERLINE_CLASS,
-  LIST_RAIL_TAB_LABEL_CLASS,
+  LIST_TOGGLE_LABEL,
   LIST_HISTORY_LOADING_CLASS,
-  LIST_SESSION_CLASS,
-  LIST_SESSION_LABEL_CLASS,
-  LIST_SESSION_NAME_CLASS,
-  LIST_SESSION_NAME_STRONG_CLASS,
   LIST_ITEMS_CLASS,
+  LIST_CARD_BODY_CLASS,
   LIST_ITEM_BASE_CLASS,
   LIST_ITEM_ACTIVE_CLASS,
   LIST_ITEM_IDLE_CLASS,
-  LIST_ITEM_ACCENT_BAR_CLASS,
   LIST_ITEM_META_CLASS,
   LIST_ITEM_KIND_BADGE_CLASS,
   LIST_ITEM_TITLE_CLASS,
   LIST_FOOTER_CLASS,
+  LIST_FOOTER_LEGEND_CLASS,
+  LIST_HISTORY_VIEW_TOGGLE_CLASS,
+  LIST_HISTORY_VIEW_TOGGLE_ACTIVE_CLASS,
+  LIST_HISTORY_VIEW_TOGGLE_IDLE_CLASS,
+  LIST_TIMER_BADGE_CLASS,
   LIST_ITEM_LIVE_CLASS,
-  LIST_TABS_CLASS,
-  LIST_TAB_BASE_CLASS,
-  LIST_TAB_IDLE_CLASS,
-  LIST_TAB_LABEL_CLASS,
-  KIND_LABEL,
+  KIND_LABEL, LIST_ITEM_LIVE_BORDER_CLASS,
 } from './ProblemsList.constants'
 import {StatusBadge} from "@components/StatusBadge";
+import { formatMoveToNext } from './ProblemsList.utils'
+import { useIsTimerExpired } from './ProblemsList.hooks'
 
-const RAIL_TAB_ICON: Record<ProblemsListTab, IconName> = {
-  session: 'book',
-  history: 'history',
-}
 
-const RAIL_TAB_LABEL: Record<ProblemsListTab, string> = {
-  session: 'Session',
-  history: 'History',
-}
-
-const RAIL_TABS: ProblemsListTab[] = ['session', 'history']
 
 /**
- * The single left-hand rail: fold/unfold toggle, session identity ("Room: XXXX" /
- * "Solo practice" + "Signed in as …" — previously in the Toolbar), a Session/History
- * tab pair (this session's assignment list vs. this student's full cross-day
- * submission history — replacing the old separate "My Progress" modal), the
- * problems list itself (one row per assignment with a pass/fail/untried
- * indicator, shared between both tabs), and Leave/Exit pinned to the bottom.
- * Clicking any row — from either tab — drives the exact same
- * description+submissions interaction in the assignment panel; only the tab
- * it came from changes whether a later Submit tags the current session.
+ * One assignment row, shared by the student rail and `TeacherProblemsList` —
+ * same badge, meta line and active/live treatment in both, so they can't
+ * drift apart the way they did before.
  */
+export function ProblemsListRow({ id, title, kind, status, isActive, isLive, isOpen, onSelect }: ProblemsListRowProps) {
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={onSelect}
+        title={title}
+        className={classNames(
+          LIST_ITEM_BASE_CLASS,
+          isActive ? LIST_ITEM_ACTIVE_CLASS : LIST_ITEM_IDLE_CLASS,
+          isLive && LIST_ITEM_LIVE_BORDER_CLASS,
+        )}
+      >
+        <StatusBadge status={status} size="s" />
+        {isOpen && (
+          <div className="min-w-0 flex-1">
+            <div className={LIST_ITEM_META_CLASS}>
+              <span>#{id}</span>
+              <span className={LIST_ITEM_KIND_BADGE_CLASS}>{KIND_LABEL[kind]}</span>
+              {isLive && <span className={LIST_ITEM_LIVE_CLASS}>live</span>}
+            </div>
+            <div className={LIST_ITEM_TITLE_CLASS}>{title}</div>
+          </div>
+        )}
+      </button>
+    </li>
+  )
+}
+
 export default function ProblemsList({
   activeTab,
   onTabChange,
@@ -73,116 +78,75 @@ export default function ProblemsList({
   teacherFocusId,
   isOpen,
   onToggleOpen,
-  sessionLabel,
-  displayName,
-  onLeaveSession,
-  leaveLabel,
+  timerEndsAt,
 }: ProblemsListProps) {
   const items = activeTab === 'session' ? sessionItems : historyItems
+  const isTimerExpired = useIsTimerExpired(timerEndsAt)
+
+  function handleToggleHistory() {
+    onTabChange(activeTab === 'history' ? 'session' : 'history')
+  }
 
   return (
     <aside className={classNames(LIST_CLASS_BASE, isOpen ? LIST_CLASS_OPEN : LIST_CLASS_CLOSED)}>
+      {/* Same markup/classes as `TeacherProblemsList`'s header — the two rails' top rows must not drift apart. */}
       <div className={LIST_HEADER_CLASS}>
-        <Icon name="book" />
-        {isOpen && 'Problems'}
+        {isOpen && 'Assignments'}
         <span className={LIST_HEADER_RIGHT_CLASS}>
-          {isOpen && <span className={LIST_COUNT_CLASS}>{items.length}</span>}
           <button
             type="button"
             onClick={onToggleOpen}
             className={LIST_TOGGLE_CLASS}
-            aria-label={isOpen ? 'Collapse problems list' : 'Expand problems list'}
+            aria-label={isOpen ? LIST_TOGGLE_LABEL.collapse : LIST_TOGGLE_LABEL.expand}
           >
             <Icon name={isOpen ? 'chevronsLeft' : 'chevronsRight'} />
           </button>
         </span>
       </div>
 
-      {isOpen && (sessionLabel || displayName) && (
-        <div className={LIST_SESSION_CLASS}>
-          {sessionLabel && <span className={LIST_SESSION_LABEL_CLASS}>{sessionLabel}</span>}
-          {displayName && (
-            <span className={LIST_SESSION_NAME_CLASS}>
-              Signed in as <span className={LIST_SESSION_NAME_STRONG_CLASS}>{displayName}</span>
-            </span>
-          )}
-        </div>
-      )}
-
-      <div className={LIST_RAIL_TABS_CLASS}>
-        {isOpen && RAIL_TABS.map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            title={RAIL_TAB_LABEL[tab]}
-            onClick={() => onTabChange(tab)}
-            className={classNames(
-              LIST_RAIL_TAB_BASE_CLASS,
-              activeTab === tab ? LIST_RAIL_TAB_ACTIVE_CLASS : LIST_RAIL_TAB_IDLE_CLASS,
-            )}
-          >
-            <Icon name={RAIL_TAB_ICON[tab]} />
-            {isOpen && <span className={LIST_RAIL_TAB_LABEL_CLASS}>{RAIL_TAB_LABEL[tab]}</span>}
-            {activeTab === tab && <span className={LIST_RAIL_TAB_UNDERLINE_CLASS} />}
-          </button>
-        ))}
-      </div>
-
+      <div className={LIST_CARD_BODY_CLASS}>
       {activeTab === 'history' && isHistoryLoading ? (
         isOpen && <p className={LIST_HISTORY_LOADING_CLASS}>Loading your history…</p>
       ) : (
         <ul className={LIST_ITEMS_CLASS}>
-          {items.map((item: ProblemListItem) => {
-            const isActive = item.id === activeId
-            const isTeacherFocus = activeTab === 'session' && item.id === teacherFocusId
-            return (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  onClick={() => onSelect(item.id)}
-                  title={item.title}
-                  className={classNames(
-                    LIST_ITEM_BASE_CLASS,
-                    isActive ? LIST_ITEM_ACTIVE_CLASS : LIST_ITEM_IDLE_CLASS,
-                    { 'bootit-teacher-glow': isTeacherFocus },
-                  )}
-                >
-                  {isActive && <span className={LIST_ITEM_ACCENT_BAR_CLASS} />}
-                  <StatusBadge status={item.status} size="s" />
-                  {isOpen && (
-                    <div className="min-w-0 flex-1">
-                      <div className={LIST_ITEM_META_CLASS}>
-                        <span>#{item.id}</span>
-                        <span className={LIST_ITEM_KIND_BADGE_CLASS}>{KIND_LABEL[item.kind]}</span>
-                        {isTeacherFocus && <span className={LIST_ITEM_LIVE_CLASS}>live</span>}
-                      </div>
-                      <div className={LIST_ITEM_TITLE_CLASS}>{item.title}</div>
-                    </div>
-                  )}
-                </button>
-              </li>
-            )
-          })}
+          {items.map((item: ProblemListItem) => (
+            <ProblemsListRow
+              key={item.id}
+              id={item.id}
+              title={item.title}
+              kind={item.kind}
+              status={item.status}
+              isActive={item.id === activeId}
+              isLive={activeTab === 'session' && item.id === teacherFocusId}
+              isOpen={isOpen}
+              onSelect={() => onSelect(item.id)}
+            />
+          ))}
         </ul>
       )}
 
       {isOpen && (
         <div className={LIST_FOOTER_CLASS}>
-          <StatusBadge status={'tried'} size="s" label='Tried' className="mr-2" />
-          <StatusBadge status={'passed'} size="s" label='Passed' className="mr-2"/>
+          {timerEndsAt && !isTimerExpired && <span className={LIST_TIMER_BADGE_CLASS}>{formatMoveToNext(timerEndsAt)}</span>}
+          <div className={LIST_FOOTER_LEGEND_CLASS}>
+            <StatusBadge status={'tried'} size="s" label='Tried' />
+            <StatusBadge status={'passed'} size="s" label='Passed' />
+            <span> | </span>
+            <button
+              type="button"
+              aria-label="View submission history"
+              aria-pressed={activeTab === 'history'}
+              onClick={handleToggleHistory}
+              className={classNames(
+                LIST_HISTORY_VIEW_TOGGLE_CLASS,
+                activeTab === 'history' ? LIST_HISTORY_VIEW_TOGGLE_ACTIVE_CLASS : LIST_HISTORY_VIEW_TOGGLE_IDLE_CLASS,
+              )}
+            >
+              View history
+            </button>
+          </div>
         </div>
       )}
-
-      <div className={LIST_TABS_CLASS}>
-        <button
-          type="button"
-          className={classNames(LIST_TAB_BASE_CLASS, LIST_TAB_IDLE_CLASS)}
-          title={leaveLabel}
-          onClick={onLeaveSession}
-        >
-          <Icon name="logout" />
-          {isOpen && <span className={LIST_TAB_LABEL_CLASS}>{leaveLabel}</span>}
-        </button>
       </div>
     </aside>
   )

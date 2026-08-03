@@ -2,20 +2,23 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { createElement } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 
-vi.mock('@lib/assignmentSetApi', () => ({
+vi.mock('@/api/assignmentSetApi.ts', () => ({
   fetchAssignmentSets: vi.fn().mockResolvedValue([{ assignmentSetId: 'set-1', displayTitle: 'Day 1' }]),
   fetchAssignmentSet: vi.fn().mockResolvedValue({ assignmentSetId: 'set-1', displayTitle: 'Day 1', assignments: [] }),
 }))
 
-vi.mock('@lib/sessionApi', () => ({
+vi.mock('@/api/sessionApi.ts', () => ({
   createSession: vi.fn().mockResolvedValue({ code: 'ABCD1234' }),
   getSession: vi.fn().mockResolvedValue({ code: 'WXYZ5678', assignmentSetId: 'set-1' }),
   startTimer: vi.fn().mockResolvedValue({ endsAt: '2026-07-21T12:00:00.000Z' }),
   endSession: vi.fn().mockResolvedValue(undefined),
+  fetchSessionAttendance: vi.fn().mockResolvedValue([]),
+  fetchSessionSubmissions: vi.fn().mockResolvedValue([]),
 }))
 
-vi.mock('@lib/sessionHub', () => ({
+vi.mock('@/api/sessionHub.ts', () => ({
   observeSession: vi.fn().mockResolvedValue(undefined),
+  focusAssignment: vi.fn().mockResolvedValue(undefined),
 }))
 
 const { default: TeacherDashboard } = await import('./TeacherDashboard')
@@ -27,7 +30,7 @@ describe('TeacherDashboard', () => {
 
   it('shows the Browse screen when there is no persisted session', async () => {
     render(createElement(TeacherDashboard))
-    expect(await screen.findByRole('heading', { name: 'Start a session' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Classroom' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'End session' })).not.toBeInTheDocument()
   })
 
@@ -47,7 +50,7 @@ describe('TeacherDashboard', () => {
     render(createElement(TeacherDashboard))
 
     expect(await screen.findByRole('button', { name: 'End session' })).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: 'Start a session' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Classroom' })).not.toBeInTheDocument()
   })
 
   it('ending a session clears storage and returns to Browse', async () => {
@@ -58,7 +61,7 @@ describe('TeacherDashboard', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'End session' }))
 
-    expect(await screen.findByRole('heading', { name: 'Start a session' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Classroom' })).toBeInTheDocument()
     expect(localStorage.getItem('bootit.teacherSession')).toBeNull()
   })
 })

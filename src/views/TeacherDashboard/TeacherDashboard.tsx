@@ -3,15 +3,16 @@ import { useSessionLifecycle } from './hooks/useSessionLifecycle'
 import {TeacherSessionCreator} from "@components/TeacherSessionCreator";
 import {TeacherWorkspace} from "@components/TeacherWorkspace";
 import {
-  TEACHER_GLOW_CLASS,
-  TEACHER_GRID_CLASS,
   TEACHER_LAYOUT_CLASS,
-  TEACHER_RESTORING_CLASS
+  TEACHER_RESTORING_CLASS,
+  TEACHER_SECTION_LABEL
 } from "@views/TeacherDashboard/TeacherDashboard.constants.ts";
-import {Spinner} from "@components";
+import {useState} from "react";
+import {Spinner, AppHeader, RoomCodeModal, PortalShell, AppColophon} from "@components";
 
 export default function TeacherDashboard() {
   const assignmentData = useAssignmentData()
+  const [isRoomCodeOpen, setIsRoomCodeOpen] = useState(false)
 
   const session = useSessionLifecycle(assignmentData.setSelectedAssignmentSetId)
 
@@ -19,23 +20,40 @@ export default function TeacherDashboard() {
     return <div className={TEACHER_RESTORING_CLASS}><Spinner /></div>
   }
 
+  if (!session.sessionCode) {
+    return (
+        <PortalShell>
+          <TeacherSessionCreator assignmentData={assignmentData} session={session} />
+        </PortalShell>
+    )
+  }
+
   return (
       <div className={TEACHER_LAYOUT_CLASS}>
-        <div className={TEACHER_GRID_CLASS} />
-        <div className={TEACHER_GLOW_CLASS} />
+        <AppHeader
+            variant="bar"
+            section={TEACHER_SECTION_LABEL}
+            sessionLabel={session.sessionCode ? `Room: ${session.sessionCode}` : undefined}
+            onSessionLabelClick={session.sessionCode ? () => setIsRoomCodeOpen(true) : undefined}
+            onLeaveSession={session.sessionCode ? session.handleEndSession : undefined}
+            leaveLabel={session.isEndingSession ? 'Ending session…' : 'End session'}
+        />
 
-        {!session.sessionCode ? (
-            <TeacherSessionCreator
-                assignmentData={assignmentData}
-                session={session}
-            />
-        ) : (
-            <TeacherWorkspace
+        {session.sessionCode && (
+            <RoomCodeModal
+                isOpen={isRoomCodeOpen}
+                onClose={() => setIsRoomCodeOpen(false)}
                 sessionCode={session.sessionCode}
-                assignmentData={assignmentData}
-                session={session}
             />
         )}
+
+        <TeacherWorkspace
+            sessionCode={session.sessionCode}
+            assignmentData={assignmentData}
+            session={session}
+        />
+
+        <AppColophon />
       </div>
   )
 }

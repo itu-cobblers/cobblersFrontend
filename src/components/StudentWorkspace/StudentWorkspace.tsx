@@ -1,5 +1,10 @@
 import { useState } from 'react'
+import type { AssignmentPanelTab } from '@components/AssignmentPanel/AssignmentPanel.types'
+import { getSubmissionNumber } from '@components/SubmissionBanner'
 import {
+    AppHeader,
+    AppColophon,
+    SubmissionBanner,
     ProblemsList,
     TeacherFollowBanner,
     AssignmentPanel,
@@ -12,12 +17,12 @@ import {
 } from '@components'
 import {
     STUDENT_WORKSPACE_LAYOUT_CLASS,
-    STUDENT_WORKSPACE_GRID_CLASS,
-    STUDENT_WORKSPACE_GLOW_CLASS,
     STUDENT_WORKSPACE_MAIN_CLASS,
     STUDENT_WORKSPACE_CLASS,
     STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS,
     STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS,
+    STUDENT_WORKSPACE_EDITOR_BODY_CLASS,
+    WORKSPACE_SECTION_LABEL,
 } from './StudentWorkspace.constants'
 
 import { useWorkspaceProgress } from './hooks/useWorkspaceProgress'
@@ -36,6 +41,7 @@ interface StudentWorkspaceProps {
     sessionCode?: string
     displayName: string
     teacherFocusedAssignmentId: number | null
+    timerEndsAt: string | null
     submissionHistory: SubmissionHistoryItem[]
     isHistoryLoading: boolean
     onSubmissionMade: () => void
@@ -54,7 +60,8 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
         assignmentSet: props.assignmentSet,
         submissionHistory: props.submissionHistory,
         teacherFocusedAssignmentId: props.teacherFocusedAssignmentId,
-        getAssignment: assignmentData.getAssignment
+        getAssignment: assignmentData.getAssignment,
+        sessionCode: props.sessionCode
     })
 
     const activeAssignment = progress.activeAssignment
@@ -132,6 +139,17 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
         progress.assignmentPanelProps.onTabChange('description');
     }
 
+    // Going back to Description is the same intent as Back to Editor: leave the
+    // past submission behind. Without this the editor stays stuck on it while
+    // the panel shows the current assignment, which reads as a bug.
+    const handlePanelTabChange = (tab: AssignmentPanelTab) => {
+        if (tab === 'description' && viewingSubmission) {
+            handleBackToEditor()
+            return
+        }
+        progress.assignmentPanelProps.onTabChange(tab)
+    }
+
     // Fetch details when a history row is clicked
     const handleViewSubmission = async (item: SubmissionHistoryItem) => {
         if (isLoadingHistoryDetail) return
@@ -157,19 +175,46 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
     const isSolutionVisible = assignmentData.isSolutionVisible[activeAssignment.id] ?? false
     const isLoadingSolution = assignmentData.loadingId === activeAssignment.id
 
+    // Lives in the tab rail for every assignment kind, so Submit sits in the
+    // same place whatever you're working on.
+    const assignmentActions = (
+        <AssignmentFooter
+            submitStatus={submit.isSubmitting ? 'waiting' : 'idle'}
+            onRun={activeAssignment.kind === 'code' ? submit.handleRunCode : undefined}
+            isRunning={submit.isRunning}
+            onSubmit={handleGlobalSubmit}
+            isSubmitDisabled={submit.isRunning || submit.isSubmitting || submit.isSubmittingPredict}
+
+            canRevealAnswer={hasSubmitted}
+            isSolutionVisible={isSolutionVisible}
+            isLoadingSolution={isLoadingSolution}
+            onToggleSolution={handleToggleSolution}
+            historyStatus={
+                viewingSubmission
+                    ? (viewingSubmission.passed ? 'success' : 'error')
+                    : null
+            }
+                onExitView={handleBackToEditor}
+        />
+    )
+
     return (
         <div className={STUDENT_WORKSPACE_LAYOUT_CLASS}>
-            <div className={STUDENT_WORKSPACE_GRID_CLASS} />
-            <div className={STUDENT_WORKSPACE_GLOW_CLASS} />
+            <AppHeader
+                variant="bar"
+                section={WORKSPACE_SECTION_LABEL}
+                sessionLabel={props.sessionLabel}
+                displayName={props.displayName}
+                onLeaveSession={props.onLeaveSession}
+                leaveLabel={props.sessionActionLabel}
+            />
+
             <div className={STUDENT_WORKSPACE_MAIN_CLASS}>
 
                 <ProblemsList
                     {...progress.problemsListProps}
-                    sessionLabel={props.sessionLabel}
-                    displayName={props.displayName}
-                    onLeaveSession={props.onLeaveSession}
-                    leaveLabel={props.sessionActionLabel}
                     isHistoryLoading={props.isHistoryLoading}
+                    timerEndsAt={props.timerEndsAt}
                 />
 
                 <div className={STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS}>
@@ -178,19 +223,28 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                     <div className={STUDENT_WORKSPACE_CLASS}>
                         <AssignmentPanel
                             {...progress.assignmentPanelProps}
+                            onTabChange={handlePanelTabChange}
                             onViewSubmission={handleViewSubmission}
                             viewingSubmissionId={viewingSubmission?.subId}
                         />
 
                         <div className={STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS}>
-                            {(activeAssignment.kind === 'code' || activeAssignment.kind === 'project') && (
-                                <CodeFileTabs
-                                    files={mode.tabFiles}
-                                    activeIndex={mode.activeTabIndex}
-                                    onSelectFile={mode.handleSelectFile}
-                                    isRunning={submit.isRunning}
-                                    onRun={submit.handleRunCode}
-                                    isReadOnly={mode.isReadOnly}
+                            <CodeFileTabs
+                                files={mode.tabFiles}
+                                activeIndex={mode.activeTabIndex}
+                                onSelectFile={mode.handleSelectFile}
+                                actions={assignmentActions}
+                            />
+                            <div className={STUDENT_WORKSPACE_EDITOR_BODY_CLASS}>
+                            {viewingSubmission && (
+                                <SubmissionBanner
+                                    number={getSubmissionNumber(
+                                        props.submissionHistory,
+                                        activeAssignment.id,
+                                        viewingSubmission.subId,
+                                    )}
+                                    submittedAt={viewingSubmission.submittedAt}
+                                    passed={viewingSubmission.passed}
                                 />
                             )}
                             <CodeEditor
@@ -226,27 +280,13 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     hasSubmitted={hasSubmitted}
                                 />
                             )}
-                            <AssignmentFooter
-                                submitStatus={submit.isSubmitting ? 'waiting' : 'idle'}
-                                onSubmit={handleGlobalSubmit}
-                                isSubmitDisabled={submit.isRunning || submit.isSubmitting || submit.isSubmittingPredict}
-
-                                canRevealAnswer={hasSubmitted}
-                                isSolutionVisible={isSolutionVisible}
-                                isLoadingSolution={isLoadingSolution}
-                                onToggleSolution={handleToggleSolution}
-                                historyStatus={
-                                    viewingSubmission
-                                        ? (viewingSubmission.passed ? 'success' : 'error')
-                                        : null
-                                }
-                                viewStatusLabel={mode.viewStatusLabel}
-                                onExitView={handleBackToEditor}
-                            />
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <AppColophon />
         </div>
     )
 }

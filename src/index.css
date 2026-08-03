@@ -30,8 +30,6 @@
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
@@ -43,22 +41,9 @@
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
+  --color-divider: var(--divider);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --color-ring-offset-background: var(--background);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
   --color-terminal: var(--terminal);
   --color-terminal-line: var(--terminal-line);
   --color-terminal-ink: var(--terminal-ink);
@@ -77,21 +62,24 @@
 }
 
 :root {
+  /* Native UI (scrollbars, form controls, and — inherited into same-origin
+     iframes — the built-in PDF viewer's chrome) follows the app: light.
+     Upstream set this to `dark` inside `.dark`, which is unreachable now that
+     no view carries that class. Check the project-brief PDF if this changes. */
+  color-scheme: light;
   --radius: 0.5rem;
   /* BootIT Palette (參照 src/constants/palette.ts) */
   --background: oklch(1 0 0);
-  --foreground: oklch(0.32 0 0); /* #424242 主要文字 */
+  --foreground: oklch(0 0 0); /* #424242 主要文字 */ /* turned this black YA*/
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.32 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.32 0 0);
-  --primary: oklch(0.56 0.09 245); /* #427BAB CTA */
+  --primary: oklch(0 0 0); /* #427BAB CTA */
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.81 0.02 250); /* #B8C1CA Secondary */
   --secondary-foreground: oklch(0.32 0 0);
   --muted: oklch(0.96 0.003 250);
-  --muted-foreground: oklch(0.5 0.01 250); /* #71717A 次要文字 */
-  --accent: oklch(0.35 0.17 305); /* #5C2482 主題高亮點綴色 */
+  --muted-foreground: oklch(0 0 0); /* #71717A 次要文字 */ /* turned this black YA*/
+  --accent: oklch(0 0 0); /* #5C2482 主題高亮點綴色 */
   --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.6 0.22 27); /* #DC2626 Compile Error & Failed */
   --destructive-foreground: oklch(1 0 0);
@@ -110,28 +98,19 @@
   --status-warning: oklch(0.77 0.17 74); /* #F0AD4E */
   --status-warning-bg: oklch(0.97 0.03 90); /* #FFF9E6 */
   --status-warning-text: oklch(0.5 0.15 60); /* #B26A00 */
-  --border: oklch(0.9 0.005 250);
-  --input: oklch(0.9 0.005 250);
-  --ring: oklch(0.56 0.09 245);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  --border: oklch(0 0 0); /* turned this black YA*/
+  /* Structural separations between the three workspace regions — assignment
+     panel, editor, terminal. Deliberately NOT --border: that one is black and
+     belongs to buttons and inputs. */
+  --divider: oklch(0.88 0 0);
+  --input: oklch(0 0 0); /* turned this black YA*/
+  --ring: oklch(0 0 0); /* turned this black YA*/
   /* Dark "glass" zone — Monaco stays vs-dark, so the editor/output area keeps
      this palette regardless of light/dark mode (see CLAUDE.md). */
-  --terminal: oklch(0.16 0.012 260);
-  --terminal-line: oklch(1 0 0 / 7%);
-  --terminal-ink: oklch(0.88 0.005 260);
-  --terminal-muted: oklch(0.56 0.02 260);
+  --terminal: oklch(1 0 0);
+  --terminal-line: oklch(0 0 0);
+  --terminal-ink: oklch(0.6 0.01 260);
+  --terminal-muted: oklch(0.43 0.014 260);
   --term-ok: oklch(0.72 0.16 150);
   --term-err: oklch(0.66 0.2 25);
 }
@@ -147,34 +126,20 @@
   --foreground: oklch(0.9 0.005 260);
   --card: oklch(0.21 0.01 260);
   --card-foreground: oklch(0.9 0.005 260);
-  --popover: oklch(0.21 0.01 260);
-  --popover-foreground: oklch(0.9 0.005 260);
   --primary: oklch(0.62 0.11 245);
   --primary-foreground: oklch(0.98 0 0);
   --secondary: oklch(0.3 0.012 260);
   --secondary-foreground: oklch(0.9 0.005 260);
   --muted: oklch(0.24 0.008 260);
   --muted-foreground: oklch(0.68 0.01 260);
-  --accent: oklch(0.45 0.19 305);
+  --accent: oklch(0.60 0.0 0);
   --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(1 0 0 / 8%);
+  --divider: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 12%);
   --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
   --terminal: oklch(0.16 0.012 260);
   --terminal-line: oklch(1 0 0 / 7%);
   --terminal-ink: oklch(0.88 0.005 260);
@@ -209,36 +174,6 @@
   }
 }
 
-/* Entry-page visual effects */
-@keyframes bootit-grid-drift {
-  0% { background-position: 0 0, 0 0; }
-  100% { background-position: 80px 80px, 80px 80px; }
-}
-@keyframes bootit-glow-pulse {
-  0%, 100% { opacity: 0.55; transform: scale(1); }
-  50% { opacity: 1; transform: scale(1.08); }
-}
-@keyframes bootit-scanline {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100vh); }
-}
-@keyframes bootit-flicker {
-  0%, 100% { opacity: 1; }
-  45% { opacity: 1; }
-  46% { opacity: 0.55; }
-  47% { opacity: 1; }
-  70% { opacity: 0.85; }
-  71% { opacity: 1; }
-}
-@keyframes bootit-caret {
-  0%, 49% { opacity: 1; }
-  50%, 100% { opacity: 0; }
-}
-@keyframes bootit-gradient-shift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-}
-
 .bootit-grid {
   background-image:
           linear-gradient(to right, oklch(1 0 0 / 0.06) 1px, transparent 1px),
@@ -246,21 +181,7 @@
   background-size: 80px 80px, 80px 80px;
   animation: bootit-grid-drift 12s linear infinite;
 }
-.bootit-glow {
-  background: radial-gradient(circle at center,
-  color-mix(in oklab, var(--accent) 60%, transparent) 0%,
-  color-mix(in oklab, var(--primary) 30%, transparent) 40%,
-  transparent 70%);
-  filter: blur(60px);
-  animation: bootit-glow-pulse 6s ease-in-out infinite;
-}
-.bootit-scanline {
-  background: linear-gradient(to bottom,
-  transparent 0%,
-  color-mix(in oklab, var(--primary) 25%, transparent) 50%,
-  transparent 100%);
-  animation: bootit-scanline 8s linear infinite;
-}
+
 .bootit-title {
   background: linear-gradient(90deg,
   oklch(1 0 0) 0%,
@@ -282,28 +203,6 @@
   transition: width 150ms ease-out, height 150ms ease-out, box-shadow 150ms ease-out, transform 100ms ease-out;
   box-shadow: 0 0 4px color-mix(in oklab, var(--accent) 70%, transparent);
 }
-/* Solid (no blink) while the student is actively typing or moving the
-   cursor — only resumes blinking once idle, like a real editor caret. */
-.bootit-caret.is-typing {
-  animation: none;
-  opacity: 1;
-}
-/* No text yet — the bold glowing "boot" block invites the first keystroke.
-   Once real text exists it slims down into a real text-caret (see above). */
-.bootit-caret.is-empty {
-  width: 4px;
-  height: 1.8em;
-  box-shadow:
-          0 0 14px color-mix(in oklab, var(--accent) 85%, transparent),
-          0 0 4px color-mix(in oklab, var(--accent) 60%, white);
-}
-
-/* Entry-screen name prompt: the input's native caret is hidden so
-   `.bootit-caret` (absolutely positioned via `useNameCaret`'s measured
-   offset) can render in its place — see EntryPortal.tsx. */
-.bootit-name-input {
-  caret-color: transparent;
-}
 
 /* Keeps a region scrollable while hiding its scrollbar chrome (e.g. the
    Problems list — scrolls on overflow, no visible track/thumb). */
@@ -318,19 +217,19 @@
 @keyframes bootit-teacher-pulse {
   0%, 100% {
     box-shadow:
-            inset 2px 0 0 color-mix(in oklab, var(--accent) 80%, transparent),
-            0 0 0 1px color-mix(in oklab, var(--accent) 20%, transparent),
-            0 0 18px -4px color-mix(in oklab, var(--accent) 60%, transparent);
+            inset 2px 0 0 color-mix(in oklab, var(--foreground) 80%, transparent),
+            0 0 0 1px color-mix(in oklab, var(--foreground) 20%, transparent),
+            0 0 18px -4px color-mix(in oklab, var(--foreground) 60%, transparent);
   }
   50% {
     box-shadow:
-            inset 2px 0 0 color-mix(in oklab, var(--accent) 90%, transparent),
-            0 0 0 1px color-mix(in oklab, var(--accent) 45%, transparent),
-            0 0 32px -2px color-mix(in oklab, var(--accent) 85%, transparent);
+            inset 2px 0 0 color-mix(in oklab, var(--foreground) 90%, transparent),
+            0 0 0 1px color-mix(in oklab, var(--foreground) 45%, transparent),
+            0 0 32px -2px color-mix(in oklab, var(--foreground) 85%, transparent);
   }
 }
 .bootit-teacher-glow {
-  background: color-mix(in oklab, var(--accent) 8%, transparent);
+  background: color-mix(in oklab, var(--foreground) 8%, transparent);
   animation: bootit-teacher-pulse 2.4s ease-in-out infinite;
 }
 

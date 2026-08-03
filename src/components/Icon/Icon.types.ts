@@ -8,6 +8,7 @@ export type IconName =
   | 'logout'
   | 'chevronsLeft'
   | 'chevronsRight'
+  | 'chevronDown'
   | 'check'
   | 'x'
   | 'circle'
@@ -21,6 +22,7 @@ export type IconName =
   | 'pencil'
   | 'pencilOff'
   | 'code'
+  | 'users'
 
 export interface IconProps {
   name: IconName

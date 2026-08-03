@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
     AttendanceList,
     TeacherAssignmentPanel,
@@ -11,7 +11,7 @@ import {
 import {
     TEACHER_WORKSPACE_MAIN_CLASS,
     TEACHER_WORKSPACE_PANEL_COLUMN_CLASS,
-    TEACHER_WORKSPACE_EDITOR_COLUMN_CLASS,
+    TEACHER_WORKSPACE_EDITOR_COLUMN_CLASS, TEACHER_WORKSPACE_EDITOR_BODY_CLASS,
 } from './TeacherWorkspace.constants'
 import { getProjectIdentity } from '@lib/projectIdentity'
 
@@ -24,15 +24,17 @@ import { useTeacherSolution } from './hooks/useTeacherSolution'
 import type { TeacherWorkspaceProps } from './TeacherWorkspace.types'
 import { getEditorContent, getTabFiles } from "@components/TeacherWorkspace/TeacherWorkspace.utils.ts";
 import {TeacherAssignmentFooter} from "@components/TeacherAssignmentFooter";
+import { getPersistedTeacherWorkspaceUI, setPersistedTeacherWorkspaceUI } from '@lib/teacherWorkspaceUI'
 
 export default function TeacherWorkspace({ sessionCode, assignmentData, session }: TeacherWorkspaceProps) {
-    const [isRailOpen, setIsRailOpen] = useState(true)
+    const [isRailOpen, setIsRailOpen] = useState(() => getPersistedTeacherWorkspaceUI()?.isRailOpen ?? true)
 
-    const { attendanceList, allSubmissions, addSubmission } = useTeacherHydration(sessionCode)
+    const { attendanceList, allSubmissions, addSubmission, mergeLiveStudents } = useTeacherHydration(sessionCode)
 
     const { liveStudentIds, focusedAssignmentId, handleFocusAssignment } = useTeacherLiveSession({
         sessionCode,
-        onSubmissionRecorded: addSubmission
+        onSubmissionRecorded: addSubmission,
+        onLiveStudents: mergeLiveStudents
     })
 
     const {
@@ -48,6 +50,7 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
         problemItems,
         attendanceStudents,
         filteredSubmissions,
+        assignmentBreakdown,
         handleSelectAssignment,
         handleSelectStudent,
         handleClearStudentFilter
@@ -55,8 +58,13 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
         assignments: assignmentData.assignments,
         attendanceList,
         allSubmissions,
-        liveStudentIds
+        liveStudentIds,
+        initialAssignmentId: getPersistedTeacherWorkspaceUI()?.selectedAssignmentId
     })
+
+    useEffect(() => {
+        setPersistedTeacherWorkspaceUI({ isRailOpen, selectedAssignmentId })
+    }, [isRailOpen, selectedAssignmentId])
 
     const { submissionDetail, isLoadingDetail } = useTeacherSubmissionDetail(activeSubId)
 
@@ -101,21 +109,18 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
     return (
         <div className={TEACHER_WORKSPACE_MAIN_CLASS}>
             <TeacherProblemsList
-                sessionCode={sessionCode}
                 items={problemItems}
                 activeId={selectedAssignmentId}
                 onSelect={handleSelectAssignment}
                 teacherFocusId={focusedAssignmentId}
                 isOpen={isRailOpen}
                 onToggleOpen={() => setIsRailOpen(!isRailOpen)}
-                minutes={session.minutes}
+                timerMinutes={session.minutes}
+                onTimerMinutesChange={session.setMinutes}
+                onStartTimer={session.handleStartTimer}
                 isStartingTimer={session.isStartingTimer}
                 timerEndsAt={session.timerEndsAt}
                 timerError={session.timerError}
-                onMinutesChange={session.setMinutes}
-                onStartTimer={session.handleStartTimer}
-                onEndSession={session.handleEndSession}
-                isEndingSession={session.isEndingSession}
             />
 
             <AttendanceList
@@ -136,6 +141,7 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
                     hint={activeAssignment?.hint}
                     onFocusClick={() => selectedAssignmentId != null && handleFocusAssignment(selectedAssignmentId)}
                     isFocused={selectedAssignmentId != null && selectedAssignmentId === focusedAssignmentId}
+                    assignmentBreakdown={assignmentBreakdown}
                     selectedStudentName={attendanceStudents.find(s => s.studentId === selectedStudentId)?.displayName}
                     onClearStudentFilter={handleClearStudentFilter}
                     submissions={filteredSubmissions}
@@ -151,9 +157,9 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
                         files={tabFiles.map(f => ({ name: f.name }))}
                         activeIndex={activeFileIndex}
                         onSelectFile={setActiveFileIndex}
-                        isReadOnly={true}
                     />
                 )}
+                <div className={TEACHER_WORKSPACE_EDITOR_BODY_CLASS}>
                 <CodeEditor
                     key={editorRemountKey}
                     value={editorValue}
@@ -187,6 +193,7 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
                     onToggleSolution={handleToggleSolution}
                     viewStatusLabel={viewStatusLabel}
                 />
+                </div>
             </div>
         </div>
     )

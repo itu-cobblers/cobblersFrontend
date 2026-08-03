@@ -8,7 +8,7 @@ import { useHintDisclosure } from '@components/AssignmentPanel/AssignmentPanel.h
 import {
   PANEL_CLASS,
   PANEL_SCROLL_CLASS,
-  PANEL_TITLE_CLASS,
+  PANEL_TITLE_BARE_CLASS,
   PANEL_LESSON_TEXT_CLASS,
   PANEL_LESSON_CODE_CLASS,
   PANEL_TASK_LABEL_CLASS,
@@ -24,9 +24,9 @@ import {
   PANEL_TAB_BASE_CLASS,
   PANEL_TAB_ACTIVE_CLASS,
   PANEL_TAB_IDLE_CLASS,
-  PANEL_TAB_UNDERLINE_CLASS,
   PANEL_SUBMISSIONS_EMPTY_CLASS,
   PANEL_SUBMISSIONS_LIST_CLASS,
+  PANEL_CARD_BODY_CLASS,
 } from '@components/AssignmentPanel/AssignmentPanel.constants'
 import {
   FILTER_BAR_CLASS,
@@ -39,6 +39,9 @@ import {
   FOCUS_BUTTON_IDLE_CLASS,
   SUBMISSIONS_EMPTY_TITLE_CLASS,
   SUBMISSIONS_EMPTY_SUBTITLE_CLASS,
+  TITLE_ROW_CLASS,
+  BREAKDOWN_ROW_CLASS,
+  BREAKDOWN_ITEM_CLASS,
 } from './TeacherAssignmentPanel.constants'
 import {SubmissionRow} from "@components/SubmissionRow";
 
@@ -61,6 +64,7 @@ export default function TeacherAssignmentPanel({
   onFocusClick,
   isFocused,
   isBroadcastable = true,
+  assignmentBreakdown,
   selectedStudentName,
   onClearStudentFilter,
   submissions,
@@ -71,27 +75,6 @@ export default function TeacherAssignmentPanel({
 
   return (
     <section className={PANEL_CLASS}>
-      {/* Student Filter Pill Bar — the assignment side can never be empty, so
-          it's shown via the title + Focus row below, not a clearable pill here. */}
-      {selectedStudentName && (
-        <div className={FILTER_BAR_CLASS}>
-          <span className={FILTER_BAR_LABEL_CLASS}>
-            Filter:
-          </span>
-          <span className={FILTER_PILL_CLASS}>
-            Student: {selectedStudentName}
-            <button
-              type="button"
-              onClick={onClearStudentFilter}
-              className={FILTER_PILL_CLEAR_CLASS}
-              aria-label="Clear student filter"
-            >
-              <Icon name="x" />
-            </button>
-          </span>
-        </div>
-      )}
-
       {/* Tabs */}
       <div className={PANEL_TABS_CLASS}>
         {TABS.map((tab) => (
@@ -107,15 +90,15 @@ export default function TeacherAssignmentPanel({
                 {submissions.length}
               </span>
             )}
-            {activeTab === tab && <span className={PANEL_TAB_UNDERLINE_CLASS} />}
           </button>
         ))}
       </div>
 
+      <div className={PANEL_CARD_BODY_CLASS}>
       {activeTab === 'description' ? (
         <div className={PANEL_SCROLL_CLASS}>
-          <div className="flex items-center justify-between gap-3">
-            <h2 className={PANEL_TITLE_CLASS}>{title}</h2>
+          <div className={TITLE_ROW_CLASS}>
+            <h2 className={PANEL_TITLE_BARE_CLASS}>{title}</h2>
             {isBroadcastable && onFocusClick && (
               <button
                 type="button"
@@ -131,6 +114,13 @@ export default function TeacherAssignmentPanel({
               </button>
             )}
           </div>
+          {assignmentBreakdown && (
+            <div className={BREAKDOWN_ROW_CLASS}>
+              <span className={BREAKDOWN_ITEM_CLASS.passed}>Passed: {assignmentBreakdown.passed}</span>
+              <span className={BREAKDOWN_ITEM_CLASS.tried}>Tried: {assignmentBreakdown.tried}</span>
+              <span className={BREAKDOWN_ITEM_CLASS.untried}>Untried: {assignmentBreakdown.untried}</span>
+            </div>
+          )}
           {lesson?.map((block, index) =>
             block.kind === 'code' ? (
               <pre key={index} className={PANEL_LESSON_CODE_CLASS}>
@@ -155,7 +145,7 @@ export default function TeacherAssignmentPanel({
           {hint && (
             <div className={PANEL_HINT_CLASS}>
               <button type="button" onClick={handleHintToggle} className={PANEL_HINT_TOGGLE_CLASS}>
-                💡 Hint
+                Hint
                 <span
                   className={classNames(PANEL_HINT_ARROW_CLASS, { [PANEL_HINT_ARROW_EXPANDED_CLASS]: isHintExpanded })}
                 >
@@ -172,6 +162,24 @@ export default function TeacherAssignmentPanel({
         </div>
       ) : (
         <div className={PANEL_SCROLL_CLASS}>
+          {selectedStudentName && (
+              <div className={FILTER_BAR_CLASS}>
+          <span className={FILTER_BAR_LABEL_CLASS}>
+            Filter:
+          </span>
+                <span className={FILTER_PILL_CLASS}>
+            Student: {selectedStudentName}
+                  <button
+                      type="button"
+                      onClick={onClearStudentFilter}
+                      className={FILTER_PILL_CLEAR_CLASS}
+                      aria-label="Clear student filter"
+                  >
+              <Icon name="x" />
+            </button>
+          </span>
+              </div>
+          )}
           {submissions.length === 0 ? (
             <div className={PANEL_SUBMISSIONS_EMPTY_CLASS}>
               <Icon name="history" />
@@ -200,6 +208,7 @@ export default function TeacherAssignmentPanel({
           )}
         </div>
       )}
+      </div>
     </section>
   )
 }

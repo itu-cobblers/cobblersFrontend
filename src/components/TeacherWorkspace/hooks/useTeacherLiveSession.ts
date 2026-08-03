@@ -5,15 +5,18 @@ import {focusAssignment, observeSession} from "@/api/sessionHub.ts";
 interface UseTeacherLiveSessionProps {
     sessionCode: string | null
     onSubmissionRecorded: (submission: SessionSubmissionDto) => void
+    /** Fires with every student seen over the hub (roster snapshot or a single join) — folds names into the attendance list as they arrive. */
+    onLiveStudents?: (students: StudentDto[]) => void
 }
 
-export function useTeacherLiveSession({ sessionCode, onSubmissionRecorded }: UseTeacherLiveSessionProps) {
+export function useTeacherLiveSession({ sessionCode, onSubmissionRecorded, onLiveStudents }: UseTeacherLiveSessionProps) {
     const [liveStudentIds, setLiveStudentIds] = useState<Set<string>>(new Set())
     const [focusedAssignmentId, setFocusedAssignmentId] = useState<number | null>(null)
 
     const handleRosterUpdate = useCallback((roster: StudentDto[]) => {
         setLiveStudentIds(new Set(roster.map(s => s.studentId)))
-    }, [])
+        onLiveStudents?.(roster)
+    }, [onLiveStudents])
 
     const handleStudentJoined = useCallback((student: StudentDto) => {
         setLiveStudentIds(prev => {
@@ -21,7 +24,8 @@ export function useTeacherLiveSession({ sessionCode, onSubmissionRecorded }: Use
             next.add(student.studentId)
             return next
         })
-    }, [])
+        onLiveStudents?.([student])
+    }, [onLiveStudents])
 
     useEffect(() => {
         if (!sessionCode) return

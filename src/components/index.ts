@@ -78,3 +78,22 @@ export type { SubmitButtonProps, SubmitButtonStatus } from './SubmitButton'
 
 export { ShowAnswerButton } from './ShowAnswerButton'
 export type { ShowAnswerButtonProps } from './ShowAnswerButton'
+
+export { AppHeader } from './AppHeader'
+export type { AppHeaderProps, AppHeaderVariant } from './AppHeader'
+
+export { AppFooter } from './AppFooter'
+
+export { SubmissionBanner } from './SubmissionBanner'
+export type { SubmissionBannerProps } from './SubmissionBanner'
+
+export { RunMenu } from './RunMenu'
+export type { RunMenuProps } from './RunMenu'
+
+export { RoomCodeModal } from './RoomCodeModal'
+export type { RoomCodeModalProps } from './RoomCodeModal'
+
+export { PortalShell } from './PortalShell'
+export type { PortalShellProps } from './PortalShell'
+
+export { AppColophon } from './AppColophon'

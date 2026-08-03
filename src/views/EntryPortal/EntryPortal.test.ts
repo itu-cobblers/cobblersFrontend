@@ -2,11 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createElement } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import EntryPortal from './EntryPortal.tsx'
-import { useEntryPortal, useNameCaret } from './EntryPortal.hooks.ts'
+import { useEntryPortal } from './EntryPortal.hooks.ts'
 
 vi.mock('./EntryPortal.hooks.ts', () => ({
   useEntryPortal: vi.fn(),
-  useNameCaret: vi.fn(),
 }))
 
 const baseProps = {
@@ -27,33 +26,65 @@ const defaultUseEntryPortalMock = {
   onRefreshTodayLatestSession: vi.fn(),
 }
 
-const defaultUseNameCaretMock = {
-  inputRef: { current: null },
-  mirrorRef: { current: null },
-  caretLeft: 0,
-  isActive: false,
-  handleCaretSync: vi.fn(),
-}
-
 describe('EntryPortal', () => {
   beforeEach(() => {
     vi.mocked(useEntryPortal).mockReturnValue(defaultUseEntryPortalMock)
-    vi.mocked(useNameCaret).mockReturnValue(defaultUseNameCaretMock)
   })
 
-  it('shows "Welcome to BootIT" for a first-time student', () => {
+  it('shows the BootCode title and the joining instructions', () => {
     render(createElement(EntryPortal, baseProps))
-    expect(screen.getByText('Welcome to BootIT')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'BootCode' })).toBeInTheDocument()
+    expect(screen.getByText(/refresh this page when your teacher has made a classroom/)).toBeInTheDocument()
   })
 
-  it('shows "Welcome to BootIT, {name}" for a returning student', () => {
+  it('prompts for a nickname in the name field', () => {
+    render(createElement(EntryPortal, baseProps))
+    expect(screen.getByRole('textbox', { name: 'Your name' })).toHaveAttribute(
+      'placeholder',
+      'Type your nickname here',
+    )
+  })
+
+  it('joins the class when Enter is pressed in the name field', () => {
+    const onJoinToday = vi.fn()
     vi.mocked(useEntryPortal).mockReturnValue({
       ...defaultUseEntryPortalMock,
       name: 'Maria',
-      isReturningStudent: true,
+      todayLatestSessionCode: 'P4FN',
+      onJoinToday,
     })
     render(createElement(EntryPortal, baseProps))
-    expect(screen.getByText('Welcome to BootIT, Maria')).toBeInTheDocument()
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'Your name' }), { key: 'Enter' })
+    expect(onJoinToday).toHaveBeenCalledOnce()
+  })
+
+  it('does nothing on Enter when there is no session to join, leaving solo practice a deliberate choice', () => {
+    const onJoinToday = vi.fn()
+    const onStartSolo = vi.fn()
+    vi.mocked(useEntryPortal).mockReturnValue({
+      ...defaultUseEntryPortalMock,
+      name: 'Maria',
+      todayLatestSessionCode: null,
+      onJoinToday,
+      onStartSolo,
+    })
+    render(createElement(EntryPortal, baseProps))
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'Your name' }), { key: 'Enter' })
+    expect(onJoinToday).not.toHaveBeenCalled()
+    expect(onStartSolo).not.toHaveBeenCalled()
+  })
+
+  it('does not join on Enter before a name has been typed', () => {
+    const onJoinToday = vi.fn()
+    vi.mocked(useEntryPortal).mockReturnValue({
+      ...defaultUseEntryPortalMock,
+      name: '   ',
+      todayLatestSessionCode: 'P4FN',
+      onJoinToday,
+    })
+    render(createElement(EntryPortal, baseProps))
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'Your name' }), { key: 'Enter' })
+    expect(onJoinToday).not.toHaveBeenCalled()
   })
 
   it('disables the join button and shows a checking label while the today-latest lookup is in flight', () => {
