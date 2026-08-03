@@ -4,7 +4,6 @@ import type { CodeFileTabsProps } from './CodeFileTabs.types'
 import {
     FILE_TABS_ROW_CLASS,
     FILE_TABS_LIST_CLASS,
-    FILE_TABS_ACTIONS_CLASS,
     FILE_TAB_BASE_CLASS,
     FILE_TAB_ACTIVE_CLASS,
     FILE_TAB_IDLE_CLASS,
@@ -36,10 +35,7 @@ export default function CodeFileTabs({
                     )
                 })}
             </div>
-
-            <div className={FILE_TABS_ACTIONS_CLASS}>
-                {actions}
-            </div>
+            {actions}
         </div>
     )
 }

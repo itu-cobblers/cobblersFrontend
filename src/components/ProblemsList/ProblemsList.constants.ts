@@ -15,63 +15,18 @@ export const LIST_CLASS_OPEN = 'w-64'
 export const LIST_CLASS_CLOSED = 'w-12'
 
 /**
- * The rail's own header row is gone — the collapse toggle moved into the
- * session row and the count onto the Session tab. These are kept because
- * `TeacherProblemsList` still renders a header of its own.
- */
-/**
- * Teacher-only (the student rail has tabs instead). Matches
- * LIST_RAIL_TAB_BASE_CLASS's `text-sm` in normal case — the letter-spaced
- * caps this used to carry were the loudest mismatch between the two views.
+ * The rail's own header row — just the "Assignments" title and the collapse
+ * toggle, identical markup/classes in both `ProblemsList` (student) and
+ * `TeacherProblemsList`, so the two rails' top rows can't drift apart.
  */
 export const LIST_HEADER_CLASS =
-  'flex h-10 shrink-0 items-center gap-2 border-b border-divider px-3 text-sm text-foreground -mb-px border border-b-0 border-divider bg-card text-foreground'
+  'flex h-10 shrink-0 items-center gap-2 border-b-0 border-divider px-3 text-sm text-foreground -mb-px border bg-card text-foreground'
 
 export const LIST_HEADER_RIGHT_CLASS = 'ml-auto flex items-center gap-1.5'
 
 export const LIST_COUNT_CLASS = 'rounded bg-muted px-1.5 py-0.5 text-[10px] normal-case tracking-normal'
 
 export const LIST_TOGGLE_CLASS = 'rounded p-1 text-muted-foreground normal-case tracking-normal transition-colors hover:bg-black/5'
-
-// The two tabs — "Session" (this session's assignment list) and "History"
-// (this student's full cross-day submission history) — rendered as one
-// underlined tab pair right under the header, mirroring AssignmentPanel's
-// Description/Submissions tabs so the pattern reads consistently app-wide.
-/**
- * Session tab on the left, a compact History icon-toggle and the collapse
- * toggle on the right. History gave up its half of the row as a labelled tab
- * (see LIST_RAIL_HISTORY_TOGGLE_CLASS) — it wasn't earning that much space —
- * but it still needs an entry point, so it's a small icon button instead.
- * `items-stretch` lets the session tab fill the row so its active underline
- * lands on the row's own bottom border.
- */
-export const LIST_RAIL_TABS_CLASS = 'flex h-10 shrink-0 items-stretch border-b border-divider'
-
-export const LIST_RAIL_TABS_OPEN_CLASS = 'pr-1'
-
-/** Collapsed, the toggle is the only thing left in the row. */
-export const LIST_RAIL_TABS_CLOSED_CLASS = 'justify-center'
-
-export const LIST_RAIL_TOGGLE_CLASS = 'shrink-0 self-center'
-
-/** `text-sm` to match PANEL_TAB_BASE_CLASS — the rail and the panel read as one tab row. */
-export const LIST_RAIL_TAB_BASE_CLASS =
-  'relative flex flex-1 items-center justify-center gap-2 rounded-t-md px-3 text-sm transition-colors'
-
-/** Same three-part seam as the file tabs: rule on the row, tab pulled over it, opaque fill. */
-export const LIST_RAIL_TAB_ACTIVE_CLASS =
-  '-mb-px border border-b-0 border-divider bg-card text-foreground'
-
-export const LIST_RAIL_TAB_IDLE_CLASS = 'text-muted-foreground hover:text-foreground'
-
-export const LIST_RAIL_TAB_LABEL_CLASS = 'truncate normal-case tracking-normal'
-
-/** Icon-only, same footprint as the fold toggle beside it — not a second full tab. */
-export const LIST_RAIL_HISTORY_TOGGLE_CLASS = 'shrink-0 self-center rounded p-1.5 transition-colors'
-
-export const LIST_RAIL_HISTORY_TOGGLE_ACTIVE_CLASS = 'bg-black/[0.06] text-foreground'
-
-export const LIST_RAIL_HISTORY_TOGGLE_IDLE_CLASS = 'text-muted-foreground hover:bg-black/5 hover:text-foreground'
 
 /** Avoids the word "problems", which means nothing to a beginner. */
 export const LIST_TOGGLE_LABEL = {
@@ -104,7 +59,17 @@ export const LIST_ITEM_LIVE_CLASS = 'ml-auto text-[9px] font-semibold uppercase 
 
 export const LIST_FOOTER_CLASS = 'flex flex-col items-center gap-1.5 text-[10px]'
 
-export const LIST_FOOTER_LEGEND_CLASS = 'flex items-center justify-center px-4 py-2 gap-3'
+/** `flex-wrap` is the fallback, not the plan — Tried, Passed and the History toggle are sized to fit one row; they only wrap on a genuinely narrow rail. */
+export const LIST_FOOTER_LEGEND_CLASS = 'flex flex-wrap items-center justify-center px-4 py-2 gap-2'
+
+/** "View history" toggle, sharing the footer legend row with the Tried/Passed badges. */
+export const LIST_HISTORY_VIEW_TOGGLE_CLASS =
+  'inline-flex items-center rounded px-1.5 py-0.5 text-[12px] font-medium normal-case tracking-normal transition-colors'
+
+/** Muted fill marks it "on", same convention as `LIST_ITEM_ACTIVE_CLASS`. */
+export const LIST_HISTORY_VIEW_TOGGLE_ACTIVE_CLASS = 'bg-muted text-foreground'
+
+export const LIST_HISTORY_VIEW_TOGGLE_IDLE_CLASS = 'text-muted-foreground hover:bg-black/5 hover:text-foreground'
 
 /** Same gray "pill" as the teacher rail's own countdown badge. */
 export const LIST_TIMER_BADGE_CLASS =

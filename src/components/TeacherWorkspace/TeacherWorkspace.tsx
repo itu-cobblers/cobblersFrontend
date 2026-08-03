@@ -11,7 +11,7 @@ import {
 import {
     TEACHER_WORKSPACE_MAIN_CLASS,
     TEACHER_WORKSPACE_PANEL_COLUMN_CLASS,
-    TEACHER_WORKSPACE_EDITOR_COLUMN_CLASS,
+    TEACHER_WORKSPACE_EDITOR_COLUMN_CLASS, TEACHER_WORKSPACE_EDITOR_BODY_CLASS,
 } from './TeacherWorkspace.constants'
 import { getProjectIdentity } from '@lib/projectIdentity'
 
@@ -159,6 +159,7 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
                         onSelectFile={setActiveFileIndex}
                     />
                 )}
+                <div className={TEACHER_WORKSPACE_EDITOR_BODY_CLASS}>
                 <CodeEditor
                     key={editorRemountKey}
                     value={editorValue}
@@ -192,6 +193,7 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
                     onToggleSolution={handleToggleSolution}
                     viewStatusLabel={viewStatusLabel}
                 />
+                </div>
             </div>
         </div>
     )

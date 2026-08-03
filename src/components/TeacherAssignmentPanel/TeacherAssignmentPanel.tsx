@@ -75,27 +75,6 @@ export default function TeacherAssignmentPanel({
 
   return (
     <section className={PANEL_CLASS}>
-      {/* Student Filter Pill Bar — the assignment side can never be empty, so
-          it's shown via the title + Focus row below, not a clearable pill here. */}
-      {selectedStudentName && (
-        <div className={FILTER_BAR_CLASS}>
-          <span className={FILTER_BAR_LABEL_CLASS}>
-            Filter:
-          </span>
-          <span className={FILTER_PILL_CLASS}>
-            Student: {selectedStudentName}
-            <button
-              type="button"
-              onClick={onClearStudentFilter}
-              className={FILTER_PILL_CLEAR_CLASS}
-              aria-label="Clear student filter"
-            >
-              <Icon name="x" />
-            </button>
-          </span>
-        </div>
-      )}
-
       {/* Tabs */}
       <div className={PANEL_TABS_CLASS}>
         {TABS.map((tab) => (
@@ -183,6 +162,24 @@ export default function TeacherAssignmentPanel({
         </div>
       ) : (
         <div className={PANEL_SCROLL_CLASS}>
+          {selectedStudentName && (
+              <div className={FILTER_BAR_CLASS}>
+          <span className={FILTER_BAR_LABEL_CLASS}>
+            Filter:
+          </span>
+                <span className={FILTER_PILL_CLASS}>
+            Student: {selectedStudentName}
+                  <button
+                      type="button"
+                      onClick={onClearStudentFilter}
+                      className={FILTER_PILL_CLEAR_CLASS}
+                      aria-label="Clear student filter"
+                  >
+              <Icon name="x" />
+            </button>
+          </span>
+              </div>
+          )}
           {submissions.length === 0 ? (
             <div className={PANEL_SUBMISSIONS_EMPTY_CLASS}>
               <Icon name="history" />

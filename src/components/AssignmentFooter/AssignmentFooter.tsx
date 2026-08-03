@@ -1,10 +1,8 @@
 import { Icon } from '@components/Icon'
 import { RunMenu } from '@components/RunMenu'
-import { SubmitButton } from '@components/SubmitButton'
 import type { AssignmentFooterProps } from '@/components'
 import {
     ASSIGNMENT_FOOTER_CLASS,
-    ASSIGNMENT_FOOTER_RIGHT_CLASS,
 } from './AssignmentFooter.constants'
 import {Button, ShowAnswerButton} from "@/components";
 
@@ -22,47 +20,39 @@ export default function AssignmentFooter({
     onExitView,
 }: AssignmentFooterProps) {
 
-
-    // Still derived from historyStatus — it decides Back-to-Editor vs Submit.
     const isHistoryView = historyStatus !== null;
     const isEditable = !isHistoryView && !isSolutionVisible;
 
     return (
         <div className={ASSIGNMENT_FOOTER_CLASS}>
-            <div className={ASSIGNMENT_FOOTER_RIGHT_CLASS}>
-                {canRevealAnswer && onToggleSolution && !isSolutionVisible && (
-                    <ShowAnswerButton
-                        onClick={onToggleSolution}
-                        isDisabled={isLoadingSolution}
-                        label="Show Answer"
-                    />
-                )}
-                {!isEditable && onExitView ? (
-                    <Button
-                        variant="zinc"
-                        onClick={onExitView}
-                    >
-                        <Icon name="arrowBack" />
-                        <span>Back to Editor</span>
-                    </Button>
-                ) : onRun ? (
-                    <RunMenu
-                        onRun={onRun}
-                        onSubmit={onSubmit}
-                        isRunning={isRunning}
-                        isSubmitting={submitStatus === 'waiting'}
-                        isSubmitDisabled={isSubmitDisabled}
-                    />
-                ) : (
-                    /* Nothing to run — a play icon would be a lie, so Submit stays a button. */
-                    <SubmitButton
-                        status={submitStatus}
-                        onClick={onSubmit}
-                        isDisabled={isSubmitDisabled}
-                        label="Submit"
-                    />
-                )}
-            </div>
+            {canRevealAnswer && onToggleSolution && !isSolutionVisible && (
+                <ShowAnswerButton
+                    onClick={onToggleSolution}
+                    isDisabled={isLoadingSolution}
+                    label="Show Answer"
+                />
+            )}
+            {!isEditable && onExitView ? (
+                <Button
+                    variant="zinc"
+                    onClick={onExitView}
+                >
+                    <Icon name="arrowBack" />
+                    <span>Back to Editor</span>
+                </Button>
+            ) : onRun ? (
+                <RunMenu
+                    onRun={onRun}
+                    onSubmit={onSubmit}
+                    isRunning={isRunning}
+                    isSubmitting={submitStatus === 'waiting'}
+                    isSubmitDisabled={isSubmitDisabled}
+                />
+            ) : (
+                <Button variant="primary" onClick={onSubmit} isDisabled={isSubmitDisabled}>
+                    Submit
+                </Button>
+            )}
         </div>
     )
 }

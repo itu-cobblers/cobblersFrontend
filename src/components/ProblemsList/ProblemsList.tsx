@@ -5,20 +5,10 @@ import {
   LIST_CLASS_BASE,
   LIST_CLASS_OPEN,
   LIST_CLASS_CLOSED,
-  LIST_COUNT_CLASS,
+  LIST_HEADER_CLASS,
+  LIST_HEADER_RIGHT_CLASS,
   LIST_TOGGLE_CLASS,
   LIST_TOGGLE_LABEL,
-  LIST_RAIL_TABS_CLASS,
-  LIST_RAIL_TABS_OPEN_CLASS,
-  LIST_RAIL_TABS_CLOSED_CLASS,
-  LIST_RAIL_TOGGLE_CLASS,
-  LIST_RAIL_TAB_BASE_CLASS,
-  LIST_RAIL_TAB_ACTIVE_CLASS,
-  LIST_RAIL_TAB_IDLE_CLASS,
-  LIST_RAIL_TAB_LABEL_CLASS,
-  LIST_RAIL_HISTORY_TOGGLE_CLASS,
-  LIST_RAIL_HISTORY_TOGGLE_ACTIVE_CLASS,
-  LIST_RAIL_HISTORY_TOGGLE_IDLE_CLASS,
   LIST_HISTORY_LOADING_CLASS,
   LIST_ITEMS_CLASS,
   LIST_CARD_BODY_CLASS,
@@ -30,12 +20,16 @@ import {
   LIST_ITEM_TITLE_CLASS,
   LIST_FOOTER_CLASS,
   LIST_FOOTER_LEGEND_CLASS,
+  LIST_HISTORY_VIEW_TOGGLE_CLASS,
+  LIST_HISTORY_VIEW_TOGGLE_ACTIVE_CLASS,
+  LIST_HISTORY_VIEW_TOGGLE_IDLE_CLASS,
   LIST_TIMER_BADGE_CLASS,
   LIST_ITEM_LIVE_CLASS,
   KIND_LABEL, LIST_ITEM_LIVE_BORDER_CLASS,
 } from './ProblemsList.constants'
 import {StatusBadge} from "@components/StatusBadge";
-import { formatPassedRatio, formatMoveToNext } from './ProblemsList.utils'
+import { formatMoveToNext } from './ProblemsList.utils'
+import { useIsTimerExpired } from './ProblemsList.hooks'
 
 
 
@@ -87,54 +81,27 @@ export default function ProblemsList({
   timerEndsAt,
 }: ProblemsListProps) {
   const items = activeTab === 'session' ? sessionItems : historyItems
+  const isTimerExpired = useIsTimerExpired(timerEndsAt)
+
+  function handleToggleHistory() {
+    onTabChange(activeTab === 'history' ? 'session' : 'history')
+  }
 
   return (
     <aside className={classNames(LIST_CLASS_BASE, isOpen ? LIST_CLASS_OPEN : LIST_CLASS_CLOSED)}>
-      <div
-        className={classNames(
-          LIST_RAIL_TABS_CLASS,
-          isOpen ? LIST_RAIL_TABS_OPEN_CLASS : LIST_RAIL_TABS_CLOSED_CLASS,
-        )}
-      >
-        {isOpen && (
+      {/* Same markup/classes as `TeacherProblemsList`'s header — the two rails' top rows must not drift apart. */}
+      <div className={LIST_HEADER_CLASS}>
+        {isOpen && 'Assignments'}
+        <span className={LIST_HEADER_RIGHT_CLASS}>
           <button
             type="button"
-            title="Assignments"
-            onClick={() => onTabChange('session')}
-            className={classNames(
-              LIST_RAIL_TAB_BASE_CLASS,
-              activeTab === 'session' ? LIST_RAIL_TAB_ACTIVE_CLASS : LIST_RAIL_TAB_IDLE_CLASS,
-            )}
+            onClick={onToggleOpen}
+            className={LIST_TOGGLE_CLASS}
+            aria-label={isOpen ? LIST_TOGGLE_LABEL.collapse : LIST_TOGGLE_LABEL.expand}
           >
-            <span className={LIST_RAIL_TAB_LABEL_CLASS}>Assignments</span>
-            <span className={LIST_COUNT_CLASS}>{formatPassedRatio(sessionItems)}</span>
+            <Icon name={isOpen ? 'chevronsLeft' : 'chevronsRight'} />
           </button>
-        )}
-
-        {isOpen && (
-          <button
-            type="button"
-            aria-label="View submission history"
-            aria-pressed={activeTab === 'history'}
-            title="History"
-            onClick={() => onTabChange(activeTab === 'history' ? 'session' : 'history')}
-            className={classNames(
-              LIST_RAIL_HISTORY_TOGGLE_CLASS,
-              activeTab === 'history' ? LIST_RAIL_HISTORY_TOGGLE_ACTIVE_CLASS : LIST_RAIL_HISTORY_TOGGLE_IDLE_CLASS,
-            )}
-          >
-            <Icon name="history" />
-          </button>
-        )}
-
-        <button
-          type="button"
-          onClick={onToggleOpen}
-          className={classNames(LIST_TOGGLE_CLASS, LIST_RAIL_TOGGLE_CLASS)}
-          aria-label={isOpen ? LIST_TOGGLE_LABEL.collapse : LIST_TOGGLE_LABEL.expand}
-        >
-          <Icon name={isOpen ? 'chevronsLeft' : 'chevronsRight'} />
-        </button>
+        </span>
       </div>
 
       <div className={LIST_CARD_BODY_CLASS}>
@@ -160,10 +127,23 @@ export default function ProblemsList({
 
       {isOpen && (
         <div className={LIST_FOOTER_CLASS}>
-          {timerEndsAt && <span className={LIST_TIMER_BADGE_CLASS}>{formatMoveToNext(timerEndsAt)}</span>}
+          {timerEndsAt && !isTimerExpired && <span className={LIST_TIMER_BADGE_CLASS}>{formatMoveToNext(timerEndsAt)}</span>}
           <div className={LIST_FOOTER_LEGEND_CLASS}>
-            <StatusBadge status={'tried'} size="s" label='Tried' className="mr-2" />
-            <StatusBadge status={'passed'} size="s" label='Passed' className="mr-2"/>
+            <StatusBadge status={'tried'} size="s" label='Tried' />
+            <StatusBadge status={'passed'} size="s" label='Passed' />
+            <span> | </span>
+            <button
+              type="button"
+              aria-label="View submission history"
+              aria-pressed={activeTab === 'history'}
+              onClick={handleToggleHistory}
+              className={classNames(
+                LIST_HISTORY_VIEW_TOGGLE_CLASS,
+                activeTab === 'history' ? LIST_HISTORY_VIEW_TOGGLE_ACTIVE_CLASS : LIST_HISTORY_VIEW_TOGGLE_IDLE_CLASS,
+              )}
+            >
+              View history
+            </button>
           </div>
         </div>
       )}

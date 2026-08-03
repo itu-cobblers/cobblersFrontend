@@ -19,4 +19,12 @@ export const COLOPHON_ORG_URL = 'https://github.com/itu-cobblers'
 
 export const COLOPHON_LINK_LABEL = 'github.com/itu-cobblers'
 
-export const COLOPHON_CREDIT = 'itu-cobblers 2026'
+export const COLOPHON_CREDIT_PREFIX = 'Built by the cobblers —'
+
+export const COLOPHON_CREDIT_SUFFIX = '© 2026. All rights reserved.'
+
+export const COLOPHON_TEAM: { name: string; url: string }[] = [
+  { name: 'Ai Ting Lee', url: 'https://github.com/AitingLee' },
+  { name: 'Ymir Arnarson', url: 'https://github.com/ymarymar' },
+  { name: 'Amanda Cunha', url: 'https://github.com/alimacunha' },
+]

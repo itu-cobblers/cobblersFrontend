@@ -23,3 +23,10 @@ export const SIZE_CLASSES = {
   m: 'h-6 w-6 text-sm',
   l: 'h-8 w-8 text-base',
 }
+
+/** Font size for the optional `label` text — follows `size` instead of a fixed `text-sm`, so a small badge's label is small too. */
+export const LABEL_TEXT_CLASSES = {
+  s: 'text-[12px]',
+  m: 'text-sm',
+  l: 'text-base',
+}

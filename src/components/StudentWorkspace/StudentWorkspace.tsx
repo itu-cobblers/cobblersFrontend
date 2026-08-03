@@ -60,7 +60,8 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
         assignmentSet: props.assignmentSet,
         submissionHistory: props.submissionHistory,
         teacherFocusedAssignmentId: props.teacherFocusedAssignmentId,
-        getAssignment: assignmentData.getAssignment
+        getAssignment: assignmentData.getAssignment,
+        sessionCode: props.sessionCode
     })
 
     const activeAssignment = progress.activeAssignment

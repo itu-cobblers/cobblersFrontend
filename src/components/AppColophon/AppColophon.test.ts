@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { createElement } from 'react'
 import { render, screen } from '@testing-library/react'
 import AppColophon from './AppColophon'
+import { COLOPHON_TEAM } from './AppColophon.constants'
 
 describe('AppColophon', () => {
   it('links to the project org', () => {
@@ -18,5 +19,15 @@ describe('AppColophon', () => {
     const link = screen.getByRole('link', { name: 'github.com/itu-cobblers' })
     expect(link).toHaveAttribute('target', '_blank')
     expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+  })
+
+  it('links each team member to their own GitHub, safely, in a new tab', () => {
+    render(createElement(AppColophon))
+    COLOPHON_TEAM.forEach((member) => {
+      const link = screen.getByRole('link', { name: member.name })
+      expect(link).toHaveAttribute('href', member.url)
+      expect(link).toHaveAttribute('target', '_blank')
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer')
+    })
   })
 })

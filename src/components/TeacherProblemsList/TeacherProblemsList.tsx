@@ -1,7 +1,7 @@
 import { type ChangeEvent } from 'react'
 import classNames from 'classnames'
 import { Icon } from '@components/Icon'
-import { formatTimerEnds, ProblemsListRow } from '@components/ProblemsList'
+import { formatTimerEnds, ProblemsListRow, useIsTimerExpired } from '@components/ProblemsList'
 
 import type { TeacherProblemsListProps, TeacherProblemItem } from './TeacherProblemsList.types'
 import {
@@ -10,7 +10,6 @@ import {
   LIST_CLASS_CLOSED,
   LIST_HEADER_CLASS,
   LIST_HEADER_RIGHT_CLASS,
-  LIST_COUNT_CLASS,
   LIST_TOGGLE_CLASS,
   LIST_ITEMS_CLASS,
   LIST_CARD_BODY_CLASS,
@@ -42,17 +41,18 @@ export default function TeacherProblemsList({
   timerError,
 }: TeacherProblemsListProps) {
 
+  const isTimerExpired = useIsTimerExpired(timerEndsAt)
+
   function handleTimerMinutesInput(event: ChangeEvent<HTMLInputElement>) {
     onTimerMinutesChange(Number(event.target.value))
   }
 
   return (
     <aside className={classNames(LIST_CLASS_BASE, isOpen ? LIST_CLASS_OPEN : LIST_CLASS_CLOSED)}>
-      {/* Header — no rounding/border of its own, same flat-top treatment as the student rail's tab row above LIST_CARD_BODY_CLASS. */}
+      {/* Same markup/classes as `ProblemsList`'s header — the two rails' top rows must not drift apart. */}
       <div className={LIST_HEADER_CLASS}>
         {isOpen && 'Assignments'}
         <span className={LIST_HEADER_RIGHT_CLASS}>
-          {isOpen && <span className={LIST_COUNT_CLASS}>{items.length}</span>}
           <button
             type="button"
             onClick={onToggleOpen}
@@ -88,7 +88,7 @@ export default function TeacherProblemsList({
                 <Icon name="history" />
                 Timer
               </span>
-              {timerEndsAt && <span className={TIMER_ENDS_BADGE_CLASS}>{formatTimerEnds(timerEndsAt)}</span>}
+              {timerEndsAt && !isTimerExpired && <span className={TIMER_ENDS_BADGE_CLASS}>{formatTimerEnds(timerEndsAt)}</span>}
             </div>
             <div className={TIMER_INPUT_ROW_CLASS}>
               <input
