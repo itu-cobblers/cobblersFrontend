@@ -31,4 +31,6 @@ export const ROSTER_ITEM_LEFT_CLASS = 'flex min-w-0 flex-1 items-center gap-2'
 /** `status-success`, not a raw palette green — the rest of the app reads pass state from tokens. */
 export const ROSTER_ONLINE_DOT_CLASS = 'inline-block h-2 w-2 shrink-0 rounded-full bg-status-success'
 
+export const ROSTER_OFFLINE_DOT_CLASS = 'inline-block h-2 w-2 shrink-0 rounded-full bg-muted-foreground/40'
+
 export const ROSTER_ITEM_NAME_CLASS = 'truncate text-[13px] leading-tight text-foreground'

@@ -5,7 +5,7 @@ import { getStudentId, getDisplayName } from '@lib/identity'
 import { upsertStudent } from '@/api/studentApi.ts'
 import { fetchSoloAssignmentSet, fetchAssignmentSet } from '@/api/assignmentSetApi.ts'
 import { fetchSubmissionHistory } from '@/api/submissionApi.ts'
-import { joinSession } from '@/api/sessionHub.ts'
+import { joinSession, leaveSession } from '@/api/sessionHub.ts'
 import {
   getPersistedStudentSession,
   setPersistedStudentSession,
@@ -38,6 +38,7 @@ export function useStudentApp() {
     setCode('')
     setTeacherFocusedAssignmentId(null)
     setTimerEndsAt(null)
+    leaveSession().catch((err: unknown) => console.warn('[room] leaveSession failed:', err))
   }
 
   function connectToRoom(roomCode: string, displayName: string) {

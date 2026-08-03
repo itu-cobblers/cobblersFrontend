@@ -42,6 +42,18 @@ export async function focusAssignment(code: string, assignmentId: number): Promi
   await conn.invoke('FocusAssignment', code, assignmentId)
 }
 
+/**
+ * Closes the shared hub connection so the server's OnDisconnectedAsync fires
+ * right away, instead of leaving the student's connection (and therefore
+ * their spot in the live roster) dangling until the tab itself closes.
+ */
+export async function leaveSession(): Promise<void> {
+  if (!connection) return
+  const conn = connection
+  connection = null
+  await conn.stop()
+}
+
 export async function observeSession(code: string, callbacks: TeacherCallbacks = {}): Promise<void> {
   const conn = await getConnection()
 

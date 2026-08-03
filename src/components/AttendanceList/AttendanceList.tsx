@@ -15,6 +15,7 @@ import {
   ROSTER_ITEM_IDLE_CLASS,
   ROSTER_ITEM_LEFT_CLASS,
   ROSTER_ONLINE_DOT_CLASS,
+  ROSTER_OFFLINE_DOT_CLASS,
   ROSTER_ITEM_NAME_CLASS,
 } from './AttendanceList.constants'
 
@@ -43,19 +44,22 @@ export default function AttendanceList({
           <li className={ROSTER_EMPTY_CLASS}>No active students in room.</li>
         ) : (
           students.map((student: AttendanceStudent) => {
-            const isActive = student.studentId === activeStudentId
+            const isSelected = student.studentId === activeStudentId
             return (
               <li key={student.studentId}>
                 <button
                   type="button"
-                  onClick={() => onSelectStudent(isActive ? null : student.studentId)}
+                  onClick={() => onSelectStudent(isSelected ? null : student.studentId)}
                   className={classNames(
                     ROSTER_ITEM_BASE_CLASS,
-                    isActive ? ROSTER_ITEM_ACTIVE_CLASS : ROSTER_ITEM_IDLE_CLASS,
+                    isSelected ? ROSTER_ITEM_ACTIVE_CLASS : ROSTER_ITEM_IDLE_CLASS,
                   )}
                 >
                   <div className={ROSTER_ITEM_LEFT_CLASS}>
-                    <span className={ROSTER_ONLINE_DOT_CLASS} title="Active student" />
+                    <span
+                      className={student.isActive ? ROSTER_ONLINE_DOT_CLASS : ROSTER_OFFLINE_DOT_CLASS}
+                      title={student.isActive ? 'Online' : 'Offline'}
+                    />
                     <span className={ROSTER_ITEM_NAME_CLASS}>{student.displayName}</span>
                   </div>
 
