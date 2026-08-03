@@ -8,7 +8,7 @@ import {
   TEACHER_SECTION_LABEL
 } from "@views/TeacherDashboard/TeacherDashboard.constants.ts";
 import {useState} from "react";
-import {Spinner, AppHeader, TimerMenu, RoomCodeModal, PortalShell} from "@components";
+import {Spinner, AppHeader, TimerMenu, RoomCodeModal, PortalShell, AppColophon} from "@components";
 
 export default function TeacherDashboard() {
   const assignmentData = useAssignmentData()
@@ -63,6 +63,8 @@ export default function TeacherDashboard() {
             sessionCode={session.sessionCode}
             assignmentData={assignmentData}
         />
+
+        <AppColophon />
       </div>
   )
 }

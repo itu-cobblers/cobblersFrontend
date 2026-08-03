@@ -109,3 +109,5 @@ export type { RoomCodeModalProps } from './RoomCodeModal'
 
 export { PortalShell } from './PortalShell'
 export type { PortalShellProps } from './PortalShell'
+
+export { AppColophon } from './AppColophon'

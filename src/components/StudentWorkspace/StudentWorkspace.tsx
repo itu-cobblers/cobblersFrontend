@@ -3,6 +3,7 @@ import type { AssignmentPanelTab } from '@components/AssignmentPanel/AssignmentP
 import { getSubmissionNumber } from '@components/SubmissionBanner'
 import {
     AppHeader,
+    AppColophon,
     SubmissionBanner,
     ProblemsList,
     TeacherFollowBanner,
@@ -281,6 +282,8 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                     </div>
                 </div>
             </div>
+
+            <AppColophon />
         </div>
     )
 }

@@ -1,5 +1,6 @@
 import { AppHeader } from '@components/AppHeader'
 import { AppFooter } from '@components/AppFooter'
+import { AppColophon } from '@components/AppColophon'
 import type { PortalShellProps } from './PortalShell.types'
 import {
   PORTAL_SCREEN_CLASS,
@@ -28,6 +29,7 @@ export default function PortalShell({ children }: PortalShellProps) {
       </section>
 
       <AppFooter />
+      <AppColophon />
     </main>
   )
 }
