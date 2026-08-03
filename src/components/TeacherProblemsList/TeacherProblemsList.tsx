@@ -1,6 +1,8 @@
+import { type ChangeEvent } from 'react'
 import classNames from 'classnames'
 import { StatusBadge } from '@components/StatusBadge'
 import { Icon } from '@components/Icon'
+import { formatTimerEnds } from '@components/ProblemsList'
 
 import type { TeacherProblemsListProps, TeacherProblemItem } from './TeacherProblemsList.types'
 import {
@@ -28,9 +30,17 @@ import {
   ITEM_LIVE_BADGE_CLASS,
   ITEM_NUMBER_BADGE_CLASS,
   TEACHER_LIST_CARD_CLASS,
+  TIMER_SECTION_CLASS,
+  TIMER_SECTION_COLLAPSED_CLASS,
+  TIMER_LABEL_ROW_CLASS,
+  TIMER_LABEL_CLASS,
+  TIMER_ENDS_BADGE_CLASS,
+  TIMER_INPUT_ROW_CLASS,
+  TIMER_INPUT_CLASS,
+  TIMER_UNIT_LABEL_CLASS,
+  TIMER_START_CLASS,
+  TIMER_ERROR_CLASS,
 } from './TeacherProblemsList.constants'
-
-
 
 export default function TeacherProblemsList({
   items,
@@ -39,7 +49,17 @@ export default function TeacherProblemsList({
   teacherFocusId,
   isOpen,
   onToggleOpen,
+  timerMinutes,
+  onTimerMinutesChange,
+  onStartTimer,
+  isStartingTimer = false,
+  timerEndsAt,
+  timerError,
 }: TeacherProblemsListProps) {
+
+  function handleTimerMinutesInput(event: ChangeEvent<HTMLInputElement>) {
+    onTimerMinutesChange(Number(event.target.value))
+  }
 
   return (
     <aside className={classNames(LIST_CLASS_BASE, TEACHER_LIST_CARD_CLASS, isOpen ? LIST_CLASS_OPEN : LIST_CLASS_CLOSED)}>
@@ -105,6 +125,42 @@ export default function TeacherProblemsList({
         })}
       </ul>
 
+      {isOpen ? (
+        <div className={TIMER_SECTION_CLASS}>
+          <div className={TIMER_LABEL_ROW_CLASS}>
+            <span className={TIMER_LABEL_CLASS}>
+              <Icon name="history" />
+              Timer
+            </span>
+            {timerEndsAt && <span className={TIMER_ENDS_BADGE_CLASS}>{formatTimerEnds(timerEndsAt)}</span>}
+          </div>
+          <div className={TIMER_INPUT_ROW_CLASS}>
+            <input
+              type="number"
+              min={1}
+              max={120}
+              value={timerMinutes}
+              onChange={handleTimerMinutesInput}
+              aria-label="Timer minutes"
+              className={TIMER_INPUT_CLASS}
+            />
+            <span className={TIMER_UNIT_LABEL_CLASS}>min</span>
+            <button
+              type="button"
+              onClick={onStartTimer}
+              disabled={isStartingTimer}
+              className={TIMER_START_CLASS}
+            >
+              {isStartingTimer ? 'Starting…' : 'Start'}
+            </button>
+          </div>
+          {timerError && <p className={TIMER_ERROR_CLASS}>{timerError}</p>}
+        </div>
+      ) : (
+        <div className={TIMER_SECTION_COLLAPSED_CLASS} title={timerEndsAt ? formatTimerEnds(timerEndsAt) : 'Timer'}>
+          <Icon name="history" />
+        </div>
+      )}
     </aside>
   )
 }

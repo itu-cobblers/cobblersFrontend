@@ -121,7 +121,7 @@ export default function ProblemsList({
                   className={classNames(
                     LIST_ITEM_BASE_CLASS,
                     isActive ? LIST_ITEM_ACTIVE_CLASS : LIST_ITEM_IDLE_CLASS,
-                    { '--foreground/60': isTeacherFocus },
+                    { 'bg-foreground/60': isTeacherFocus },
                   )}
                 >
                   <StatusBadge status={item.status} size="s" />

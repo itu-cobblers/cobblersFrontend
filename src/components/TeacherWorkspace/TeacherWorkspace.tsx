@@ -25,14 +25,15 @@ import type { TeacherWorkspaceProps } from './TeacherWorkspace.types'
 import { getEditorContent, getTabFiles } from "@components/TeacherWorkspace/TeacherWorkspace.utils.ts";
 import {TeacherAssignmentFooter} from "@components/TeacherAssignmentFooter";
 
-export default function TeacherWorkspace({ sessionCode, assignmentData }: TeacherWorkspaceProps) {
+export default function TeacherWorkspace({ sessionCode, assignmentData, session }: TeacherWorkspaceProps) {
     const [isRailOpen, setIsRailOpen] = useState(true)
 
-    const { attendanceList, allSubmissions, addSubmission } = useTeacherHydration(sessionCode)
+    const { attendanceList, allSubmissions, addSubmission, mergeLiveStudents } = useTeacherHydration(sessionCode)
 
     const { liveStudentIds, focusedAssignmentId, handleFocusAssignment } = useTeacherLiveSession({
         sessionCode,
-        onSubmissionRecorded: addSubmission
+        onSubmissionRecorded: addSubmission,
+        onLiveStudents: mergeLiveStudents
     })
 
     const {
@@ -107,6 +108,12 @@ export default function TeacherWorkspace({ sessionCode, assignmentData }: Teache
                 teacherFocusId={focusedAssignmentId}
                 isOpen={isRailOpen}
                 onToggleOpen={() => setIsRailOpen(!isRailOpen)}
+                timerMinutes={session.minutes}
+                onTimerMinutesChange={session.setMinutes}
+                onStartTimer={session.handleStartTimer}
+                isStartingTimer={session.isStartingTimer}
+                timerEndsAt={session.timerEndsAt}
+                timerError={session.timerError}
             />
 
             <AttendanceList

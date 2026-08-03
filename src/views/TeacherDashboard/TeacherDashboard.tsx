@@ -8,7 +8,7 @@ import {
   TEACHER_SECTION_LABEL
 } from "@views/TeacherDashboard/TeacherDashboard.constants.ts";
 import {useState} from "react";
-import {Spinner, AppHeader, TimerMenu, RoomCodeModal, PortalShell, AppColophon} from "@components";
+import {Spinner, AppHeader, RoomCodeModal, PortalShell, AppColophon} from "@components";
 
 export default function TeacherDashboard() {
   const assignmentData = useAssignmentData()
@@ -33,18 +33,6 @@ export default function TeacherDashboard() {
         <AppHeader
             variant="bar"
             section={TEACHER_SECTION_LABEL}
-            actions={
-              session.sessionCode ? (
-                  <TimerMenu
-                      minutes={session.minutes}
-                      onMinutesChange={session.setMinutes}
-                      onStartTimer={session.handleStartTimer}
-                      isStartingTimer={session.isStartingTimer}
-                      timerEndsAt={session.timerEndsAt}
-                      timerError={session.timerError}
-                  />
-              ) : undefined
-            }
             sessionLabel={session.sessionCode ? `Room: ${session.sessionCode}` : undefined}
             onSessionLabelClick={session.sessionCode ? () => setIsRoomCodeOpen(true) : undefined}
             onLeaveSession={session.sessionCode ? session.handleEndSession : undefined}
@@ -62,6 +50,7 @@ export default function TeacherDashboard() {
         <TeacherWorkspace
             sessionCode={session.sessionCode}
             assignmentData={assignmentData}
+            session={session}
         />
 
         <AppColophon />

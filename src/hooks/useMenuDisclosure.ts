@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from 'react'
  * is expected to have: clicking elsewhere, and Escape. Without those the panel
  * survives a click on the editor and hangs over the content.
  *
- * Shared by RunMenu and TimerMenu — spread the returned ref on the element that
+ * Shared by RunMenu — spread the returned ref on the element that
  * wraps both the trigger and the panel, or the outside-click check will treat
  * the panel itself as outside.
  */

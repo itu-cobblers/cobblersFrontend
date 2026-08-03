@@ -8,23 +8,28 @@ export const ROOM_CODE_LABEL_CLASS = 'text-[10px] font-bold uppercase tracking-[
 
 export const ROOM_CODE_VALUE_CLASS = 'font-mono text-3xl font-extrabold tracking-widest text-accent'
 
-export const TIMER_SECTION_CLASS = 'flex flex-col border-b border-border bg-card'
+// Timer, as a fixed action section at the foot of the rail — always visible,
+// not a menu the teacher has to open. Collapses to a bare icon with the list.
+export const TIMER_SECTION_CLASS = 'mt-auto flex flex-col gap-2 border-t border-border bg-card p-3'
 
-export const TIMER_TOGGLE_CLASS =
-  'flex items-center justify-between px-4 py-2.5 text-xs font-semibold text-foreground/80 hover:bg-black/5'
+export const TIMER_SECTION_COLLAPSED_CLASS = 'mt-auto flex items-center justify-center border-t border-border bg-card py-3'
 
-export const TIMER_TOGGLE_LABEL_CLASS = 'flex items-center gap-1.5'
+export const TIMER_LABEL_ROW_CLASS = 'flex items-center justify-between gap-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground'
+
+export const TIMER_LABEL_CLASS = 'flex items-center gap-1.5'
 
 export const TIMER_ENDS_BADGE_CLASS =
-  'ml-1 inline-flex items-center rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-medium text-emerald-400'
-
-export const TIMER_BODY_CLASS = 'flex flex-col gap-2.5 px-4 pb-3 pt-1'
+  'inline-flex items-center rounded bg-emerald-500/20 px-1.5 py-0.5 text-[10px] font-medium normal-case tracking-normal text-emerald-600'
 
 export const TIMER_INPUT_ROW_CLASS = 'flex items-center gap-2'
 
-export const TIMER_INPUT_CLASS = 'w-20'
+export const TIMER_INPUT_CLASS =
+  'h-8 w-16 rounded-md border border-input bg-background px-2 text-sm text-foreground outline-none focus:ring-1 focus:ring-ring'
 
 export const TIMER_UNIT_LABEL_CLASS = 'text-xs text-muted-foreground'
+
+export const TIMER_START_CLASS =
+  'ml-auto flex h-8 shrink-0 cursor-pointer items-center rounded-md bg-foreground px-3 text-xs font-semibold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50'
 
 export const TIMER_ERROR_CLASS = 'text-xs text-destructive'
 

@@ -23,5 +23,11 @@ export interface TeacherProblemsListProps {
   isOpen: boolean
   onToggleOpen: () => void
   // Timer controls
-  // Session end
+  timerMinutes: number
+  onTimerMinutesChange: (minutes: number) => void
+  onStartTimer: () => void
+  isStartingTimer?: boolean
+  /** ISO string while a timer is running; null when none is set. */
+  timerEndsAt?: string | null
+  timerError?: string | null
 }
