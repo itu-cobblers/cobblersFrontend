@@ -2,16 +2,16 @@ import { useEffect, useState } from 'react'
 import type { AssignmentSet, SubmissionHistoryItem } from '@types'
 import type { JoinMode, ToastTone } from '@components'
 import { getStudentId, getDisplayName } from '@lib/identity'
-import { upsertStudent } from '@lib/studentApi'
-import { fetchSoloAssignmentSet, fetchAssignmentSet } from '@lib/assignmentSetApi'
-import { fetchSubmissionHistory } from '@lib/submissionApi'
-import { joinSession } from '@lib/sessionHub'
+import { upsertStudent } from '@/api/studentApi.ts'
+import { fetchSoloAssignmentSet, fetchAssignmentSet } from '@/api/assignmentSetApi.ts'
+import { fetchSubmissionHistory } from '@/api/submissionApi.ts'
+import { joinSession } from '@/api/sessionHub.ts'
 import {
   getPersistedStudentSession,
   setPersistedStudentSession,
   clearPersistedStudentSession,
 } from '@lib/studentSession'
-import { getSession } from "@lib/sessionApi"
+import { getSession } from "@/api/sessionApi.ts"
 
 interface ToastState {
   message: string

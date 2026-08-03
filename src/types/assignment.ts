@@ -1,30 +1,8 @@
-/**
- * Assignment domain types — the "assignment boundary" contract (see src/lib/assignmentSetApi.ts).
- *
- * Assignments are a discriminated union on `kind`:
- *   - 'code'    — the student writes/runs Java; graded by check() on the run result.
- *   - 'predict' — the student reads a read-only snippet and predicts its output.
- *   - 'project' — a multi-file mini-project uploaded from VS Code (scaffolded grading).
- *
- * The IDE core (stepper, progress) only ever touches the shared base fields;
- * only rendering + grading branch on `kind`.
- */
+import type {SourceFileDto} from "@types";
 
 export type AssignmentKind = 'code' | 'predict' | 'project'
-
-/**
- * One block of teaching content shown above the task in the assignment panel.
- * Kept structured (no markdown) so code examples render as real code cards.
- */
-export type LessonBlock =
-  | { kind: 'text'; text: string }
-  | { kind: 'code'; code: string }
-
-/** One Java source file (name + contents) for multi-file execution. */
-export interface SourceFile {
-  name: string
-  content: string
-}
+export type LessonBlock = { kind: 'text'; text: string } | { kind: 'code'; code: string }
+export type SourceFile = SourceFileDto
 
 interface AssignmentBase {
   /** Server-assigned assignment id — used as the active/completed key. */

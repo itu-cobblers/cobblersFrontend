@@ -1,19 +1,16 @@
-import type { LessonBlock, ExecuteResult } from '@types'
+import type { LessonBlock } from '@types'
 import type { AssignmentPanelTab } from '@components/AssignmentPanel/AssignmentPanel.types'
 import type { ProjectIdentity } from '@lib/projectIdentity'
 
 export interface TeacherSubmissionItem {
-  subId: string
-  studentId: string
-  studentName: string
-  assignmentId: number
-  assignmentTitle: string
-  passed: boolean
-  submittedAt: string
-  code: string
-  result?: ExecuteResult | null
+  subId: string;
+  studentId: string;
+  studentName: string;
+  assignmentId: number;
+  assignmentTitle: string;
+  passed: boolean | null;
+  submittedAt: string;
 }
-
 export interface TeacherAssignmentPanelProps {
   activeTab: AssignmentPanelTab
   onTabChange: (tab: AssignmentPanelTab) => void
