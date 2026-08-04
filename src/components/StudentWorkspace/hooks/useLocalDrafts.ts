@@ -48,18 +48,18 @@ export function useLocalDrafts(allAssignments: Assignment[]) {
 
     // Backfill drafts for assignments missing from a previously-saved blob
     // (e.g. a new assignment set, or one added after this hook's first mount).
-    useEffect(() => {
-        const missingCode = allAssignments.filter(a => a.kind === 'code' && !a.starterFiles && !(a.id in drafts.code))
-        const missingMultiFiles = allAssignments.filter(a => a.kind === 'code' && a.starterFiles && !(a.id in drafts.multiFiles))
-
-        if (missingCode.length === 0 && missingMultiFiles.length === 0) return
-
+    // Adjusted during render, not in an effect: setDrafts here is a bail-out
+    // that makes React re-render immediately with the missing ids filled in,
+    // so this condition is false on the very next pass — no cascading renders.
+    const missingCode = allAssignments.filter(a => a.kind === 'code' && !a.starterFiles && !(a.id in drafts.code))
+    const missingMultiFiles = allAssignments.filter(a => a.kind === 'code' && a.starterFiles && !(a.id in drafts.multiFiles))
+    if (missingCode.length > 0 || missingMultiFiles.length > 0) {
         setDrafts(prev => ({
             ...prev,
             code: { ...prev.code, ...initialCode(missingCode) },
             multiFiles: { ...prev.multiFiles, ...initialMultiFiles(missingMultiFiles) }
         }))
-    }, [allAssignments, drafts.code, drafts.multiFiles])
+    }
 
     const updateCode = (id: number, value: string) => {
         setDrafts((prev) => ({ ...prev, code: { ...prev.code, [id]: value } }))

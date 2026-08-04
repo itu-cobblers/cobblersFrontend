@@ -113,6 +113,14 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions, viewingS
 
     const editorPath = `assignment-${assignmentId}-${modeString}-${currentIndex}-${currentFileName}`
 
+    // Local class names come from starterFiles' filenames, not by parsing
+    // `class` declarations — the write gate below guarantees a file's
+    // declared class always matches its filename, so the filename is the
+    // cheaper, always-correct source of truth.
+    const localClassNames = activeAssignment.kind === 'code' && activeAssignment.starterFiles
+        ? activeAssignment.starterFiles.map(f => f.name.replace(/\.java$/i, ''))
+        : []
+
     let writeKind: WriteKind = 'none'
     if (!isVisible && !isHistoryView && activeAssignment.kind !== 'predict') {
         if (activeAssignment.kind === 'project') writeKind = 'project'
@@ -175,6 +183,7 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions, viewingS
         editorValue: activeContent,
         editorPath,
         editorRemountKey: editorPath,
+        localClassNames,
         isReadOnly:
             activeAssignment.kind === 'predict' ||
             isVisible ||
