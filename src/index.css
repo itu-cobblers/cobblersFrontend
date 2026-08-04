@@ -42,6 +42,15 @@
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-divider: var(--divider);
+  --color-wash-hover: var(--wash-hover);
+  --color-wash-subtle: var(--wash-subtle);
+  --color-wash-badge: var(--wash-badge);
+  --color-wash-active: var(--wash-active);
+  --color-wash-panel: var(--wash-panel);
+  --color-wash-strong: var(--wash-strong);
+  --color-wash-heavy: var(--wash-heavy);
+  --color-wash-line: var(--wash-line);
+  --color-scrim: var(--scrim);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-terminal: var(--terminal);
@@ -103,6 +112,24 @@
      panel, editor, terminal. Deliberately NOT --border: that one is black and
      belongs to buttons and inputs. */
   --divider: oklch(0.88 0 0);
+
+  /* ── Wash scale ───────────────────────────────────────────────────────────
+     Translucent neutral over whatever surface is beneath. Black in light mode,
+     white in dark — which is the whole point: `bg-black/6` on a near-black
+     canvas is invisible, and that exact bug has already shipped here twice.
+     Every literal `bg-black/N` in the app maps to one of these.
+     The light values are byte-identical to the literals they replaced. */
+  --wash-hover: oklch(0 0 0 / 3%);    /* row hover, field fill */
+  --wash-subtle: oklch(0 0 0 / 4%);   /* contextual strip */
+  --wash-badge: oklch(0 0 0 / 5%);    /* kind badge, icon-button hover */
+  --wash-active: oklch(0 0 0 / 6%);   /* selected row */
+  --wash-panel: oklch(0 0 0 / 10%);   /* code blocks, textarea, dropzone */
+  --wash-strong: oklch(0 0 0 / 20%);  /* file chip, dropzone hover */
+  --wash-heavy: oklch(0 0 0 / 30%);   /* untried dot */
+  --wash-line: oklch(0 0 0 / 30%);    /* hover/focus edge on a washed control */
+
+  /* Dims the page behind a dialog. Dark in both themes — it is shadow, not surface. */
+  --scrim: oklch(0 0 0 / 50%);
   --input: oklch(0 0 0); /* turned this black YA*/
   --ring: oklch(0 0 0); /* turned this black YA*/
   /* Dark "glass" zone — Monaco stays vs-dark, so the editor/output area keeps
@@ -116,52 +143,77 @@
 }
 
 .dark {
-  /* Tells the browser to render native UI (scrollbars, form controls, and —
-     inherited into same-origin iframes — the built-in PDF viewer's own
-     chrome) with its dark palette instead of the light default, so plain
-     `overflow-y-auto` regions and the embedded project-brief PDF match the
-     app's always-dark theme instead of showing a jarring light scrollbar. */
+  /* ── VS Code "Dark 2026" (default since 1.113) ────────────────────────────
+     Surfaces and accents are the theme's own hex values so they can be checked
+     against the source, rather than approximated in oklch. Washes stay in
+     oklch because they're relative to whatever they sit on, not sourced.
+
+     The hierarchy is the theme's: the editor is the *darkest* surface, with
+     the surrounding chrome sitting above it. That's the opposite of most dark
+     UIs and it's deliberate — it makes the code the focus. */
   color-scheme: dark;
-  --background: oklch(0.17 0.008 260);
-  --foreground: oklch(0.9 0.005 260);
-  --card: oklch(0.21 0.01 260);
-  --card-foreground: oklch(0.9 0.005 260);
-  --primary: oklch(0.62 0.11 245);
-  --primary-foreground: oklch(0.98 0 0);
-  --secondary: oklch(0.3 0.012 260);
-  --secondary-foreground: oklch(0.9 0.005 260);
-  --muted: oklch(0.24 0.008 260);
-  --muted-foreground: oklch(0.68 0.01 260);
-  --accent: oklch(0.60 0.0 0);
-  --accent-foreground: oklch(1 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 8%);
+
+  --background: #191a1b;            /* sidebar — the app's page colour */
+  --foreground: #e6edf3;
+  --card: #1f2021;                  /* panels sit one step above the page */
+  --card-foreground: #e6edf3;
+  --popover: #1f2021;
+  --popover-foreground: #e6edf3;
+
+  /* The CTA inverts rather than recolours: in light it's the darkest thing on
+     the page, so in dark it's the lightest. */
+  --primary: #e6edf3;
+  --primary-foreground: #121314;
+
+  --secondary: #2a2c2e;
+  --secondary-foreground: #e6edf3;
+  --muted: #232527;
+  --muted-foreground: #9198a1;
+  --accent: #d2a8ff;                /* function purple */
+  --accent-foreground: #121314;
+  --destructive: #ff7b72;           /* structural red */
+  --destructive-foreground: #121314;
+
+  --border: oklch(1 0 0 / 12%);
   --divider: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.551 0.027 264.364);
-  --terminal: oklch(0.16 0.012 260);
-  --terminal-line: oklch(1 0 0 / 7%);
-  --terminal-ink: oklch(0.88 0.005 260);
-  --terminal-muted: oklch(0.56 0.02 260);
-  --term-ok: oklch(0.72 0.16 150);
-  --term-err: oklch(0.66 0.2 25);
+  --input: oklch(1 0 0 / 14%);
+  --ring: #d2a8ff;
 
-  /* Compile Error & Failed 狀態色 (Dark Mode) */
-  --status-error: oklch(0.66 0.2 25);
-  --status-error-bg: oklch(0.25 0.08 25);
-  --status-error-text: oklch(0.85 0.12 25);
+  /* Wash scale — white here, black in `:root`. Nudged slightly heavier than
+     their light counterparts: a white film over a dark surface reads weaker
+     than the same percentage of black over a light one. */
+  --wash-hover: oklch(1 0 0 / 4%);
+  --wash-subtle: oklch(1 0 0 / 5%);
+  --wash-badge: oklch(1 0 0 / 7%);
+  --wash-active: oklch(1 0 0 / 9%);
+  --wash-panel: oklch(1 0 0 / 6%);
+  --wash-strong: oklch(1 0 0 / 12%);
+  --wash-heavy: oklch(1 0 0 / 22%);
+  --wash-line: oklch(1 0 0 / 30%);
+  --scrim: oklch(0 0 0 / 60%);      /* still shadow, just deeper on a dark page */
 
-  /* Success & Passed 狀態色 (Dark Mode) */
-  --status-success: oklch(0.72 0.16 150);
-  --status-success-bg: oklch(0.25 0.08 150);
-  --status-success-text: oklch(0.85 0.12 150);
+  /* The code zone. `--terminal` is the editor background — the darkest
+     surface in the theme, per the note above. */
+  --terminal: #121314;
+  --terminal-line: oklch(1 0 0 / 8%);
+  --terminal-ink: #e6edf3;
+  --terminal-muted: #9198a1;
+  --term-ok: #7ee787;
+  --term-err: #ff7b72;
 
-  /* Warning 狀態色 (Dark Mode) */
-  --status-warning: oklch(0.77 0.17 74);
-  --status-warning-bg: oklch(0.3 0.06 74);
-  --status-warning-text: oklch(0.85 0.14 74);
+  --status-error: #ff7b72;          /* structural red */
+  --status-error-bg: #2b1b1a;
+  --status-error-text: #ffb3ae;
+
+  --status-success: #7ee787;        /* JSX/tag green */
+  --status-success-bg: #16251a;
+  --status-success-text: #a9f2ae;
+
+  --status-warning: #ffa657;        /* parameter orange */
+  --status-warning-bg: #2b2117;
+  --status-warning-text: #ffc894;
 }
+
 
 @layer base {
   * {

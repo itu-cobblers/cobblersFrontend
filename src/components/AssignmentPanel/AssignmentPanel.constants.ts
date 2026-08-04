@@ -24,7 +24,7 @@ export const PANEL_TITLE_ROW_CLASS = 'mb-3 flex items-center justify-between gap
 export const PANEL_LESSON_TEXT_CLASS = 'mb-3 whitespace-pre-wrap text-[15px] leading-relaxed text-muted-foreground'
 
 export const PANEL_LESSON_CODE_CLASS =
-  'mb-3 overflow-x-auto bg-black/10 px-3.5 py-3 font-mono text-[12px] leading-relaxed whitespace-pre text-foreground/90'
+  'mb-3 overflow-x-auto bg-wash-panel px-3.5 py-3 font-mono text-[12px] leading-relaxed whitespace-pre text-foreground/90'
 
 export const PANEL_TASK_LABEL_CLASS = 'mb-1.5 mt-4 text-[13px] font-semibold uppercase tracking-[0.8px] text-black'
 
@@ -37,7 +37,7 @@ export const PANEL_BODY_CLASS = 'mt-3 whitespace-pre-wrap text-[15px] leading-re
 // `TeacherAssignmentPanel` so both look identical.
 
 export const PANEL_HINT_CLASS =
-  'mt-4 bg-black/10 px-2.5 py-2 text-[12px] leading-relaxed text-foreground'
+  'mt-4 bg-wash-panel px-2.5 py-2 text-[12px] leading-relaxed text-foreground'
 
 export const PANEL_HINT_TOGGLE_CLASS =
   'flex w-full items-center justify-between gap-2 text-left font-medium text-foreground'

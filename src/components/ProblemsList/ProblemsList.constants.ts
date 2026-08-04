@@ -26,7 +26,7 @@ export const LIST_HEADER_RIGHT_CLASS = 'ml-auto flex items-center gap-1.5'
 
 export const LIST_COUNT_CLASS = 'rounded bg-muted px-1.5 py-0.5 text-[10px] normal-case tracking-normal'
 
-export const LIST_TOGGLE_CLASS = 'rounded p-1 text-muted-foreground normal-case tracking-normal transition-colors hover:bg-black/5'
+export const LIST_TOGGLE_CLASS = 'rounded p-1 text-muted-foreground normal-case tracking-normal transition-colors hover:bg-wash-badge'
 
 /** Avoids the word "problems", which means nothing to a beginner. */
 export const LIST_TOGGLE_LABEL = {
@@ -43,14 +43,14 @@ export const LIST_ITEM_BASE_CLASS =
 
 export const LIST_ITEM_ACTIVE_CLASS = 'bg-muted text-foreground'
 
-export const LIST_ITEM_IDLE_CLASS = 'text-muted-foreground hover:bg-black/[0.03] hover:text-foreground'
+export const LIST_ITEM_IDLE_CLASS = 'text-muted-foreground hover:bg-wash-hover hover:text-foreground'
 
 export const LIST_ITEM_LIVE_BORDER_CLASS = 'border-2 border-primary'
 
 export const LIST_ITEM_META_CLASS = 'flex items-center gap-1.5 text-[11px] font-mono text-foreground/40'
 
 export const LIST_ITEM_KIND_BADGE_CLASS =
-  'inline-flex items-center gap-1 rounded bg-black/5 px-1.5 py-[1px] text-[9px] uppercase tracking-widest'
+  'inline-flex items-center gap-1 rounded bg-wash-badge px-1.5 py-[1px] text-[9px] uppercase tracking-widest'
 
 export const LIST_ITEM_TITLE_CLASS = 'mt-0.5 truncate text-[13px] leading-tight'
 
@@ -69,7 +69,7 @@ export const LIST_HISTORY_VIEW_TOGGLE_CLASS =
 /** Muted fill marks it "on", same convention as `LIST_ITEM_ACTIVE_CLASS`. */
 export const LIST_HISTORY_VIEW_TOGGLE_ACTIVE_CLASS = 'bg-muted text-foreground'
 
-export const LIST_HISTORY_VIEW_TOGGLE_IDLE_CLASS = 'text-muted-foreground hover:bg-black/5 hover:text-foreground'
+export const LIST_HISTORY_VIEW_TOGGLE_IDLE_CLASS = 'text-muted-foreground hover:bg-wash-badge hover:text-foreground'
 
 /** Same gray "pill" as the teacher rail's own countdown badge. */
 export const LIST_TIMER_BADGE_CLASS =
@@ -86,7 +86,7 @@ export const LIST_STATUS_DOT_CLASS: Record<string, string> = {
 export const LIST_LEGEND_DOT_CLASS: Record<string, string> = {
   passed: 'inline-block h-1.5 w-1.5 rounded-full bg-status-success',
   tried: 'inline-block h-1.5 w-1.5 rounded-full bg-status-warning',
-  untried: 'inline-block h-1.5 w-1.5 rounded-full bg-black/30',
+  untried: 'inline-block h-1.5 w-1.5 rounded-full bg-wash-heavy',
 }
 
 export const KIND_LABEL: Record<AssignmentKind, string> = {
