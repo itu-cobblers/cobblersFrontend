@@ -26,6 +26,7 @@ export default function SubmissionRow({
                     <StatusBadge
                         status={isPassed ? 'passed' : 'tried'}
                         size="m"
+                        label={isPassed ? 'Passed' : 'Tried'}
                     />
                     <div>
                         <div className={SUBMISSION_TITLE_CLASS}>{title}</div>

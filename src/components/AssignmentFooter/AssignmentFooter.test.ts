@@ -4,16 +4,15 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import AssignmentFooter from './AssignmentFooter'
 
 describe('AssignmentFooter', () => {
-  it('renders Submit alone when no reveal/mark actions are offered', () => {
+  it('renders Submit alone when no reveal action is offered', () => {
     const onSubmit = vi.fn()
     render(createElement(AssignmentFooter, { submitStatus: 'idle', onSubmit }))
     fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
     expect(onSubmit).toHaveBeenCalledOnce()
-    expect(screen.queryByText('Show reference answer')).not.toBeInTheDocument()
-    expect(screen.queryByText('Marked as done')).not.toBeInTheDocument()
+    expect(screen.queryByText('Show Answer')).not.toBeInTheDocument()
   })
 
-  it('shows the reveal toggle after a submit, and toggles its label', () => {
+  it('shows the reveal button, which disappears once the answer is visible', () => {
     const onToggleSolution = vi.fn()
     const { rerender } = render(
       createElement(AssignmentFooter, {
@@ -23,7 +22,7 @@ describe('AssignmentFooter', () => {
         onToggleSolution,
       }),
     )
-    fireEvent.click(screen.getByText('Show reference answer'))
+    fireEvent.click(screen.getByText('Show Answer'))
     expect(onToggleSolution).toHaveBeenCalledOnce()
 
     rerender(
@@ -35,11 +34,11 @@ describe('AssignmentFooter', () => {
         onToggleSolution,
       }),
     )
-    expect(screen.getByText('Hide reference answer')).toBeInTheDocument()
+    expect(screen.queryByText('Show Answer')).not.toBeInTheDocument()
   })
 
-  it('binds mark-as-done to the Submit button while the reference answer is open', () => {
-    const onMarkAsDone = vi.fn()
+  it('offers Back to Editor instead of Submit while viewing the reference answer', () => {
+    const onExitView = vi.fn()
     render(
       createElement(AssignmentFooter, {
         submitStatus: 'idle',
@@ -47,17 +46,18 @@ describe('AssignmentFooter', () => {
         canRevealAnswer: true,
         isSolutionVisible: true,
         onToggleSolution: vi.fn(),
+        onExitView,
       }),
     )
-    expect(screen.queryByText('Marked as done')).not.toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Submit' }))
-    expect(onMarkAsDone).toHaveBeenCalledOnce()
+    expect(screen.queryByRole('button', { name: 'Submit' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('Back to Editor'))
+    expect(onExitView).toHaveBeenCalledOnce()
   })
 
-  it('shows the Submit button waiting state while mark-as-done is saving', () => {
+  it('shows the Submit button waiting state while a submission is in flight', () => {
     render(
       createElement(AssignmentFooter, {
-        submitStatus: 'idle',
+        submitStatus: 'waiting',
         onSubmit: vi.fn(),
       }),
     )

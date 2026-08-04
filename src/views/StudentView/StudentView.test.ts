@@ -76,6 +76,7 @@ vi.mock('@/api/sessionHub.ts', () => ({
     capturedJoinCallbacks = callbacks
     return Promise.resolve(undefined)
   }),
+  leaveSession: vi.fn().mockResolvedValue(undefined),
 }))
 
 const { default: StudentView } = await import('./StudentView')
