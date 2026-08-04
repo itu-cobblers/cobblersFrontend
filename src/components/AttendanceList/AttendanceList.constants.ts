@@ -34,3 +34,12 @@ export const ROSTER_ONLINE_DOT_CLASS = 'inline-block h-2 w-2 shrink-0 rounded-fu
 export const ROSTER_OFFLINE_DOT_CLASS = 'inline-block h-2 w-2 shrink-0 rounded-full bg-muted-foreground/40'
 
 export const ROSTER_ITEM_NAME_CLASS = 'truncate text-[13px] leading-tight text-foreground'
+
+/** Named group (`/hand`) scoped to just this icon, so hover swaps only when the
+ * pointer is over the hand icon itself — not anywhere else in the row. */
+export const ROSTER_ITEM_HAND_CLASS =
+  'group/hand relative inline-flex shrink-0 cursor-pointer items-center justify-center text-status-warning'
+
+export const ROSTER_ITEM_HAND_DEFAULT_ICON_CLASS = 'group-hover/hand:hidden'
+
+export const ROSTER_ITEM_HAND_HOVER_ICON_CLASS = 'hidden group-hover/hand:block'

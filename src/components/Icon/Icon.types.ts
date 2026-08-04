@@ -23,6 +23,8 @@ export type IconName =
   | 'pencilOff'
   | 'code'
   | 'users'
+  | 'handStop'
+  | 'handOff'
 
 export interface IconProps {
   name: IconName

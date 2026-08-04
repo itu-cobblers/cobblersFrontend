@@ -59,6 +59,8 @@
   --color-status-warning: var(--status-warning);
   --color-status-warning-bg: var(--status-warning-bg);
   --color-status-warning-text: var(--status-warning-text);
+  --color-raise-hand-idle-bg: var(--raise-hand-idle-bg);
+  --color-raise-hand-active-bg: var(--raise-hand-active-bg);
 }
 
 :root {
@@ -98,6 +100,10 @@
   --status-warning: oklch(0.77 0.17 74); /* #F0AD4E */
   --status-warning-bg: oklch(0.97 0.03 90); /* #FFF9E6 */
   --status-warning-text: oklch(0.5 0.15 60); /* #B26A00 */
+
+  /* Raise Hand button */
+  --raise-hand-idle-bg: oklch(0.968 0.011 226.0); /* #EDF6FA */
+  --raise-hand-active-bg: oklch(0.437 0.097 247.5); /* #1C5584 */
   --border: oklch(0 0 0); /* turned this black YA*/
   /* Structural separations between the three workspace regions — assignment
      panel, editor, terminal. Deliberately NOT --border: that one is black and
@@ -161,6 +167,10 @@
   --status-warning: oklch(0.77 0.17 74);
   --status-warning-bg: oklch(0.3 0.06 74);
   --status-warning-text: oklch(0.85 0.14 74);
+
+  /* Raise Hand button — same fixed colors as light; not part of the app's reachable dark palette (see note above .dark). */
+  --raise-hand-idle-bg: oklch(0.968 0.011 226.0); /* #EDF6FA */
+  --raise-hand-active-bg: oklch(0.437 0.097 247.5); /* #1C5584 */
 }
 
 @layer base {

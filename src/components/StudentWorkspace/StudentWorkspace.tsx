@@ -42,6 +42,8 @@ interface StudentWorkspaceProps {
     displayName: string
     teacherFocusedAssignmentId: number | null
     timerEndsAt: string | null
+    isHandRaised?: boolean
+    onToggleHand?: () => void
     submissionHistory: SubmissionHistoryItem[]
     isHistoryLoading: boolean
     onSubmissionMade: () => void
@@ -215,6 +217,8 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                     {...progress.problemsListProps}
                     isHistoryLoading={props.isHistoryLoading}
                     timerEndsAt={props.timerEndsAt}
+                    isHandRaised={props.isHandRaised}
+                    onToggleHand={props.onToggleHand}
                 />
 
                 <div className={STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS}>

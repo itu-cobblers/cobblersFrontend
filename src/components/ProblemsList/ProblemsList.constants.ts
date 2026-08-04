@@ -71,6 +71,25 @@ export const LIST_HISTORY_VIEW_TOGGLE_ACTIVE_CLASS = 'bg-muted text-foreground'
 
 export const LIST_HISTORY_VIEW_TOGGLE_IDLE_CLASS = 'text-muted-foreground hover:bg-black/5 hover:text-foreground'
 
+/**
+ * Raise Hand — its own full-width row under the Tried/Passed/History legend.
+ * `group/hand` scopes the icon-swap below to hovering this button only.
+ */
+export const LIST_RAISE_HAND_CLASS =
+  'group/hand flex w-full items-center justify-center gap-1.5 rounded px-2 py-1.5 text-[11px] font-medium normal-case tracking-normal transition-colors'
+
+/** Filled solid while the hand is up, white text/icon to stay readable on the dark fill. Hover lightens slightly for feedback. */
+export const LIST_RAISE_HAND_ACTIVE_CLASS =
+  'bg-raise-hand-active-bg text-white hover:bg-[color-mix(in_oklch,var(--raise-hand-active-bg),white_12%)]'
+
+export const LIST_RAISE_HAND_IDLE_CLASS =
+  'bg-raise-hand-idle-bg text-muted-foreground hover:bg-[color-mix(in_oklch,var(--raise-hand-idle-bg),black_6%)] hover:text-foreground'
+
+/** While raised: hand-stop by default, swapping to hand-off only on hover — signals "click to put it down" without changing the icon at rest. */
+export const LIST_RAISE_HAND_DEFAULT_ICON_CLASS = 'group-hover/hand:hidden'
+
+export const LIST_RAISE_HAND_HOVER_ICON_CLASS = 'hidden group-hover/hand:block'
+
 /** Same gray "pill" as the teacher rail's own countdown badge. */
 export const LIST_TIMER_BADGE_CLASS =
   'inline-flex items-center justify-center w-[100%] bg-muted px-2 py-2 font-mono text-[13px] font-medium normal-case tracking-normal text-muted-foreground'
