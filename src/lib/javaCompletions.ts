@@ -1,13 +1,20 @@
 /**
  * Java completion provider for Monaco.
  *
- * Two providers:
- *  1. Dot-trigger: fires on '.' — extracts the chain before the dot and
- *     returns method/field completions for known types.
- *  2. Word-trigger: fires on every keystroke — returns snippet completions
- *     (sout, psvm, fori, etc.) keyed by the current word prefix.
+ * Two providers, registered once per Monaco instance (repeated editor mounts
+ * are a no-op, so suggestions never duplicate):
+ *  1. Dot-trigger: fires on '.' and while typing the member. Resolves the
+ *     receiver chain before the dot — declared variable types scanned out of
+ *     the document first (`Scanner sc = …` → Scanner members), then static
+ *     class names, then common-variable-name heuristics — and follows chained
+ *     calls with known return types (`sb.append(x).` → StringBuilder,
+ *     `sc.nextLine().` → String, `"abc".` → String).
+ *  2. Word-trigger: snippet/class/keyword completions keyed by the current
+ *     word prefix; after `new ` it offers class names only.
+ * Both stay silent inside strings, chars and comments.
  */
-import type { languages } from 'monaco-editor'
+import type { editor as MonacoEditor, languages, Position } from 'monaco-editor'
+import { sanitizeJava } from './javaSource'
 
 type Monaco = typeof import('monaco-editor')
 /** A completion item before its `range` is attached at provide-time. */
@@ -253,6 +260,20 @@ function listCompletions(m: Monaco): Suggestion[] {
   ]
 }
 
+function setCompletions(m: Monaco): Suggestion[] {
+  return [
+    M(m, 'add()',        'add(${1:element})',             'boolean add(E)'),
+    M(m, 'remove()',     'remove(${1:element})',          'boolean remove(Object)'),
+    M(m, 'contains()',   'contains(${1:o})',              'boolean contains(Object)'),
+    M(m, 'size()',       'size()',                        'int size()'),
+    M(m, 'isEmpty()',    'isEmpty()',                     'boolean isEmpty()'),
+    M(m, 'clear()',      'clear()',                       'void clear()'),
+    M(m, 'iterator()',   'iterator()',                    'Iterator<E> iterator()'),
+    M(m, 'stream()',     'stream()',                      'Stream<E> stream()'),
+    M(m, 'forEach()',    'forEach(${1:item} -> {\n\t$2\n})', 'void forEach(Consumer)'),
+  ]
+}
+
 function mapCompletions(m: Monaco): Suggestion[] {
   return [
     M(m, 'put()',             'put(${1:key}, ${2:value})',         'V put(K, V)'),
@@ -315,61 +336,236 @@ function scannerCompletions(m: Monaco): Suggestion[] {
   ]
 }
 
-// ── chain → completions map ───────────────────────────────────────────────────
-
-const CHAIN_MAP: Record<string, Completions> = {
-  // Static classes
-  'System':         systemCompletions,
-  'System.out':     systemOutCompletions,
-  'System.err':     systemErrCompletions,
-  'Math':           mathCompletions,
-  'Arrays':         arraysCompletions,
-  'Collections':    collectionsCompletions,
-  'String':         stringStaticCompletions,
-  'Integer':        integerCompletions,
-  'Double':         doubleCompletions,
-  // Instance heuristics (lowercase match)
-  'string':         stringInstanceCompletions,
-  'str':            stringInstanceCompletions,
-  's':              stringInstanceCompletions,
-  'name':           stringInstanceCompletions,
-  'word':           stringInstanceCompletions,
-  'text':           stringInstanceCompletions,
-  'line':           stringInstanceCompletions,
-  'input':          stringInstanceCompletions,
-  'result':         stringInstanceCompletions,
-  'output':         stringInstanceCompletions,
-  'list':           listCompletions,
-  'arraylist':      listCompletions,
-  'al':             listCompletions,
-  'arr':            listCompletions,
-  'nums':           listCompletions,
-  'map':            mapCompletions,
-  'hashmap':        mapCompletions,
-  'hm':             mapCompletions,
-  'treemap':        mapCompletions,
-  'tm':             mapCompletions,
-  'linkedhashmap':  mapCompletions,
-  'stack':          stackQueueCompletions,
-  'queue':          stackQueueCompletions,
-  'deque':          stackQueueCompletions,
-  'pq':             stackQueueCompletions,
-  'sb':             sbCompletions,
-  'builder':        sbCompletions,
-  'stringbuilder':  sbCompletions,
-  'scanner':        scannerCompletions,
-  'sc':             scannerCompletions,
-  'scn':            scannerCompletions,
+function arrayCompletions(m: Monaco): Suggestion[] {
+  return [
+    F(m, 'length',   'length',   'int — number of elements'),
+    M(m, 'clone()',  'clone()',  'T[] clone()'),
+  ]
 }
 
-function getSuggestions(monaco: Monaco, chain: string): Suggestion[] {
-  // Exact match first (handles "System", "System.out", "System.err", "Math", etc.)
-  const exact = CHAIN_MAP[chain]
-  if (exact) return exact(monaco)
-  // Lowercase match for instance variables
-  const lower = CHAIN_MAP[chain.toLowerCase()]
-  if (lower) return lower(monaco)
-  return []
+function exceptionCompletions(m: Monaco): Suggestion[] {
+  return [
+    M(m, 'getMessage()',       'getMessage()',       'String getMessage()'),
+    M(m, 'printStackTrace()',  'printStackTrace()',  'void printStackTrace()'),
+    M(m, 'toString()',         'toString()',         'String toString()'),
+  ]
+}
+
+// ── chain resolution ──────────────────────────────────────────────────────────
+
+type TableKey =
+  | 'system' | 'systemOut' | 'systemErr'
+  | 'math' | 'arrays' | 'collections' | 'stringStatic' | 'integer' | 'double'
+  | 'string' | 'list' | 'set' | 'map' | 'stackQueue' | 'sb' | 'scanner'
+  | 'array' | 'exception'
+
+const TABLES: Record<TableKey, Completions> = {
+  system:       systemCompletions,
+  systemOut:    systemOutCompletions,
+  systemErr:    systemErrCompletions,
+  math:         mathCompletions,
+  arrays:       arraysCompletions,
+  collections:  collectionsCompletions,
+  stringStatic: stringStaticCompletions,
+  integer:      integerCompletions,
+  double:       doubleCompletions,
+  string:       stringInstanceCompletions,
+  list:         listCompletions,
+  set:          setCompletions,
+  map:          mapCompletions,
+  stackQueue:   stackQueueCompletions,
+  sb:           sbCompletions,
+  scanner:      scannerCompletions,
+  array:        arrayCompletions,
+  exception:    exceptionCompletions,
+}
+
+// Static classes, matched by exact (case-sensitive) name.
+const STATIC_CHAINS: Record<string, TableKey> = {
+  'System':      'system',
+  'System.out':  'systemOut',
+  'System.err':  'systemErr',
+  'Math':        'math',
+  'Arrays':      'arrays',
+  'Collections': 'collections',
+  'String':      'stringStatic',
+  'Integer':     'integer',
+  'Double':      'double',
+}
+
+// Declared Java type → member table. A declared type that isn't listed here
+// (a student's own class, a primitive) deliberately resolves to nothing —
+// wrong suggestions are worse than none.
+const DECLARED_TYPE_TO_KEY: Record<string, TableKey> = {
+  String:            'string',
+  StringBuilder:     'sb',
+  Scanner:           'scanner',
+  ArrayList:         'list',
+  LinkedList:        'list',
+  List:              'list',
+  HashMap:           'map',
+  TreeMap:           'map',
+  LinkedHashMap:     'map',
+  Map:               'map',
+  HashSet:           'set',
+  TreeSet:           'set',
+  LinkedHashSet:     'set',
+  Set:               'set',
+  Stack:             'stackQueue',
+  Queue:             'stackQueue',
+  Deque:             'stackQueue',
+  ArrayDeque:        'stackQueue',
+  PriorityQueue:     'stackQueue',
+  Exception:         'exception',
+  RuntimeException:  'exception',
+}
+
+// Fallback when a variable has no discoverable declaration: guess the type
+// from names beginners typically use (lowercased).
+const NAME_HEURISTICS: Record<string, TableKey> = {
+  string:         'string',
+  str:            'string',
+  s:              'string',
+  name:           'string',
+  word:           'string',
+  text:           'string',
+  line:           'string',
+  input:          'string',
+  result:         'string',
+  output:         'string',
+  list:           'list',
+  arraylist:      'list',
+  al:             'list',
+  arr:            'list',
+  nums:           'list',
+  items:          'list',
+  set:            'set',
+  hashset:        'set',
+  hs:             'set',
+  map:            'map',
+  hashmap:        'map',
+  hm:             'map',
+  treemap:        'map',
+  tm:             'map',
+  linkedhashmap:  'map',
+  stack:          'stackQueue',
+  queue:          'stackQueue',
+  deque:          'stackQueue',
+  pq:             'stackQueue',
+  sb:             'sb',
+  builder:        'sb',
+  stringbuilder:  'sb',
+  scanner:        'scanner',
+  sc:             'scanner',
+  scn:            'scanner',
+  e:              'exception',
+  ex:             'exception',
+}
+
+// Per-receiver members whose result type we know, so chains keep resolving:
+// `sb.append(x).` → sb, `sc.nextLine().` → string. Keys ending in '()' are
+// calls; bare keys are fields.
+const MEMBER_RETURNS: Partial<Record<TableKey, Record<string, TableKey>>> = {
+  system: { out: 'systemOut', err: 'systemErr' },
+  string: {
+    'toUpperCase()': 'string', 'toLowerCase()': 'string', 'trim()': 'string',
+    'strip()': 'string', 'substring()': 'string', 'replace()': 'string',
+    'replaceAll()': 'string', 'concat()': 'string', 'repeat()': 'string',
+    'intern()': 'string', 'split()': 'array', 'toCharArray()': 'array',
+  },
+  sb: {
+    'append()': 'sb', 'insert()': 'sb', 'delete()': 'sb',
+    'deleteCharAt()': 'sb', 'replace()': 'sb', 'reverse()': 'sb',
+  },
+  scanner:      { 'next()': 'string', 'nextLine()': 'string' },
+  map:          { 'keySet()': 'set', 'entrySet()': 'set' },
+  list:         { 'subList()': 'list' },
+  stringStatic: { 'valueOf()': 'string', 'format()': 'string', 'join()': 'string' },
+  integer:      { 'toBinaryString()': 'string', 'toHexString()': 'string', 'toOctalString()': 'string' },
+  arrays:       { 'deepToString()': 'string', 'asList()': 'list', 'copyOf()': 'array', 'copyOfRange()': 'array' },
+  exception:    { 'getMessage()': 'string' },
+}
+
+// A chain typed at the start of a line continues the statement above
+// (`.append(x).`) — resolve unambiguous method names without a receiver.
+const BARE_CALL_RETURNS: Record<string, TableKey> = {
+  'append()':      'sb',
+  'insert()':      'sb',
+  'reverse()':     'sb',
+  'toString()':    'string',
+  'trim()':        'string',
+  'strip()':       'string',
+  'substring()':   'string',
+  'toUpperCase()': 'string',
+  'toLowerCase()': 'string',
+  'next()':        'string',
+  'nextLine()':    'string',
+}
+
+function resolveBaseSegment(segment: string, varTypes: Record<string, string>): TableKey | null {
+  if (segment.endsWith('()')) return BARE_CALL_RETURNS[segment] ?? null
+  const declaredType = varTypes[segment]
+  if (declaredType) {
+    if (declaredType.endsWith('[]')) return 'array'
+    return DECLARED_TYPE_TO_KEY[declaredType] ?? null
+  }
+  return STATIC_CHAINS[segment] ?? NAME_HEURISTICS[segment.toLowerCase()] ?? null
+}
+
+function resolveMemberSegment(receiver: TableKey, segment: string): TableKey | null {
+  const members = MEMBER_RETURNS[receiver]
+  const known = members ? members[segment] : undefined
+  if (known) return known
+  if (segment === 'toString()') return 'string'
+  return null
+}
+
+/**
+ * Resolve a receiver chain ("sc", "System.out", "sb.append(x)") to a member
+ * table. Exported for unit tests.
+ */
+export function resolveChainKey(chain: string, varTypes: Record<string, string>): TableKey | null {
+  const exact = STATIC_CHAINS[chain]
+  if (exact) return exact
+
+  // Normalize call arguments away so segments are `name` or `name()`.
+  const segments = chain.replace(/\([^()]*\)/g, '()').split('.').map((seg) => seg.trim())
+  if (!segments[0]) return null
+
+  let key = resolveBaseSegment(segments[0], varTypes)
+  for (let i = 1; i < segments.length && key !== null; i++) {
+    key = resolveMemberSegment(key, segments[i])
+  }
+  return key
+}
+
+// ── variable type inference ───────────────────────────────────────────────────
+
+// `Scanner sc`, `ArrayList<Integer> nums`, `String[] parts`, `String w :` …
+const DECLARATION_RE = /\b(?:final\s+)?([A-Z][\w$]*)\s*(?:<[^<>]*(?:<[^<>]*>[^<>]*)*>)?\s*(\[\s*\])?\s+([a-z_$][\w$]*)\s*(?=[=;,):])/g
+// `int count`, `double[] values` …
+const PRIMITIVE_RE = /\b(int|long|double|float|boolean|char|short|byte)\s*(\[\s*\])?\s+([a-z_$][\w$]*)/g
+// `x = new Scanner(...)` — also covers `var x = new ...`.
+const NEW_ASSIGNMENT_RE = /\b([a-z_$][\w$]*)\s*=\s*new\s+([A-Z][\w$]*)/g
+
+/**
+ * Scan the document (comments/strings blanked first) for variable
+ * declarations and build a var-name → declared-type map. Declarations win
+ * over `new` assignments. Exported for unit tests.
+ */
+export function inferVariableTypes(code: string): Record<string, string> {
+  const text = sanitizeJava(code).lines.join('\n')
+  const types: Record<string, string> = {}
+  for (const match of text.matchAll(NEW_ASSIGNMENT_RE)) {
+    types[match[1]] = match[2]
+  }
+  for (const match of text.matchAll(PRIMITIVE_RE)) {
+    types[match[3]] = match[1] + (match[2] ? '[]' : '')
+  }
+  for (const match of text.matchAll(DECLARATION_RE)) {
+    types[match[3]] = match[1] + (match[2] ? '[]' : '')
+  }
+  return types
 }
 
 // ── top-level snippets ────────────────────────────────────────────────────────
@@ -428,40 +624,93 @@ const JAVA_KEYWORDS = [
   'true', 'false', 'null',
 ]
 
-function getWordCompletions(monaco: Monaco): Suggestion[] {
-  return [
-    ...COMMON_CLASSES.map(([name, detail]) => C(monaco, name, detail)),
-    ...JAVA_KEYWORDS.map((kw) => K(monaco, kw)),
-    ...getSnippets(monaco),
-  ]
+// Word-completion items are identical on every keystroke — build once per
+// Monaco instance instead of ~90 objects per provide call.
+interface WordCompletionCache {
+  monaco: Monaco
+  classes: Suggestion[]
+  words: Suggestion[]
+}
+
+let wordCache: WordCompletionCache | null = null
+
+function getWordCache(monaco: Monaco): WordCompletionCache {
+  if (wordCache === null || wordCache.monaco !== monaco) {
+    const classes = COMMON_CLASSES.map(([name, detail]) => C(monaco, name, detail))
+    wordCache = {
+      monaco,
+      classes,
+      words: [
+        ...classes,
+        ...JAVA_KEYWORDS.map((kw) => K(monaco, kw)),
+        ...getSnippets(monaco),
+      ],
+    }
+  }
+  return wordCache
 }
 
 // ── registration ─────────────────────────────────────────────────────────────
 
+// Receiver chain incl. call segments: "sc", "System.out", "sb.append(x)".
+const CHAIN_RE = /([A-Za-z_$][\w$]*(?:\([^()]*\))?(?:\.[A-Za-z_$][\w$]*(?:\([^()]*\))?)*)\.(\w*)$/
+// A string literal as receiver: `"abc".le` → String members.
+const STRING_RECEIVER_RE = /"\s*\.(\w*)$/
+
+function textBeforeCursor(model: MonacoEditor.ITextModel, position: Position): string {
+  return model.getValueInRange({
+    startLineNumber: 1,
+    startColumn:     1,
+    endLineNumber:   position.lineNumber,
+    endColumn:       position.column,
+  })
+}
+
+// The cursor sits in real code — not inside a string, char or comment.
+function isCodeContext(model: MonacoEditor.ITextModel, position: Position): boolean {
+  return sanitizeJava(textBeforeCursor(model, position)).endState === 'code'
+}
+
+const registeredInstances = new WeakSet<object>()
+
 export function registerJavaCompletions(monaco: Monaco): void {
+  // The editor remounts per file/mode (React `key`), but providers are global
+  // to the Monaco instance — registering again would duplicate every item.
+  if (registeredInstances.has(monaco)) return
+  registeredInstances.add(monaco)
 
   // ── Provider 1: member completions (after '.', and while typing the member) ──
   monaco.languages.registerCompletionItemProvider('java', {
     triggerCharacters: ['.'],
 
     provideCompletionItems(model, position) {
+      if (!isCodeContext(model, position)) return { suggestions: [] }
+
       // Text on the line up to the cursor. Match a chain followed by a dot and
       // the (possibly partial) member being typed: "System.", "System.out",
-      // "sb.app", etc. This makes members keep showing as you type, not just
-      // the instant you press '.'.
-      const textUntil = model.getValueInRange({
+      // "sb.app", "sc.nextLine().le" — so members keep showing as you type,
+      // not just the instant you press '.'.
+      const lineUntil = model.getValueInRange({
         startLineNumber: position.lineNumber,
         startColumn:     1,
         endLineNumber:   position.lineNumber,
         endColumn:       position.column,
       })
-      const match = textUntil.match(/([\w$][\w\d$]*(?:\.[\w$][\w\d$]*)*)\.(\w*)$/)
-      if (!match) return { suggestions: [] }
 
-      const chain   = match[1]
-      const partial = match[2]
-      const items   = getSuggestions(monaco, chain)
-      if (!items.length) return { suggestions: [] }
+      let key: TableKey | null = null
+      let partial = ''
+      const chainMatch = lineUntil.match(CHAIN_RE)
+      if (chainMatch) {
+        key = resolveChainKey(chainMatch[1], inferVariableTypes(model.getValue()))
+        partial = chainMatch[2]
+      } else {
+        const literalMatch = lineUntil.match(STRING_RECEIVER_RE)
+        if (literalMatch) {
+          key = 'string'
+          partial = literalMatch[1]
+        }
+      }
+      if (!key) return { suggestions: [] }
 
       // Replace the partial member word (if any) so filtering works correctly.
       const range = {
@@ -471,7 +720,7 @@ export function registerJavaCompletions(monaco: Monaco): void {
         endColumn:       position.column,
       }
 
-      return { suggestions: items.map((s) => ({ ...s, range })) }
+      return { suggestions: TABLES[key](monaco).map((s) => ({ ...s, range })) }
     },
   })
 
@@ -480,6 +729,8 @@ export function registerJavaCompletions(monaco: Monaco): void {
     triggerCharacters: [],
 
     provideCompletionItems(model, position) {
+      if (!isCodeContext(model, position)) return { suggestions: [] }
+
       const word = model.getWordUntilPosition(position)
 
       // If we're in member position (right after a '.'), let Provider 1 handle
@@ -498,9 +749,11 @@ export function registerJavaCompletions(monaco: Monaco): void {
         startColumn:     word.startColumn,
         endColumn:       word.endColumn,
       }
-      return {
-        suggestions: getWordCompletions(monaco).map((s) => ({ ...s, range })),
-      }
+
+      // After `new `, only a constructor call makes sense — offer classes only.
+      const cache = getWordCache(monaco)
+      const items = /\bnew\s+$/.test(beforeWord) ? cache.classes : cache.words
+      return { suggestions: items.map((s) => ({ ...s, range })) }
     },
   })
 }
