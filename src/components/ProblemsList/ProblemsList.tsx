@@ -156,7 +156,7 @@ export default function ProblemsList({
           {onToggleHand && (
             <button
               type="button"
-              aria-pressed={isHandRaised}
+              aria-pressed={!!isHandRaised}
               onClick={onToggleHand}
               className={classNames(
                 LIST_RAISE_HAND_CLASS,
