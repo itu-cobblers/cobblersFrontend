@@ -46,6 +46,21 @@ export function useLocalDrafts(allAssignments: Assignment[]) {
         localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(drafts))
     }, [drafts])
 
+    // Backfill drafts for assignments missing from a previously-saved blob
+    // (e.g. a new assignment set, or one added after this hook's first mount).
+    useEffect(() => {
+        const missingCode = allAssignments.filter(a => a.kind === 'code' && !a.starterFiles && !(a.id in drafts.code))
+        const missingMultiFiles = allAssignments.filter(a => a.kind === 'code' && a.starterFiles && !(a.id in drafts.multiFiles))
+
+        if (missingCode.length === 0 && missingMultiFiles.length === 0) return
+
+        setDrafts(prev => ({
+            ...prev,
+            code: { ...prev.code, ...initialCode(missingCode) },
+            multiFiles: { ...prev.multiFiles, ...initialMultiFiles(missingMultiFiles) }
+        }))
+    }, [allAssignments, drafts.code, drafts.multiFiles])
+
     const updateCode = (id: number, value: string) => {
         setDrafts((prev) => ({ ...prev, code: { ...prev.code, [id]: value } }))
     }

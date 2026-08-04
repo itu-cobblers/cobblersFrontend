@@ -78,7 +78,7 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions, viewingS
         // Default draft files
         if (activeAssignment.kind === 'project') return drafts.state.project[assignmentId] ?? []
         if (activeAssignment.kind === 'code') {
-            if (activeAssignment.starterFiles) return drafts.state.multiFiles[assignmentId] ?? []
+            if (activeAssignment.starterFiles) return drafts.state.multiFiles[assignmentId] ?? activeAssignment.starterFiles
             return [{ name: 'Main.java', content: drafts.state.code[assignmentId] ?? defaultStarter }]
         }
         return []
