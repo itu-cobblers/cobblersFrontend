@@ -11,8 +11,8 @@ describe('StatusBadge', () => {
   })
 
   it('renders the label text alongside the icon when given one', () => {
-    render(createElement(StatusBadge, { status: 'passed', label: 'Accepted' }))
-    expect(screen.getByText('Accepted')).toBeInTheDocument()
+    render(createElement(StatusBadge, { status: 'passed', label: 'Passed' }))
+    expect(screen.getByText('Passed')).toBeInTheDocument()
   })
 
   it('renders untried with no icon', () => {

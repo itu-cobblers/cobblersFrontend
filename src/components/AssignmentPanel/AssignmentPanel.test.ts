@@ -62,6 +62,6 @@ describe('AssignmentPanel', () => {
         submissions: [{ subId: 's1', assignmentId: 0, sessionId: null, passed: true, submittedAt: '2026-07-24T14:30:00Z' }],
       }),
     )
-    expect(screen.getByText('Accepted')).toBeInTheDocument()
+    expect(screen.getByText('Passed')).toBeInTheDocument()
   })
 })
