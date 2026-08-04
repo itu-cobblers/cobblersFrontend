@@ -5,4 +5,6 @@ export interface CodeEditorProps {
   isReadOnly?: boolean
   /** Distinct Monaco model path per open file (multi-file tabs) so each file keeps its own undo history. */
   path?: string
+  /** Sibling class names (from starterFiles filenames) to highlight as local types, e.g. ['Main', 'FlightTicket']. */
+  localClassNames?: string[]
 }

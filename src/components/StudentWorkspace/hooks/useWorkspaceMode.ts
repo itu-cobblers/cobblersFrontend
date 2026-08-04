@@ -78,7 +78,7 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions, viewingS
         // Default draft files
         if (activeAssignment.kind === 'project') return drafts.state.project[assignmentId] ?? []
         if (activeAssignment.kind === 'code') {
-            if (activeAssignment.starterFiles) return drafts.state.multiFiles[assignmentId] ?? []
+            if (activeAssignment.starterFiles) return drafts.state.multiFiles[assignmentId] ?? activeAssignment.starterFiles
             return [{ name: 'Main.java', content: drafts.state.code[assignmentId] ?? defaultStarter }]
         }
         return []
@@ -112,6 +112,14 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions, viewingS
     const currentIndex = isVisible ? safeSolutionIndex : safeStudentIndex
 
     const editorPath = `assignment-${assignmentId}-${modeString}-${currentIndex}-${currentFileName}`
+
+    // Local class names come from starterFiles' filenames, not by parsing
+    // `class` declarations — the write gate below guarantees a file's
+    // declared class always matches its filename, so the filename is the
+    // cheaper, always-correct source of truth.
+    const localClassNames = activeAssignment.kind === 'code' && activeAssignment.starterFiles
+        ? activeAssignment.starterFiles.map(f => f.name.replace(/\.java$/i, ''))
+        : []
 
     let writeKind: WriteKind = 'none'
     if (!isVisible && !isHistoryView && activeAssignment.kind !== 'predict') {
@@ -175,6 +183,7 @@ export function useWorkspaceMode({ activeAssignment, drafts, solutions, viewingS
         editorValue: activeContent,
         editorPath,
         editorRemountKey: editorPath,
+        localClassNames,
         isReadOnly:
             activeAssignment.kind === 'predict' ||
             isVisible ||

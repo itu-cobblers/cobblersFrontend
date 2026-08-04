@@ -252,6 +252,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                 value={mode.editorValue}
                                 onChange={mode.handleEditorChange}
                                 isReadOnly={mode.isReadOnly}
+                                localClassNames={mode.localClassNames}
                             />
                             {activeAssignment.kind === 'code' && (
                                 <OutputPanel
