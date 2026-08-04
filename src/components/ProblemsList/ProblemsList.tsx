@@ -23,6 +23,11 @@ import {
   LIST_HISTORY_VIEW_TOGGLE_CLASS,
   LIST_HISTORY_VIEW_TOGGLE_ACTIVE_CLASS,
   LIST_HISTORY_VIEW_TOGGLE_IDLE_CLASS,
+  LIST_RAISE_HAND_CLASS,
+  LIST_RAISE_HAND_ACTIVE_CLASS,
+  LIST_RAISE_HAND_IDLE_CLASS,
+  LIST_RAISE_HAND_DEFAULT_ICON_CLASS,
+  LIST_RAISE_HAND_HOVER_ICON_CLASS,
   LIST_TIMER_BADGE_CLASS,
   LIST_ITEM_LIVE_CLASS,
   KIND_LABEL, LIST_ITEM_LIVE_BORDER_CLASS,
@@ -79,6 +84,8 @@ export default function ProblemsList({
   isOpen,
   onToggleOpen,
   timerEndsAt,
+  isHandRaised,
+  onToggleHand,
 }: ProblemsListProps) {
   const items = activeTab === 'session' ? sessionItems : historyItems
   const isTimerExpired = useIsTimerExpired(timerEndsAt)
@@ -145,6 +152,32 @@ export default function ProblemsList({
               View history
             </button>
           </div>
+
+          {onToggleHand && (
+            <button
+              type="button"
+              aria-pressed={!!isHandRaised}
+              onClick={onToggleHand}
+              className={classNames(
+                LIST_RAISE_HAND_CLASS,
+                isHandRaised ? LIST_RAISE_HAND_ACTIVE_CLASS : LIST_RAISE_HAND_IDLE_CLASS,
+              )}
+            >
+              {isHandRaised ? (
+                <>
+                  <span className={LIST_RAISE_HAND_DEFAULT_ICON_CLASS}>
+                    <Icon name="handStop" />
+                  </span>
+                  <span className={LIST_RAISE_HAND_HOVER_ICON_CLASS}>
+                    <Icon name="handOff" />
+                  </span>
+                </>
+              ) : (
+                <Icon name="handStop" />
+              )}
+              {isHandRaised ? 'Hand Raised' : 'Raise Hand'}
+            </button>
+          )}
         </div>
       )}
       </div>

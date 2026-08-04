@@ -31,7 +31,7 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
 
     const { attendanceList, allSubmissions, addSubmission, mergeLiveStudents } = useTeacherHydration(sessionCode)
 
-    const { liveStudentIds, focusedAssignmentId, handleFocusAssignment } = useTeacherLiveSession({
+    const { liveStudentIds, focusedAssignmentId, raisedHandOrder, handleFocusAssignment, handleLowerHand } = useTeacherLiveSession({
         sessionCode,
         onSubmissionRecorded: addSubmission,
         onLiveStudents: mergeLiveStudents
@@ -59,6 +59,7 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
         attendanceList,
         allSubmissions,
         liveStudentIds,
+        raisedHandOrder,
         initialAssignmentId: getPersistedTeacherWorkspaceUI()?.selectedAssignmentId
     })
 
@@ -128,6 +129,7 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
                 activeStudentId={selectedStudentId}
                 onSelectStudent={handleSelectStudent}
                 selectedAssignmentTitle={activeAssignment?.title}
+                onLowerHand={handleLowerHand}
             />
 
             <div className={TEACHER_WORKSPACE_PANEL_COLUMN_CLASS}>

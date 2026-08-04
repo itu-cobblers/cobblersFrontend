@@ -39,6 +39,7 @@ export interface AttendanceStudentDto {
 export interface SessionStateDto {
     activeTimer?: TimerDto
     focusedAssignmentId?: number
+    raisedHandStudentIds?: string[]
 }
 
 export interface JoinArgsDto {
@@ -51,12 +52,14 @@ export interface StudentCallbacks {
     onTimerStarted?: (timer: TimerDto) => void
     onAssignmentFocused?: (assignmentId: number) => void
     onSessionEnded?: () => void
+    onHandsUpdated?: (studentIds: string[]) => void
 }
 
 export interface TeacherCallbacks {
     onStudentJoined?: (student: StudentDto) => void
     onRoster?: (roster: StudentDto[]) => void
     onSubmissionRecorded?: (submission: SessionSubmissionDto) => void
+    onHandsUpdated?: (studentIds: string[]) => void
 }
 
 // ==========================================

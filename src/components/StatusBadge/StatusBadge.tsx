@@ -21,7 +21,7 @@ export default function StatusBadge({ status, size = 's', label, className }: St
     return (
         <div
             className={classNames(
-                'flex items-center gap-1 font-medium',
+                'flex items-center justify-center gap-1 font-medium',
                 LABEL_TEXT_CLASSES[size],
                 STATUS_COLORS[status].split(' ')[1],
                 className
@@ -34,7 +34,10 @@ export default function StatusBadge({ status, size = 's', label, className }: St
   }
 
   return (
-      <span className={className}>
+      <span className={classNames(
+          'flex items-center justify-center gap-1 font-medium',
+          STATUS_COLORS[status].split(' ')[1],
+          className)}>
       {badgeElement}
     </span>
   )

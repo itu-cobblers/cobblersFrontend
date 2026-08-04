@@ -13,6 +13,8 @@ interface UseTeacherSelectionProps {
     attendanceList: AttendanceStudentDto[]
     allSubmissions: SessionSubmissionDto[]
     liveStudentIds: Set<string>
+    /** studentIds with a raised hand, oldest-raised first. */
+    raisedHandOrder: string[]
     /** Seeds the selected assignment (e.g. restoring a persisted selection after a refresh). */
     initialAssignmentId?: number | null
 }
@@ -28,6 +30,7 @@ export function useTeacherSelection({
                                         attendanceList,
                                         allSubmissions,
                                         liveStudentIds,
+                                        raisedHandOrder,
                                         initialAssignmentId = null
                                     }: UseTeacherSelectionProps) {
     const [selectedAssignmentIdRaw, setSelectedAssignmentIdRaw] = useState<number | null>(initialAssignmentId)
@@ -82,7 +85,7 @@ export function useTeacherSelection({
     }, [attendanceList, allSubmissions, selectedAssignmentId]);
 
     const attendanceStudents: AttendanceStudent[] = useMemo(() => {
-        return attendanceList.map(student => {
+        const mapped = attendanceList.map(student => {
             let assignmentStatus: ProblemStatus | undefined = undefined;
 
             if (selectedAssignmentId !== null) {
@@ -96,10 +99,22 @@ export function useTeacherSelection({
                 studentId: student.studentId,
                 displayName: student.displayName,
                 isActive: liveStudentIds.has(student.studentId),
+                isHandRaised: raisedHandOrder.includes(student.studentId),
                 assignmentStatus
             }
         })
-    }, [attendanceList, allSubmissions, selectedAssignmentId, liveStudentIds]);
+
+        // Raised hands bubble to the top, oldest-raised first; everyone else
+        // keeps their existing relative order (stable sort).
+        return [...mapped].sort((a, b) => {
+            const aIndex = raisedHandOrder.indexOf(a.studentId)
+            const bIndex = raisedHandOrder.indexOf(b.studentId)
+            if (aIndex === -1 && bIndex === -1) return 0
+            if (aIndex === -1) return 1
+            if (bIndex === -1) return -1
+            return aIndex - bIndex
+        })
+    }, [attendanceList, allSubmissions, selectedAssignmentId, liveStudentIds, raisedHandOrder]);
 
     const filteredSubmissions: TeacherSubmissionItem[] = useMemo(() => {
         if (!selectedAssignmentId) return [];
