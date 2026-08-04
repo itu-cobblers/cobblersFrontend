@@ -23,8 +23,8 @@ import { useCodeEditorSetup } from './CodeEditor.hooks'
  * applies `value` in useEffect, which runs after useLayoutEffect, so the skip
  * arm is already true before ghost onChange can fire.
  */
-export default function CodeEditor({ value, onChange, isReadOnly = false }: CodeEditorProps) {
-  const { handleBeforeMount, handleMount } = useCodeEditorSetup()
+export default function CodeEditor({ value, onChange, isReadOnly = false, localClassNames = [] }: CodeEditorProps) {
+  const { handleBeforeMount, handleMount } = useCodeEditorSetup(localClassNames)
   const options = isReadOnly ? { ...EDITOR_OPTIONS, ...EDITOR_READ_ONLY_OPTIONS } : EDITOR_OPTIONS
   const skipOnChangeRef = useRef(false)
 

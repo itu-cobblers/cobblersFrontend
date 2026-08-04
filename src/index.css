@@ -204,6 +204,16 @@
   box-shadow: 0 0 4px color-mix(in oklab, var(--accent) 70%, transparent);
 }
 
+/* Highlights a student's own class name inside the code editor (e.g.
+   `FlightTicket` in Main.java) — the built-in Monaco Java tokenizer has no
+   idea it's a type, so `javaLocalTypes.ts` decorates it directly. Outside
+   the design-token system on purpose: Monaco's syntax colors are Monaco's
+   own theme, not ours (see CLAUDE.md "Things the tokens do NOT control").
+   !important overrides Monaco's own generated token color on the same span. */
+.java-local-type {
+  color: #267f99 !important;
+}
+
 /* Keeps a region scrollable while hiding its scrollbar chrome (e.g. the
    Problems list — scrolls on overflow, no visible track/thumb). */
 .scrollbar-hide {

@@ -1,5 +1,6 @@
 import { Icon } from '@components/Icon'
 import { RunMenu } from '@components/RunMenu'
+import { SubmitButton } from '@components/SubmitButton'
 import type { AssignmentFooterProps } from '@/components'
 import {
     ASSIGNMENT_FOOTER_CLASS,
@@ -49,9 +50,7 @@ export default function AssignmentFooter({
                     isSubmitDisabled={isSubmitDisabled}
                 />
             ) : (
-                <Button variant="primary" onClick={onSubmit} isDisabled={isSubmitDisabled}>
-                    Submit
-                </Button>
+                <SubmitButton status={submitStatus} onClick={onSubmit} isDisabled={isSubmitDisabled} />
             )}
         </div>
     )
