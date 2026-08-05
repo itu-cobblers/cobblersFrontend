@@ -56,10 +56,11 @@ src/
     Button/ Spinner/ Icon/ StatusBadge/ ProgressBar/ TextField/ Modal/ IconButton/ Toast/
     CodeEditor/ CodeFileTabs/ OutputPanel/ AssignmentPanel/ AssignmentFooter/
     SubmitButton/ ShowAnswerButton/ PredictPanel/ FileUpload/ ProjectPanel/
-    ProjectBrief/ ProblemsList/ SubmissionRow/ AssignmentSetPreview/       # student side
+    ProjectBrief/ ProblemsList/ SubmissionRow/ SubmissionBanner/ RunMenu/   # student side
+    AppHeader/ AppFooter/ AppColophon/ PortalShell/ RoomCodeModal/         # chrome
     StudentWorkspace/       # the IDE itself — NOT pure; owns the workspace hooks (see below)
-    TeacherWorkspace/ TeacherSessionCreator/                # teacher side, post-#28
-    TeacherAssignmentPanel/ TeacherProblemsList/ TeacherCodeViewer/ TeacherFollowBanner/
+    TeacherWorkspace/ TeacherSessionCreator/ TeacherAssignmentFooter/      # teacher side
+    TeacherAssignmentPanel/ TeacherProblemsList/ TeacherFollowBanner/
     AttendanceList/ StudentRoster/
     index.ts                # barrel re-exporting every component + its types
   views/                    # page-level views — OWN state/business logic via co-located hooks
@@ -69,15 +70,17 @@ src/
     TeacherGate/            # code-entry gate; useTeacherAuth
     TeacherDashboard/       # thin shell since #28 — useAssignmentData + useSessionLifecycle,
                             #   then TeacherSessionCreator or TeacherWorkspace
-  hooks/                    # cross-cutting state hooks: useExecutor, useAssignments, useSubmission
+  hooks/                    # cross-cutting state hooks: useExecutor, useAssignments,
+                            #   useSubmission, useTheme, useMenuDisclosure
+  api/                      # REST + SignalR seams (moved out of lib/ in #29)
+    executeApi.ts / submissionApi.ts / studentApi.ts / sessionApi.ts / assignmentSetApi.ts
+    sessionHub.ts           # joinSession (student) / observeSession (teacher) / TimerStarted
   lib/                      # framework-agnostic client-side tooling — see src/lib/CLAUDE.md
-    assignmentSet.ts        # groups an assignment set's list for the teacher preview
+    theme.ts                # light/dark preference, system lookup, applies `.dark` to <html>
     defaultStarter.ts       # fallback Java template when an assignment omits `starter`
     predict.ts              # predict-quiz comparison helper (unit-tested; NOT the runtime path)
-    executeApi.ts / submissionApi.ts / studentApi.ts / sessionApi.ts / assignmentSetApi.ts   # REST seams
-    sessionHub.ts           # SignalR seam: joinSession (student) / observeSession (teacher) / TimerStarted
     identity.ts / teacherAuth.ts   # anon studentId + displayName; teacher sessionStorage flag
-    javaValidator.ts        # heuristic Java linter → Monaco markers
+    javaValidator.ts / javaSource.ts / javaLocalTypes.ts   # Java linting + local-type decoration
     javaCompletions.ts      # Monaco completion providers (members + snippets)
   test/setup.ts             # jest-dom matchers for Vitest
   assets/                   # images (hero.png, svgs)
@@ -88,6 +91,10 @@ calls the real API and a failure surfaces as a failure), `lib/assignments.ts` (t
 local bundle; content comes from the backend), `StudentIde.tsx` (the workspace moved into
 `components/StudentWorkspace/`), and the `SubmitModal` / `StudentEntry` components
 (replaced by `SubmitButton` and `EntryPortal`).
+
+**Deleted by upstream in #29 — do not reintroduce:** `AssignmentSetPreview/` and
+`TeacherCodeViewer/` (the teacher now reuses the student's `CodeFileTabs` + `CodeEditor` +
+`OutputPanel`, with a new `TeacherAssignmentFooter`).
 
 **Deleted by upstream in #28 — do not reintroduce:** `AssignmentStepper/`, `Badge/`
 (superseded by `StatusBadge/`), `FeedbackBanner/`, `FileTabs/`, **all of `src/themes/`**
@@ -199,30 +206,9 @@ leftover mock behaviour: `fetchSubmissionHistory` resolves to an empty result an
 
 ## Style — the design system
 
-> **In flux (branch `design-ITU-style`).** The app is being restyled from the dark
-> purple/violet look to a reduced, technical, ITU-like light one. Already done: the whole
-> app runs light (the hardcoded `dark` class is gone from every view root), `--foreground`
-> / `--border` / `--input` / `--ring` / `--primary` are black, `--terminal` is white, all
-> shadows and `backdrop-blur` are removed, every `bg-card/NN` translucency is flat
-> `bg-card`, and all the `bootit-*` decorative layers (grid, glow, scanline, title
-> gradient, fake caret, teacher pulse) are deleted from the TSX. Still to do: fold the raw
-> `bg-black/NN` values into semantic tokens, decide on `--radius`, and restyle whatever
-> arrives from upstream unstyled.
->
-> **Reverted, to be redone:** commit `31dac15` moved Submit up beside Run in the toolbar,
-> moved the reveal toggle into `AssignmentPanel`, and deleted `AssignmentFooter`. It was
-> reverted before merging #28 (which reworked both of those components and added history
-> view) and is to be reapplied on top once history view's behaviour is understood. The
-> hand-matched Submit scale (`h-[29px] text-xs font-medium gap-1.5`, replacing the
-> `TYPOGRAPHY_LEVELS` interpolation) went with it — it lives in `cbd0455`.
->
-> **Upstream's new `Button.constants.ts` is built on tokens this app doesn't have.**
-> `BUTTON_VARIANT_CLASS` uses `bg-action`, `bg-action-strong`, `text-ink-muted`, `text-ink`
-> and `border-line` — pre-#21 names, absent from `index.css`, so those utilities generate
-> nothing and the `primary`/`ghost` variants render unstyled. It also stacks a literal
-> `text-[13px]` in `BUTTON_BASE_CLASS` against `BUTTON_BASE_TYPOGRAPHY`
-> (= `TYPOGRAPHY_LEVELS.bodyStrong` = `text-sm`) — two font sizes on one element.
-> `SUBMIT_BUTTON_CLASS` imports that base, so both problems reach the Submit button.
+> **The ITU restyle is merged** (#30) and is the app's look: white, flat, squared,
+> dense, after itustudent.itu.dk. A dark theme now sits alongside it — see
+> "Two themes" below. Nothing about the light theme is provisional any more.
 
 **`src/index.css` (334 lines) is the entire design system.** Nothing else defines a colour.
 It was rebuilt in #21/#22 into a shadcn-style token set; the old `canvas`/`surface`/`panel`/
@@ -247,28 +233,68 @@ So: *to restyle anything, find its component folder and open the `.constants.ts`
 `terminal`/`terminal-line`/`terminal-ink`/`terminal-muted`/`term-ok`/`term-err`, and
 `status-{success,error,warning}` each with `-bg`/`-text` variants.
 
-### There is no dark-mode toggle — and the `.dark` block is currently unreachable
+### Two themes
 
-`@custom-variant dark (&:is(.dark *))` means the dark values apply to anything inside an
-element carrying the literal class `dark`. There is no toggle: that word used to be baked
-into all four view root class strings (`EntryPortal`, `StudentView` ×2, `TeacherDashboard`,
-`TeacherGate`), which is the only reason the app rendered dark while `:root` was pure white.
+`@custom-variant dark (&:is(.dark *))` styles **descendants** of an element
+carrying the class `dark`, so the flag has to sit above everything the app
+renders. `src/lib/theme.ts` puts it on `<html>` and is the only place that
+writes it. Putting it on a view root — as this app once did — leaves anything
+portalled outside that root (a Modal, a Monaco overlay) stranded in light.
 
-**Those have been removed on `design-ITU-style`, so the whole `.dark` block (~35 lines) is
-now dead code.** It's deliberately left in place rather than deleted.
+- **`src/lib/theme.ts`** — preference storage (`bootit.theme`), system-preference
+  lookup, and `applyTheme`. `'system'` is the default and is stored as *absence*
+  of the key, so it can't be confused with a stale explicit choice.
+- **`useTheme()`** (`src/hooks/useTheme.ts`) — returns `{ theme, preference,
+  setPreference }`. `theme` is the *resolved* value and is derived, not stored;
+  holding it in state would mean setting state from an effect on every change.
+- **`main.tsx`** applies the theme *before* React mounts. After mounting, the
+  first paint is light and then snaps.
 
-Note this is a **recurring merge chore, not a one-off**: `upstream/main` still ships the
-literal `dark` class on its view roots, so every upstream merge reintroduces it. It came back
-in #28 on `STUDENT_WORKSPACE_LAYOUT_CLASS` and `TEACHER_LAYOUT_CLASS` (along with the
-`bootit-grid` / `bootit-glow` layers) and was stripped again by hand. After any merge, sweep
-with `grep -rn "bootit-\|'dark " src` before trusting the result.
+There is deliberately **no toggle UI yet** — placement is waiting on user
+stories. Until then the app follows the OS and reacts live to it, so switching
+system appearance is enough to see both themes.
+
+### The wash scale
+
+The `--wash-*` tokens are translucent neutral over whatever surface is beneath:
+black in `:root`, white in `.dark`. Every `bg-black/N` literal in the app maps to
+one, because a literal cannot invert — and `bg-black/6` on a near-black canvas
+is invisible. **That exact bug has shipped here twice**: submission rows that
+looked unclickable, and an untried badge that rendered as nothing. If you need a
+translucent fill, take a wash token; don't write the literal.
+
+`--scrim` is the exception that stays dark in both — it's shadow, not surface.
+
+### Brand chrome does not invert
+
+`--brand-surface` / `--brand-surface-hover` / `--brand-ink` are declared in
+`:root` and **deliberately absent from `.dark`**, which is what pins them. They
+carry everything that is black-on-white by identity rather than by theme:
+
+- `AppHeader` — the band, the `ITU | BootIT` lockup, the chips, the section
+  label and the action hover
+- `AppFooter` — the "IT University of Copenhagen" mark and its address line
+- `AppColophon` — the whole credit band
+- `RunMenu` — the split control and its dropdown
+- `SubmitButton` — it fills the same slot in the editor rail that `RunMenu`
+  does on `code` assignments, so the two kinds must not disagree
+
+`APP_HEADER_BAR_CLASS` (`bg-black/70`) and `APP_FOOTER_CLASS` (`bg-black/80`)
+stay literal for the same reason: both are translucent over a fixed-dark band.
+
+Reach for `--brand-*` — not `--foreground` / `--background` / `--primary` —
+whenever a surface has to look identical in both themes.
 
 ### Things the tokens do NOT control
 
-- **Monaco.** `EDITOR_THEME = 'vs-dark'` in `CodeEditor.constants.ts` — a Monaco theme name,
-  not CSS. The code pane ignores the token system entirely.
-- **The terminal/output slab.** `--terminal*` is deliberately *identical* in `:root` and
-  `.dark`, so that zone stays dark in light mode by design.
+- **Monaco.** `EDITOR_THEME` in `CodeEditor.constants.ts` maps the app's two themes onto
+  Monaco's own built-ins (`vs` / `vs-dark`). These are theme *names*, not CSS — a `.dark`
+  class on `<html>` cannot reach inside the editor, so `CodeEditor` reads `useTheme()` and
+  passes the right one. The same applies to `.java-local-type`, which has a light and a
+  dark rule in `index.css`.
+- **The terminal/output slab.** `--terminal*` now differs per theme: white in light,
+  `#121314` in dark — VS Code Dark 2026 makes the editor the *darkest* surface, with the
+  chrome above it, which is the opposite of most dark UIs and is what puts the code first.
 - **The entry-page effects** (`.bootit-grid`, `.bootit-title`, `.bootit-glow`,
   `.bootit-scanline`, `.bootit-caret`, `.bootit-teacher-glow`, ~lines 210–300). These assume a
   dark canvas — white-alpha grid lines and a white→accent→white text gradient. On a light

@@ -16,7 +16,7 @@ import type { AppHeaderVariant } from './AppHeader.types'
  * part in the page's stacking order — photo unpositioned (so a scrim can sit
  * over and blur it), bar at `z-20` (so it can't be).
  */
-export const APP_HEADER_CLASS = 'relative w-full shrink-0 overflow-hidden bg-foreground'
+export const APP_HEADER_CLASS = 'relative w-full shrink-0 overflow-hidden bg-brand-surface'
 
 /** `bar` matches the 40px row height the rails and toolbar already use. */
 export const APP_HEADER_BAND_CLASS: Record<AppHeaderVariant, string> = {
@@ -49,7 +49,7 @@ export const APP_HEADER_BRAND_ROW_CLASS = 'flex min-w-0 items-center gap-3'
 export const APP_HEADER_BRAND_CLASS = 'inline-flex shrink-0 gap-[2px]'
 
 export const APP_HEADER_BRAND_BOX_CLASS =
-  'flex items-center bg-foreground uppercase leading-none tracking-tight text-background'
+  'flex items-center bg-brand-surface uppercase leading-none tracking-tight text-brand-ink'
 
 /** `hero` matches the 236x40 lockup the ITU header ships; `bar` fits inside 40px. */
 export const APP_HEADER_BRAND_BOX_SIZE_CLASS: Record<AppHeaderVariant, string> = {
@@ -63,9 +63,9 @@ export const APP_HEADER_BRAND_PREFIX_CLASS = 'font-bold'
 export const APP_HEADER_BRAND_NAME_CLASS = 'font-normal'
 
 export const APP_HEADER_SECTION_CLASS =
-  'flex min-w-0 items-center gap-3 text-[13px] font-medium text-background'
+  'flex min-w-0 items-center gap-3 text-[13px] font-medium text-brand-ink'
 
-export const APP_HEADER_SEPARATOR_CLASS = 'text-background/40'
+export const APP_HEADER_SEPARATOR_CLASS = 'text-brand-ink/40'
 
 export const APP_HEADER_SECTION_NAME_CLASS = 'truncate'
 
@@ -78,7 +78,7 @@ export const APP_HEADER_NAV_CLASS = 'flex min-w-0 shrink items-center gap-[2px]'
  * lockup, so the two ends of the bar read as one system.
  */
 export const APP_HEADER_CHIP_CLASS =
-  'flex h-6 shrink-0 items-center gap-1.5 bg-foreground px-2.5 text-[12px] leading-none text-background'
+  'flex h-6 shrink-0 items-center gap-1.5 bg-brand-surface px-2.5 text-[12px] leading-none text-brand-ink'
 
 /**
  * Only the interactive box reacts to the pointer — the identity boxes are
@@ -86,7 +86,7 @@ export const APP_HEADER_CHIP_CLASS =
  * Hover inverts, the way the ITU nav marks its active tab.
  */
 export const APP_HEADER_ACTION_CLASS =
-  'cursor-pointer transition-colors hover:bg-background hover:text-foreground'
+  'cursor-pointer transition-colors hover:bg-brand-ink hover:text-brand-surface'
 
 export const APP_HEADER_SESSION_NAME_CLASS = 'min-w-0'
 

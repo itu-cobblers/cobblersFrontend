@@ -51,6 +51,9 @@
   --color-wash-heavy: var(--wash-heavy);
   --color-wash-line: var(--wash-line);
   --color-scrim: var(--scrim);
+  --color-brand-surface: var(--brand-surface);
+  --color-brand-surface-hover: var(--brand-surface-hover);
+  --color-brand-ink: var(--brand-ink);
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-terminal: var(--terminal);
@@ -130,6 +133,16 @@
 
   /* Dims the page behind a dialog. Dark in both themes — it is shadow, not surface. */
   --scrim: oklch(0 0 0 / 50%);
+
+  /* ── Brand chrome ─────────────────────────────────────────────────────────
+     The ITU lockup, the app header, the credit band and the run control are
+     black-on-white *by identity*, not by theme — the same way ITU's own mark is.
+     Declared here and deliberately NOT overridden in `.dark`, which is what
+     stops them flipping. Reach for these instead of `--foreground` /
+     `--background` whenever a surface must look identical in both themes. */
+  --brand-surface: oklch(0 0 0);
+  --brand-surface-hover: #262626;
+  --brand-ink: oklch(1 0 0);
   --input: oklch(0 0 0); /* turned this black YA*/
   --ring: oklch(0 0 0); /* turned this black YA*/
   /* Dark "glass" zone — Monaco stays vs-dark, so the editor/output area keeps
@@ -264,6 +277,12 @@
    !important overrides Monaco's own generated token color on the same span. */
 .java-local-type {
   color: #267f99 !important;
+}
+
+/* The dark counterpart — `vs-dark`'s own type colour, since the decoration
+   sits alongside Monaco's tokens and has to match the theme it's drawn over. */
+.dark .java-local-type {
+  color: #4ec9b0 !important;
 }
 
 /* Keeps a region scrollable while hiding its scrollbar chrome (e.g. the

@@ -6,7 +6,7 @@ import Spinner from './Spinner'
 describe('Spinner', () => {
   it('defaults to the solid variant', () => {
     const { container } = render(createElement(Spinner))
-    expect(container.firstChild).toHaveClass('border-t-black')
+    expect(container.firstChild).toHaveClass('border-t-foreground')
   })
 
   it('applies the accent variant classes', () => {

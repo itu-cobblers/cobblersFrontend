@@ -11,6 +11,7 @@ import {
   EDITOR_THEME,
 } from './CodeEditor.constants'
 import { useCodeEditorSetup } from './CodeEditor.hooks'
+import { useTheme } from '@hooks/useTheme'
 
 /**
  * Monaco editor pane. Controlled: `value` + `onChange` are owned by the caller.
@@ -25,6 +26,7 @@ import { useCodeEditorSetup } from './CodeEditor.hooks'
  */
 export default function CodeEditor({ value, onChange, isReadOnly = false, localClassNames = [] }: CodeEditorProps) {
   const { handleBeforeMount, handleMount } = useCodeEditorSetup(localClassNames)
+  const { theme } = useTheme()
   const options = isReadOnly ? { ...EDITOR_OPTIONS, ...EDITOR_READ_ONLY_OPTIONS } : EDITOR_OPTIONS
   const skipOnChangeRef = useRef(false)
 
@@ -54,7 +56,7 @@ export default function CodeEditor({ value, onChange, isReadOnly = false, localC
           language="java"
           value={value}
           onChange={handleChange}
-          theme={EDITOR_THEME}
+          theme={EDITOR_THEME[theme]}
           beforeMount={handleBeforeMount}
           onMount={handleMount}
           options={options}
