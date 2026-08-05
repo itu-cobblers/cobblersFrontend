@@ -97,3 +97,12 @@ export { PortalShell } from './PortalShell'
 export type { PortalShellProps } from './PortalShell'
 
 export { AppColophon } from './AppColophon'
+
+export { SlidesList, SlidesListRow } from './SlidesList'
+export type { SlidesListProps, SlidesListRowProps } from './SlidesList'
+
+export { SlideViewer } from './SlideViewer'
+export type { SlideViewerProps } from './SlideViewer'
+
+export { ViewModeToggle } from './ViewModeToggle'
+export type { ViewModeToggleProps, ViewMode } from './ViewModeToggle'

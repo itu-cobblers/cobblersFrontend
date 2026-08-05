@@ -13,6 +13,7 @@ import {
   PANEL_LESSON_CODE_CLASS,
   PANEL_TASK_LABEL_CLASS,
   PANEL_TASK_CLASS,
+  PANEL_SLIDE_LINK_CLASS,
   PANEL_BODY_CLASS,
   PANEL_HINT_CLASS,
   PANEL_HINT_TOGGLE_CLASS,
@@ -70,6 +71,7 @@ export default function TeacherAssignmentPanel({
   submissions,
   activeSubId,
   onSelectSubmission,
+  relatedSlideLink,
 }: TeacherAssignmentPanelProps) {
   const [isHintExpanded, handleHintToggle] = useHintDisclosure(hint)
 
@@ -158,6 +160,12 @@ export default function TeacherAssignmentPanel({
                 </div>
               )}
             </div>
+          )}
+
+          {relatedSlideLink && (
+            <button type="button" onClick={relatedSlideLink.onNavigate} className={PANEL_SLIDE_LINK_CLASS}>
+              Go to slide to learn more →
+            </button>
           )}
         </div>
       ) : (

@@ -30,6 +30,9 @@ export const PANEL_TASK_LABEL_CLASS = 'mb-1.5 mt-4 text-[13px] font-semibold upp
 
 export const PANEL_TASK_CLASS = 'whitespace-pre-wrap text-[15px] leading-relaxed text-foreground'
 
+export const PANEL_SLIDE_LINK_CLASS =
+  'mt-2 inline-block text-[12px] font-medium text-muted-foreground underline decoration-dotted hover:text-foreground'
+
 export const PANEL_BODY_CLASS = 'mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-muted-foreground'
 
 // Project briefs (embedded PDF + setup-guide popup) render via the shared

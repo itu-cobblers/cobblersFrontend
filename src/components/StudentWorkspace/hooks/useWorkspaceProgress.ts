@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import type { Assignment, AssignmentSet, SubmissionHistoryItem, AssignmentKind } from '@types'
+import type { Assignment, AssignmentSet, SubmissionHistoryItem, AssignmentKind, SlidePage, TeacherFocus } from '@types'
 import type { ProblemsListTab, AssignmentPanelTab, ProblemStatus } from '@components'
 import { useAssignments } from '@hooks/useAssignments'
 import { getProjectIdentity } from '@lib/projectIdentity'
@@ -8,10 +8,16 @@ import { getPersistedWorkspaceUI, setPersistedWorkspaceUI } from '@lib/studentWo
 interface ProgressOptions {
     assignmentSet: AssignmentSet
     submissionHistory: SubmissionHistoryItem[]
-    teacherFocusedAssignmentId: number | null
+    teacherFocus: TeacherFocus
+    /** For labelling a slide-focus follow banner — "Slide · <title>". */
+    slides: SlidePage[]
     getAssignment: (id: number) => Assignment | undefined
     /** Current room's code, if any — scopes the "Session" tab's statuses to this room only. */
     sessionCode?: string
+    /** Switches to Slides and opens this page — powers the slide-focus follow banner. */
+    onNavigateToSlide: (slideId: number) => void
+    /** Set by a slide's "Try this now" link — takes priority over the persisted selection at mount, so a fresh `StudentWorkspace` opens on this assignment instead of flashing whatever was last cached. */
+    pendingAssignmentId?: number | null
 }
 
 function collectStatusSets(items: SubmissionHistoryItem[], getAssignment: (id: number) => Assignment | undefined) {
@@ -31,21 +37,30 @@ function collectStatusSets(items: SubmissionHistoryItem[], getAssignment: (id: n
 export function useWorkspaceProgress({
     assignmentSet,
     submissionHistory,
-    teacherFocusedAssignmentId,
+    teacherFocus,
+    slides,
     getAssignment,
-    sessionCode
+    sessionCode,
+    onNavigateToSlide,
+    pendingAssignmentId
 }: ProgressOptions) {
     // Read once — only the value on first render matters, since every state
     // below seeds itself from this via a lazy initializer.
     const persistedUI = getPersistedWorkspaceUI()
 
+    // A pending "Try this now" target always wins over the persisted tab/selection —
+    // this component mounts fresh on that navigation, so without this override the
+    // first render (and the `session` rail) would show the last-cached assignment
+    // until the pending-id effect below caught up a tick later.
+    const initialRailTab: ProblemsListTab = pendingAssignmentId != null ? 'session' : (persistedUI?.railTab ?? 'session')
+
     const [isRailOpen, setIsRailOpen] = useState(persistedUI?.isRailOpen ?? true)
-    const [railTab, setRailTab] = useState<ProblemsListTab>(persistedUI?.railTab ?? 'session')
+    const [railTab, setRailTab] = useState<ProblemsListTab>(initialRailTab)
     const [panelTab, setPanelTab] = useState<AssignmentPanelTab>('description')
-    const [selectionSource, setSelectionSource] = useState<ProblemsListTab>(persistedUI?.railTab ?? 'session')
+    const [selectionSource, setSelectionSource] = useState<ProblemsListTab>(initialRailTab)
 
     const [historySelectedId, setHistorySelectedId] = useState<number | null>(
-        persistedUI?.railTab === 'history' ? persistedUI.selectedAssignmentId : null
+        persistedUI?.railTab === 'history' ? (persistedUI.selectedAssignmentId ?? null) : null
     )
 
     const latestHistoryAssignmentId = submissionHistory[0]?.assignmentId
@@ -72,9 +87,11 @@ export function useWorkspaceProgress({
         [submissionHistory, getAssignment, sessionCode]
     )
 
-    const initialSessionIndex = persistedUI?.railTab === 'session' && persistedUI.selectedAssignmentId != null
-        ? assignmentSet.assignments.findIndex((a) => a.id === persistedUI.selectedAssignmentId)
-        : -1
+    const initialSessionIndex = pendingAssignmentId != null
+        ? assignmentSet.assignments.findIndex((a) => a.id === pendingAssignmentId)
+        : persistedUI?.railTab === 'session' && persistedUI.selectedAssignmentId != null
+            ? assignmentSet.assignments.findIndex((a) => a.id === persistedUI.selectedAssignmentId)
+            : -1
     const assignmentProgress = useAssignments(
         assignmentSet.assignments,
         Array.from(sessionPassedIds),
@@ -164,9 +181,24 @@ export function useWorkspaceProgress({
         }).filter(Boolean) as { id: number, title: string, kind: AssignmentKind, status: ProblemStatus }[]
     }, [attemptedIds, getAssignment, passedIds, assignmentProgress.completedAssignments])
 
-    const teacherFocused = teacherFocusedAssignmentId != null
-        ? assignmentSet.assignments.find((a) => a.id === teacherFocusedAssignmentId)
+    const focusedAssignmentId = teacherFocus?.kind === 'assignment' ? teacherFocus.id : null
+    const teacherFocusedAssignment = focusedAssignmentId != null
+        ? assignmentSet.assignments.find((a) => a.id === focusedAssignmentId)
         : undefined
+
+    // Practice tab always surfaces the teacher's focus, whichever kind it is —
+    // an assignment (unless it's the one already open) or a Slides page.
+    const followBannerProps = teacherFocusedAssignment && teacherFocusedAssignment.id !== activeAssignment?.id
+        ? {
+            label: `#${teacherFocusedAssignment.id} · ${teacherFocusedAssignment.title}`,
+            onFollow: () => handleSelectAssignment(teacherFocusedAssignment.id, 'session'),
+        }
+        : teacherFocus?.kind === 'slide'
+            ? {
+                label: `Slide · ${slides.find((s) => s.id === teacherFocus.id)?.title ?? teacherFocus.id}`,
+                onFollow: () => onNavigateToSlide(teacherFocus.id),
+            }
+            : undefined
 
     return {
         activeAssignment: activeAssignment!,
@@ -180,7 +212,7 @@ export function useWorkspaceProgress({
             historyItems: historyProblems,
             activeId: activeAssignment?.id,
             onSelect: (id: number) => handleSelectAssignment(id, railTab),
-            teacherFocusId: teacherFocusedAssignmentId,
+            teacherFocusId: focusedAssignmentId,
             isOpen: isRailOpen,
             onToggleOpen: () => setIsRailOpen((prev) => !prev),
         },
@@ -199,10 +231,6 @@ export function useWorkspaceProgress({
             hint: activeAssignment?.hint,
         },
 
-        followBannerProps: teacherFocused && teacherFocused.id !== activeAssignment?.id ? {
-            assignmentId: teacherFocused.id,
-            assignmentTitle: teacherFocused.title,
-            onFollow: () => handleSelectAssignment(teacherFocused.id, 'session'),
-        } : undefined
+        followBannerProps
     }
 }

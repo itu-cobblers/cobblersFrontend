@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react'
-import type { AssignmentSet, SubmissionHistoryItem } from '@types'
-import type { JoinMode, ToastTone } from '@components'
+import type { AssignmentSet, SubmissionHistoryItem, TeacherFocus } from '@types'
+import type { JoinMode, ToastTone, ViewMode } from '@components'
 import { getStudentId, getDisplayName } from '@lib/identity'
 import { upsertStudent } from '@/api/studentApi.ts'
 import { fetchSoloAssignmentSet, fetchAssignmentSet } from '@/api/assignmentSetApi.ts'
 import { fetchSubmissionHistory } from '@/api/submissionApi.ts'
 import { joinSession, leaveSession, raiseHand, lowerHand } from '@/api/sessionHub.ts'
+import { decodeTeacherFocus } from '@lib/teacherFocus'
 import {
   getPersistedStudentSession,
   setPersistedStudentSession,
   clearPersistedStudentSession,
 } from '@lib/studentSession'
+import { getPersistedWorkspaceUI, setPersistedWorkspaceUI } from '@lib/studentWorkspaceUI'
 import { getSession } from "@/api/sessionApi.ts"
 
 interface ToastState {
@@ -25,7 +27,10 @@ export function useStudentApp() {
   const [assignmentSet, setAssignmentSet] = useState<AssignmentSet | null>(null)
   const [mode, setMode] = useState<JoinMode>('join')
   const [code, setCode] = useState('')
-  const [teacherFocusedAssignmentId, setTeacherFocusedAssignmentId] = useState<number | null>(null)
+  // Raw encoded value off the hub — see @lib/teacherFocus for the sentinel
+  // convention (positive = assignment, negative = -(slide id), 0 = cleared).
+  const [teacherFocusRaw, setTeacherFocusRaw] = useState<number | null>(null)
+  const teacherFocus: TeacherFocus = decodeTeacherFocus(teacherFocusRaw)
   const [timerEndsAt, setTimerEndsAt] = useState<string | null>(null)
   const [raisedHandStudentIds, setRaisedHandStudentIds] = useState<string[]>([])
 
@@ -33,11 +38,36 @@ export function useStudentApp() {
   const [submissionHistory, setSubmissionHistory] = useState<SubmissionHistoryItem[]>([])
   const [isHistoryLoading, setIsHistoryLoading] = useState(true)
 
+  // Opens on the deck, not the exercises — the instructor talks over Slides, then
+  // switches to Practice when it's time for students to do something. Only a
+  // genuinely fresh session (nothing persisted yet) defaults to Slides; a
+  // refresh mid-session restores whichever tab/page was last open.
+  const [viewMode, setViewMode] = useState<ViewMode>(() => getPersistedWorkspaceUI()?.viewMode ?? 'slides')
+  const [lastSlideId, setLastSlideId] = useState<number | null>(() => getPersistedWorkspaceUI()?.lastSlideId ?? null)
+  const [slidesRailOpen, setSlidesRailOpen] = useState<boolean>(() => getPersistedWorkspaceUI()?.slidesRailOpen ?? true)
+  const [pendingAssignmentId, setPendingAssignmentId] = useState<number | null>(null)
+  const [pendingSlideId, setPendingSlideId] = useState<number | null>(null)
+
+  useEffect(() => {
+    setPersistedWorkspaceUI({ viewMode, lastSlideId, slidesRailOpen })
+  }, [viewMode, lastSlideId, slidesRailOpen])
+
+  function navigateToAssignment(assignmentId: number) {
+    setPendingAssignmentId(assignmentId)
+    setViewMode('practice')
+  }
+
+  function navigateToSlide(slideId: number) {
+    setPendingSlideId(slideId)
+    setLastSlideId(slideId)
+    setViewMode('slides')
+  }
+
   function handleLeaveSession() {
     clearPersistedStudentSession()
     setAssignmentSet(null)
     setCode('')
-    setTeacherFocusedAssignmentId(null)
+    setTeacherFocusRaw(null)
     setTimerEndsAt(null)
     setRaisedHandStudentIds([])
     leaveSession().catch((err: unknown) => console.warn('[room] leaveSession failed:', err))
@@ -48,7 +78,7 @@ export function useStudentApp() {
     joinSession(
         { code: roomCode, studentId, displayName },
         {
-          onAssignmentFocused: setTeacherFocusedAssignmentId,
+          onAssignmentFocused: setTeacherFocusRaw,
           onTimerStarted: (timer) => setTimerEndsAt(timer.endsAt),
           onHandsUpdated: setRaisedHandStudentIds,
           onSessionEnded: () => {
@@ -156,10 +186,24 @@ export function useStudentApp() {
       actionLabel: mode === 'solo' ? 'Exit' : 'Leave',
       onLeave: handleLeaveSession,
       displayName: getDisplayName(),
-      teacherFocusedAssignmentId: mode === 'join' ? teacherFocusedAssignmentId : null,
+      teacherFocus: mode === 'join' ? teacherFocus : null,
       timerEndsAt: mode === 'join' ? timerEndsAt : null,
       isHandRaised: mode === 'join' && raisedHandStudentIds.includes(getStudentId()),
       onToggleHand: mode === 'join' ? handleToggleHand : undefined,
+    },
+    view: {
+      mode: viewMode,
+      onModeChange: setViewMode,
+      pendingAssignmentId,
+      onConsumedPendingAssignment: () => setPendingAssignmentId(null),
+      pendingSlideId,
+      onConsumedPendingSlide: () => setPendingSlideId(null),
+      navigateToAssignment,
+      navigateToSlide,
+      lastSlideId,
+      onActiveSlideChange: setLastSlideId,
+      slidesRailOpen,
+      onToggleSlidesRailOpen: () => setSlidesRailOpen((prev) => !prev),
     },
     progress: {
       isLoading: isHistoryLoading,

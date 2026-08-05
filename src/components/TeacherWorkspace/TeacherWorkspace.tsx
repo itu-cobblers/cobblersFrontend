@@ -15,27 +15,23 @@ import {
 } from './TeacherWorkspace.constants'
 import { getProjectIdentity } from '@lib/projectIdentity'
 
-import { useTeacherHydration } from './hooks/useTeacherHydration'
-import { useTeacherLiveSession } from './hooks/useTeacherLiveSession'
 import { useTeacherSelection } from './hooks/useTeacherSelection'
 import { useTeacherSubmissionDetail } from './hooks/useTeacherSubmissionDetail'
 import { useTeacherSolution } from './hooks/useTeacherSolution'
+import { useCourseContent } from '@hooks/useCourseContent'
 
 import type { TeacherWorkspaceProps } from './TeacherWorkspace.types'
 import { getEditorContent, getTabFiles } from "@components/TeacherWorkspace/TeacherWorkspace.utils.ts";
 import {TeacherAssignmentFooter} from "@components/TeacherAssignmentFooter";
 import { getPersistedTeacherWorkspaceUI, setPersistedTeacherWorkspaceUI } from '@lib/teacherWorkspaceUI'
 
-export default function TeacherWorkspace({ sessionCode, assignmentData, session }: TeacherWorkspaceProps) {
+export default function TeacherWorkspace({ assignmentData, session, hydration, liveSession, onNavigateToSlide }: TeacherWorkspaceProps) {
     const [isRailOpen, setIsRailOpen] = useState(() => getPersistedTeacherWorkspaceUI()?.isRailOpen ?? true)
 
-    const { attendanceList, allSubmissions, addSubmission, mergeLiveStudents } = useTeacherHydration(sessionCode)
+    const { attendanceList, allSubmissions } = hydration
+    const { liveStudentIds, teacherFocus, raisedHandOrder, handleToggleFocusAssignment, handleLowerHand } = liveSession
 
-    const { liveStudentIds, focusedAssignmentId, raisedHandOrder, handleFocusAssignment, handleLowerHand } = useTeacherLiveSession({
-        sessionCode,
-        onSubmissionRecorded: addSubmission,
-        onLiveStudents: mergeLiveStudents
-    })
+    const courseContent = useCourseContent(assignmentData.selectedAssignmentSetId, assignmentData.assignments[0]?.id)
 
     const {
         selectedAssignmentId,
@@ -101,6 +97,14 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
     const activeSubmission = filteredSubmissions.find(s => s.subId === activeSubId)
     const projectIdentity = isProject && activeAssignment ? getProjectIdentity(activeAssignment.title) : undefined
 
+    const focusedAssignmentId = teacherFocus?.kind === 'assignment' ? teacherFocus.id : null
+    const isSelectedAssignmentFocused = selectedAssignmentId != null && focusedAssignmentId === selectedAssignmentId
+    const relatedSlide = selectedAssignmentId != null ? courseContent.findSlideForAssignment(selectedAssignmentId) : undefined
+
+    function handleFocusClick() {
+        if (selectedAssignmentId != null) handleToggleFocusAssignment(selectedAssignmentId)
+    }
+
     const viewStatusLabel = isSolutionVisible
         ? 'Viewing reference solution'
         : activeSubmission
@@ -141,8 +145,9 @@ export default function TeacherWorkspace({ sessionCode, assignmentData, session 
                     description={activeAssignment?.description ?? ''}
                     projectIdentity={projectIdentity}
                     hint={activeAssignment?.hint}
-                    onFocusClick={() => selectedAssignmentId != null && handleFocusAssignment(selectedAssignmentId)}
-                    isFocused={selectedAssignmentId != null && selectedAssignmentId === focusedAssignmentId}
+                    onFocusClick={handleFocusClick}
+                    isFocused={isSelectedAssignmentFocused}
+                    relatedSlideLink={relatedSlide ? { onNavigate: () => onNavigateToSlide(relatedSlide.id) } : undefined}
                     assignmentBreakdown={assignmentBreakdown}
                     selectedStudentName={attendanceStudents.find(s => s.studentId === selectedStudentId)?.displayName}
                     onClearStudentFilter={handleClearStudentFilter}

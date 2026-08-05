@@ -27,4 +27,6 @@ export interface AssignmentPanelProps {
   hint?: string
   onViewSubmission?: (item: SubmissionHistoryItem) => void;
   viewingSubmissionId?: string;
+  /** Present only when this assignment has a related Slides page — "Go to slide to learn more". */
+  relatedSlideLink?: { onNavigate: () => void }
 }

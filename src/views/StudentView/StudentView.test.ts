@@ -105,6 +105,9 @@ describe('StudentView', () => {
     fireEvent.change(screen.getByRole('textbox', { name: 'Your name' }), { target: { value: 'Maria' } })
     fireEvent.click(screen.getByRole('button', { name: 'Solo Practice' }))
 
+    // Opens on Slides by default — switch to Practice to see the editor chrome.
+    fireEvent.click(await screen.findByRole('button', { name: 'Practice' }))
+
     expect(await screen.findByText('Terminal')).toBeInTheDocument()
     expect(screen.getByText('Terminal')).toBeInTheDocument()
     expect(screen.getByTestId('editor')).toBeInTheDocument()
@@ -120,6 +123,8 @@ describe('StudentView', () => {
 
     render(createElement(StudentView))
 
+    fireEvent.click(await screen.findByRole('button', { name: 'Practice' }))
+
     expect(await screen.findByText('Terminal')).toBeInTheDocument()
     expect(screen.getByText('Room: ABCD1234')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Leave' })).toBeInTheDocument()
@@ -130,6 +135,8 @@ describe('StudentView', () => {
 
     render(createElement(StudentView))
 
+    fireEvent.click(await screen.findByRole('button', { name: 'Practice' }))
+
     expect(await screen.findByText('Terminal')).toBeInTheDocument()
     expect(screen.getByText('Solo practice')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Exit' })).toBeInTheDocument()
@@ -138,6 +145,7 @@ describe('StudentView', () => {
   it('shows a follow banner when the teacher moves to a different assignment, and follows on click', async () => {
     localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'join', code: 'ABCD1234' }))
     render(createElement(StudentView))
+    fireEvent.click(await screen.findByRole('button', { name: 'Practice' }))
     await screen.findByText('Terminal')
     expect(screen.getByRole('heading', { name: 'Hello, World!' })).toBeInTheDocument()
 
@@ -153,6 +161,7 @@ describe('StudentView', () => {
   it('bounces back to the entry screen when the teacher ends the session', async () => {
     localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'join', code: 'ABCD1234' }))
     render(createElement(StudentView))
+    fireEvent.click(await screen.findByRole('button', { name: 'Practice' }))
     await screen.findByText('Terminal')
 
     capturedJoinCallbacks?.onSessionEnded?.()
@@ -165,7 +174,7 @@ describe('StudentView', () => {
   it('leaving the session clears storage and returns to the entry screen', async () => {
     localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'solo' }))
     render(createElement(StudentView))
-    await screen.findByText('Terminal')
+    await screen.findByRole('button', { name: 'Practice' })
 
     fireEvent.click(screen.getByRole('button', { name: 'Exit' }))
 
@@ -177,6 +186,7 @@ describe('StudentView', () => {
   it('does not render a Raise Hand button in solo practice — there is no teacher to notify', async () => {
     localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'solo' }))
     render(createElement(StudentView))
+    fireEvent.click(await screen.findByRole('button', { name: 'Practice' }))
     await screen.findByText('Terminal')
 
     expect(screen.queryByText('Raise Hand')).not.toBeInTheDocument()
@@ -185,6 +195,7 @@ describe('StudentView', () => {
   it('raises the hand via the hub when Raise Hand is clicked in a room', async () => {
     localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'join', code: 'ABCD1234' }))
     render(createElement(StudentView))
+    fireEvent.click(await screen.findByRole('button', { name: 'Practice' }))
     await screen.findByText('Terminal')
     const studentId = localStorage.getItem('bootit.studentId')
 
@@ -196,6 +207,7 @@ describe('StudentView', () => {
   it('shows "Hand Raised" once the hub echoes the broadcast back, and lowers it on the next click', async () => {
     localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'join', code: 'ABCD1234' }))
     render(createElement(StudentView))
+    fireEvent.click(await screen.findByRole('button', { name: 'Practice' }))
     await screen.findByText('Terminal')
     const studentId = localStorage.getItem('bootit.studentId')
 

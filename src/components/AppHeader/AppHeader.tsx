@@ -17,6 +17,7 @@ import {
   APP_HEADER_SECTION_CLASS,
   APP_HEADER_SEPARATOR_CLASS,
   APP_HEADER_SECTION_NAME_CLASS,
+  APP_HEADER_TABS_CLASS,
   APP_HEADER_NAV_CLASS,
   APP_HEADER_CHIP_CLASS,
   APP_HEADER_SESSION_NAME_CLASS,
@@ -40,6 +41,7 @@ import {
 export default function AppHeader({
   variant = 'hero',
   section,
+  tabs,
   actions,
   sessionLabel,
   onSessionLabelClick,
@@ -73,6 +75,8 @@ export default function AppHeader({
             </span>
           )}
         </div>
+
+        {tabs && <div className={APP_HEADER_TABS_CLASS}>{tabs}</div>}
 
         <nav className={APP_HEADER_NAV_CLASS} aria-label="Main">
           {actions}

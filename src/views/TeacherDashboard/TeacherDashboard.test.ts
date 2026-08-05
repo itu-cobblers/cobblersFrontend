@@ -85,6 +85,8 @@ describe('TeacherDashboard', () => {
     await screen.findByRole('option', { name: 'Day 1' })
     fireEvent.click(screen.getByRole('button', { name: 'Create session' }))
     await screen.findByRole('button', { name: 'End session' })
+    // Opens on Slides by default — the roster/attendance list lives in Practice.
+    fireEvent.click(screen.getByRole('button', { name: 'Practice' }))
 
     capturedObserveCallbacks?.onRoster?.([
       { studentId: 'student-maria', displayName: 'Maria' },
@@ -118,6 +120,8 @@ describe('TeacherDashboard', () => {
     await screen.findByRole('option', { name: 'Day 1' })
     fireEvent.click(screen.getByRole('button', { name: 'Create session' }))
     await screen.findByRole('button', { name: 'End session' })
+    // Opens on Slides by default — the roster/attendance list lives in Practice.
+    fireEvent.click(screen.getByRole('button', { name: 'Practice' }))
 
     capturedObserveCallbacks?.onRoster?.([
       { studentId: 'student-maria', displayName: 'Maria' },

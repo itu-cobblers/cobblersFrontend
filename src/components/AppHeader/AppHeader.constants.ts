@@ -30,9 +30,16 @@ export const APP_HEADER_BAND_CLASS: Record<AppHeaderVariant, string> = {
  */
 export const APP_HEADER_IMAGE_CLASS = 'absolute inset-0 h-full w-full object-cover object-top'
 
-/** The translucent bar, `rgba(0,0,0,.7)` as on the ITU site. */
+/**
+ * The translucent bar, `rgba(0,0,0,.7)` as on the ITU site. No `justify-between` —
+ * `tabs` sits left-of-center right after the brand lockup, and `nav` (`ml-auto`
+ * on `APP_HEADER_NAV_CLASS`) is what pushes the right-hand actions to the edge.
+ */
 export const APP_HEADER_BAR_CLASS =
-  'absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-6 bg-black/70'
+  'absolute inset-x-0 top-0 z-20 flex items-center gap-6 bg-black/70'
+
+/** Wraps `tabs` — the gap from `APP_HEADER_BAR_CLASS` already separates it from the brand lockup. */
+export const APP_HEADER_TABS_CLASS = 'flex min-w-0 items-center'
 
 export const APP_HEADER_BAR_SIZE_CLASS: Record<AppHeaderVariant, string> = {
   hero: 'h-[70px] px-8',
@@ -69,8 +76,8 @@ export const APP_HEADER_SEPARATOR_CLASS = 'text-background/40'
 
 export const APP_HEADER_SECTION_NAME_CLASS = 'truncate'
 
-/** The right-hand action strip. */
-export const APP_HEADER_NAV_CLASS = 'flex min-w-0 shrink items-center gap-[2px]'
+/** The right-hand action strip — `ml-auto` is what pins it to the right now that the bar isn't `justify-between`. */
+export const APP_HEADER_NAV_CLASS = 'ml-auto flex min-w-0 shrink items-center gap-[2px]'
 
 /**
  * The action strip, after the ITU Student nav: a row of solid black boxes with
