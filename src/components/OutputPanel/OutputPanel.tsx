@@ -8,10 +8,13 @@ import {
   OUTPUT_STATUS_BASE_CLASS,
   OUTPUT_CONTENT_CLASS,
   OUTPUT_PLACEHOLDER_CLASS,
+  OUTPUT_FEEDBACK_CLASS,
+  OUTPUT_FEEDBACK_HEADER_CLASS,
+  OUTPUT_FEEDBACK_LIST_CLASS,
 } from './OutputPanel.constants'
-import { isErrorStatus, getStatusLabel } from './OutputPanel.utils'
+import { isErrorStatus, getStatusLabel, hasFeedback } from './OutputPanel.utils'
 
-export default function OutputPanel({ output, status, placeHolder }: OutputPanelProps) {
+export default function OutputPanel({ output, status, placeHolder, feedback }: OutputPanelProps) {
   const isError = isErrorStatus(status)
   const statusLabel = getStatusLabel(status)
 
@@ -36,6 +39,19 @@ export default function OutputPanel({ output, status, placeHolder }: OutputPanel
       <pre className={classNames(OUTPUT_CONTENT_CLASS, { 'text-term-err': isError })}>
         {output || <span className={OUTPUT_PLACEHOLDER_CLASS}>{placeHolder}</span>}
       </pre>
+      {hasFeedback(feedback) && (
+        <div className={OUTPUT_FEEDBACK_CLASS}>
+          <span className={OUTPUT_FEEDBACK_HEADER_CLASS}>
+            <Icon name="info" />
+            What to fix
+          </span>
+          <ul className={OUTPUT_FEEDBACK_LIST_CLASS}>
+            {feedback.map((message, index) => (
+              <li key={index}>{message}</li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }

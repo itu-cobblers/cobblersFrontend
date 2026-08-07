@@ -92,6 +92,7 @@ export interface SubmissionResponseDto {
     subId: string
     passed: boolean | null
     result: ExecuteResponseDto | null
+    feedback?: string[] | null
     submittedAt: string
 }
 
@@ -111,6 +112,7 @@ export interface SubmissionDetailDto {
     content: string
     result: ExecuteResponseDto | null
     passed: boolean | null
+    feedback?: string[] | null
     submittedAt: string
 }
 

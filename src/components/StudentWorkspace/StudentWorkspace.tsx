@@ -126,6 +126,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                 assignmentId: activeAssignment.id,
                 passed: submitResult.passed,
                 result: submitResult.result,
+                feedback: submitResult.feedback,
                 content: activeAssignment.kind === 'predict'
                     ? drafts.state.predict[activeAssignment.id] ?? ''
                     : (activeAssignment.kind === 'project' || (activeAssignment.kind === 'code' && activeAssignment.starterFiles))
@@ -267,6 +268,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     }
                                     status={viewingSubmission ? (viewingSubmission.result?.status ?? null ) : submit.outputState.status}
                                     placeHolder={mode.isReadOnly ? 'Back to Editor to run your code…' : 'Press Run to see your output…'}
+                                    feedback={viewingSubmission?.feedback}
                                 />
                             )}
                             {activeAssignment.kind === 'predict' && (
@@ -276,6 +278,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     expectedOutput={activeAssignment.expectedOutput}
                                     isSolutionVisible={isSolutionVisible}
                                     onAnswerChange={(val) => drafts.updatePredict(activeAssignment.id, val)}
+                                    feedback={viewingSubmission?.feedback}
                                 />
                             )}
                             {activeAssignment.kind === 'project' && !viewingSubmission && !isSolutionVisible && (
