@@ -1,7 +1,8 @@
 import classNames from 'classnames'
 import { Icon } from '@components/Icon'
 import { ProjectBrief } from '@components/ProjectBrief'
-import type { AssignmentPanelProps, AssignmentPanelTab } from './AssignmentPanel.types'
+import { renderBoldText } from '@lib/renderBoldText'
+import type { AssignmentPanelProps, AssignmentPanelTab } from '@/components'
 import { useHintDisclosure } from './AssignmentPanel.hooks'
 import {
   PANEL_CLASS,
@@ -91,14 +92,14 @@ export default function AssignmentPanel({
               </pre>
             ) : (
               <p key={index} className={PANEL_LESSON_TEXT_CLASS}>
-                {block.text}
+                {renderBoldText(block.text)}
               </p>
             ),
           )}
           { (
             <>
               <h3 className={PANEL_TASK_LABEL_CLASS}>Your task</h3>
-              <p className={PANEL_TASK_CLASS}>{description}</p>
+              <p className={PANEL_TASK_CLASS}>{renderBoldText(description)}</p>
             </>
           )}
 
@@ -118,7 +119,7 @@ export default function AssignmentPanel({
               </button>
               {isHintExpanded && (
                 <div className={PANEL_HINT_BODY_CLASS}>
-                  <code className={PANEL_HINT_CODE_CLASS}>{hint}</code>
+                  <code className={PANEL_HINT_CODE_CLASS}>{renderBoldText(hint)}</code>
                 </div>
               )}
             </div>
