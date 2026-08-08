@@ -1,4 +1,4 @@
-export type ProblemStatus = 'untried' | 'tried' | 'passed'
+export type ProblemStatus = 'untried' | 'tried' | 'passed' | 'error'
 
 export interface StatusBadgeProps {
   status: ProblemStatus

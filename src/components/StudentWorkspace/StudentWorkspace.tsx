@@ -250,6 +250,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     )}
                                     submittedAt={viewingSubmission.submittedAt}
                                     passed={viewingSubmission.passed}
+                                    result={viewingSubmission.result}
                                 />
                             )}
                             <CodeEditor

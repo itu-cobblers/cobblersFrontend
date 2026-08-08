@@ -19,10 +19,18 @@ interface UseTeacherSelectionProps {
     initialAssignmentId?: number | null
 }
 
+/**
+ * "Passed" wins if any attempt ever passed. Otherwise the *most recent*
+ * attempt decides tried vs error — an old compile error the student has
+ * since resubmitted past shouldn't keep flashing red.
+ */
 function getStudentAssignmentStatus(studentSubs: SessionSubmissionDto[]): ProblemStatus {
     if (studentSubs.length === 0) return 'untried';
-    if (studentSubs.some(s => s.passed === true)) return 'passed';
-    return 'tried';
+    if (studentSubs.some(s => s.status === 'passed')) return 'passed';
+    const latest = [...studentSubs].sort(
+        (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+    )[0];
+    return latest.status === 'error' ? 'error' : 'tried';
 }
 
 export function useTeacherSelection({
@@ -78,7 +86,9 @@ export function useTeacherSelection({
             )
             const status = getStudentAssignmentStatus(studentSubs)
             if (status === 'passed') passed++
-            else if (status === 'tried') tried++
+            // `error` still counts as an attempt for this breakdown — it's a
+            // 3-bucket count (passed/tried/untried), not a 4th bucket.
+            else if (status === 'tried' || status === 'error') tried++
         })
 
         return { passed, tried, untried: attendanceList.length - passed - tried }
@@ -132,7 +142,7 @@ export function useTeacherSelection({
                     studentName,
                     assignmentId: sub.assignmentId,
                     assignmentTitle,
-                    passed: sub.passed,
+                    status: sub.status,
                     submittedAt: sub.submittedAt,
                 }
             });

@@ -96,11 +96,13 @@ export interface SubmissionResponseDto {
     submittedAt: string
 }
 
+export type SubmissionStatus = 'passed' | 'tried' | 'error'
+
 export interface SubmissionHistoryDto {
     subId: string
     assignmentId: number
     sessionId?: string | null
-    passed: boolean | null
+    status: SubmissionStatus
     submittedAt: string
 }
 
@@ -120,7 +122,7 @@ export interface SessionSubmissionDto {
     subId: string
     studentId: string
     assignmentId: number
-    passed: boolean | null
+    status: SubmissionStatus
     submittedAt: string
 }
 

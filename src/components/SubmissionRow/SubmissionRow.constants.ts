@@ -1,3 +1,5 @@
+import type { SubmissionStatus } from '@types'
+
 /**
  * Active/hover washes are `bg-black/…` to match `LIST_ITEM_ACTIVE_CLASS` on
  * the assignment rail. They were `bg-white/…` — invisible on a white panel,
@@ -14,6 +16,12 @@ export const SUBMISSION_BADGE_PASSED_CLASS =
 
 export const SUBMISSION_BADGE_FAILED_CLASS =
     'inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-500/15 text-red-500'
+
+export const SUBMISSION_STATUS_LABEL: Record<SubmissionStatus, string> = {
+    passed: 'Passed',
+    tried: 'Tried',
+    error: 'Error',
+}
 
 export const SUBMISSION_TITLE_CLASS = 'text-sm font-medium text-foreground'
 

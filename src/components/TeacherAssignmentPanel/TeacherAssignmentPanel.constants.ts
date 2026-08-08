@@ -1,3 +1,5 @@
+import type { SubmissionStatus } from '@types'
+
 export const FILTER_BAR_CLASS = 'flex items-center gap-1.5 border-b border-border bg-card py-2 mb-3 text-xs flex-wrap'
 export const FILTER_BAR_LABEL_CLASS = 'text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mr-1'
 export const FILTER_PILL_CLASS =
@@ -24,4 +26,11 @@ export const BREAKDOWN_ITEM_CLASS: Record<'passed' | 'tried' | 'untried', string
   passed: 'text-status-success',
   tried: 'text-status-warning',
   untried: 'text-muted-foreground',
+}
+
+/** Per-row submission title label (Col 3) — mirrors `SubmissionRow`'s label, one word per `SubmissionStatus`. */
+export const SUBMISSION_STATUS_LABEL: Record<SubmissionStatus, string> = {
+  passed: 'Passed',
+  tried: 'Tried',
+  error: 'Error',
 }

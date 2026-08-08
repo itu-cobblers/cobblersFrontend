@@ -1,4 +1,4 @@
-import type { LessonBlock } from '@types'
+import type { LessonBlock, SubmissionStatus } from '@types'
 import type { AssignmentPanelTab } from '@components/AssignmentPanel/AssignmentPanel.types'
 import type { ProjectIdentity } from '@lib/projectIdentity'
 
@@ -8,7 +8,7 @@ export interface TeacherSubmissionItem {
   studentName: string;
   assignmentId: number;
   assignmentTitle: string;
-  passed: boolean | null;
+  status: SubmissionStatus;
   submittedAt: string;
 }
 export interface TeacherAssignmentPanelProps {
