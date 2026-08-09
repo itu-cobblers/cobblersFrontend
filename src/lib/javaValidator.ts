@@ -116,6 +116,36 @@ function isTypeToken(type: string): boolean {
 const FOR_LOOP_DECL = /^for\s*\(\s*(?:final\s+)?([A-Za-z_$][\w$]*(?:<[^<>]*>)?(?:\[\])*)\s+([A-Za-z_$][\w$]*)\s*=/
 const CATCH_DECL = /^\}?\s*catch\s*\(\s*([\w$.<>[\],|\s]+?)\s+([A-Za-z_$][\w$]*)\s*\)/
 
+// ── for/while loop header syntax ─────────────────────────────────────────────
+
+// `for (Type item : collection)` — the for-each form has no semicolons at all,
+// so it's excluded from the semicolon-count check below.
+const FOR_EACH_HEADER = /^for\s*\(\s*(?:final\s+)?[\w$.]+(?:<[^()]*>)?(?:\[\])*\s+[A-Za-z_$][\w$]*\s*:/
+
+function findMatchingParen(text: string, openIndex: number): number {
+  let depth = 0
+  for (let i = openIndex; i < text.length; i++) {
+    if (text[i] === '(') depth++
+    else if (text[i] === ')') {
+      depth--
+      if (depth === 0) return i
+    }
+  }
+  return -1
+}
+
+// A `for (name = …; …)` init clause with no type is only valid if `name` was
+// declared earlier — as a local, or as a field this validator's scope
+// tracking doesn't see (it only registers `Type name …` lines, so a
+// modifier-prefixed field like `private int i;` is invisible to it).
+// Deliberately over-matches — `return i;` looks like a declaration too — so
+// we skip flagging rather than risk a false "never declared" on code this
+// heuristic can't fully see.
+function isDeclaredLoosely(name: string, lines: string[]): boolean {
+  const pattern = new RegExp(`[A-Za-z_$][\\w$]*(?:<[^<>]*>)?(?:\\[\\])*\\s+${name}\\s*(=(?!=)|;|,|:)`)
+  return lines.some((l) => pattern.test(l))
+}
+
 const VAR_DECL = /^(?:final\s+)?([A-Za-z_$][\w$]*(?:<[^<>]*>)?(?:\[\])*)\s+([A-Za-z_$][\w$]*)\s*(=|;|,)/
 // Group 2 (the initializer, if any) is deliberately not parenthesis-aware —
 // a method-call initializer like `Math.max(1, 2)` never matches
@@ -255,6 +285,79 @@ export function collectJavaIssues(code: string): JavaIssue[] {
         parenStack.pop()
         // A stray ')' stays unflagged: false positives too common mid-edit.
       }
+    }
+
+    // ── for/while loop header syntax ──
+    const indentForLoopHeader = line.length - line.trimStart().length
+    if (/^for\b/.test(trimmed)) {
+      if (!/^for\s*\(/.test(trimmed)) {
+        issues.push({
+          message: "Missing '(' — for needs its header in parentheses: for (init; condition; update)",
+          line: lineNum,
+          startColumn: indentForLoopHeader + 1,
+          endColumn: line.trimEnd().length + 1,
+        })
+      } else {
+        const openIdx = trimmed.indexOf('(')
+        const closeIdx = findMatchingParen(trimmed, openIdx)
+        if (closeIdx !== -1 && !FOR_EACH_HEADER.test(trimmed)) {
+          const inner = trimmed.slice(openIdx + 1, closeIdx)
+          const semiOffsets: number[] = []
+          for (let k = 0; k < inner.length; k++) {
+            if (inner[k] === ';') semiOffsets.push(k)
+          }
+          if (semiOffsets.length > 2) {
+            const lastOffset = semiOffsets[semiOffsets.length - 1]
+            const trailingEmpty = inner.slice(lastOffset + 1).trim() === ''
+            const anchor = trailingEmpty ? lastOffset : semiOffsets[2]
+            const absIndex = openIdx + 1 + anchor
+            const startColumn = indentForLoopHeader + absIndex + 1
+            issues.push({
+              message: trailingEmpty && semiOffsets.length === 3
+                ? "Unexpected ';' — a for-loop header only has two: for (init; condition; update)"
+                : "Too many ';' in the for-loop header — expected exactly two: for (init; condition; update)",
+              line: lineNum,
+              startColumn,
+              endColumn: startColumn + 1,
+            })
+          } else if (semiOffsets.length < 2) {
+            const startColumn = indentForLoopHeader + closeIdx + 1
+            issues.push({
+              message: `Missing ';' — for (init; condition; update) needs two semicolons, found ${semiOffsets.length}`,
+              line: lineNum,
+              startColumn,
+              endColumn: startColumn + 1,
+            })
+          } else if (!forMatch) {
+            // Well-formed two-semicolon header, but the init clause is a bare
+            // `name = …` rather than `Type name = …` — check the name was
+            // ever declared before flagging "never declared".
+            const initRaw = inner.slice(0, semiOffsets[0])
+            const bareAssign = /^(\s*)([A-Za-z_$][\w$]*)\s*=(?!=)/.exec(initRaw)
+            if (bareAssign) {
+              const varName = bareAssign[2]
+              if (!lookupType(varName) && !isDeclaredLoosely(varName, lines)) {
+                const absIndex = openIdx + 1 + bareAssign[1].length
+                const startColumn = indentForLoopHeader + absIndex + 1
+                issues.push({
+                  message: `'${varName}' is used here but was never declared — write 'for (int ${varName} = …; …)' the first time you introduce it`,
+                  line: lineNum,
+                  startColumn,
+                  endColumn: startColumn + varName.length,
+                })
+              }
+            }
+          }
+        }
+      }
+    }
+    if (/^\}?\s*while\b/.test(trimmed) && !/^\}?\s*while\s*\(/.test(trimmed)) {
+      issues.push({
+        message: "Missing '(' — while needs a condition in parentheses: while (condition)",
+        line: lineNum,
+        startColumn: indentForLoopHeader + 1,
+        endColumn: line.trimEnd().length + 1,
+      })
     }
 
     // ── redeclared variable ──

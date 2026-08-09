@@ -284,4 +284,100 @@ describe('collectJavaIssues', () => {
     ].join('\n')
     expect(collectJavaIssues(code)).toEqual([])
   })
+
+  it('flags a trailing extra semicolon in a for-loop header', () => {
+    const issues = collectJavaIssues(['for (i = 10; i > 0; i --;){', '}'].join('\n'))
+    expect(issues).toHaveLength(1)
+    expect(issues[0].message).toContain("Unexpected ';'")
+    expect(issues[0].message).toContain('only has two')
+  })
+
+  it('flags a for-loop header missing a semicolon', () => {
+    const issues = collectJavaIssues(['for (i = 0 i < 10; i++) {', '}'].join('\n'))
+    expect(issues).toHaveLength(1)
+    expect(issues[0].message).toContain("Missing ';'")
+    expect(issues[0].message).toContain('found 1')
+  })
+
+  it('flags a for-loop header with too many semicolons', () => {
+    const issues = collectJavaIssues(['for (i = 0; i < 10; i++; i++) {', '}'].join('\n'))
+    expect(issues).toHaveLength(1)
+    expect(issues[0].message).toContain('Too many')
+  })
+
+  it('flags a for-loop missing its parentheses', () => {
+    const issues = collectJavaIssues(['for i = 0; i < 10; i++ {', '}'].join('\n'))
+    expect(issues).toHaveLength(1)
+    expect(issues[0].message).toContain("Missing '('")
+  })
+
+  it('does not flag a well-formed for-loop header', () => {
+    expect(collectJavaIssues(['for (int i = 0; i < 10; i++) {', '}'].join('\n'))).toEqual([])
+    expect(collectJavaIssues(['for (;;) {', '}'].join('\n'))).toEqual([])
+  })
+
+  it('does not flag a for-each loop header', () => {
+    expect(collectJavaIssues(['for (int item : numbers) {', '}'].join('\n'))).toEqual([])
+    expect(collectJavaIssues(['for (String s : names) {', '}'].join('\n'))).toEqual([])
+  })
+
+  it('flags a while-loop missing its parentheses', () => {
+    const issues = collectJavaIssues(['while x > 0 {', '}'].join('\n'))
+    expect(issues).toHaveLength(1)
+    expect(issues[0].message).toContain("Missing '('")
+  })
+
+  it('does not flag a well-formed while-loop or do-while', () => {
+    expect(collectJavaIssues(['while (x > 0) {', '}'].join('\n'))).toEqual([])
+    const code = [
+      'do {',
+      '    x++;',
+      '} while (x < 10);',
+    ].join('\n')
+    expect(collectJavaIssues(code)).toEqual([])
+  })
+
+  it('flags a for-loop variable used without ever being declared', () => {
+    const code = [
+      'public class Main {',
+      '    public static void main(String[] args) {',
+      '        for (i = 10; i > 0; i --){',
+      '            System.out.println(i * 5);',
+      '        }',
+      '    }',
+      '}',
+    ].join('\n')
+    const issues = collectJavaIssues(code)
+    expect(issues).toHaveLength(1)
+    expect(issues[0].message).toContain("'i' is used here but was never declared")
+    expect(issues[0].line).toBe(3)
+  })
+
+  it('does not flag a for-loop reusing a variable declared earlier', () => {
+    const code = [
+      'public class Main {',
+      '    public static void main(String[] args) {',
+      '        int i;',
+      '        for (i = 10; i > 0; i --) {',
+      '            System.out.println(i * 5);',
+      '        }',
+      '    }',
+      '}',
+    ].join('\n')
+    expect(collectJavaIssues(code)).toEqual([])
+  })
+
+  it('does not flag a for-loop reusing a field-like variable this heuristic cannot see', () => {
+    const code = [
+      'public class Main {',
+      '    private static int i;',
+      '    public static void main(String[] args) {',
+      '        for (i = 10; i > 0; i --) {',
+      '            System.out.println(i * 5);',
+      '        }',
+      '    }',
+      '}',
+    ].join('\n')
+    expect(collectJavaIssues(code)).toEqual([])
+  })
 })
