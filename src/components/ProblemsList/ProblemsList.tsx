@@ -30,7 +30,7 @@ import {
   LIST_RAISE_HAND_HOVER_ICON_CLASS,
   LIST_TIMER_BADGE_CLASS,
   LIST_ITEM_LIVE_CLASS,
-  KIND_LABEL, LIST_ITEM_LIVE_BORDER_CLASS,
+  KIND_LABEL, LIST_ITEM_LIVE_BORDER_CLASS, LIST_FOOTER_ACTIONS_CLASS,
 } from './ProblemsList.constants'
 import {StatusBadge} from "@components/StatusBadge";
 import { formatMoveToNext } from './ProblemsList.utils'
@@ -94,6 +94,8 @@ export default function ProblemsList({
     onTabChange(activeTab === 'history' ? 'session' : 'history')
   }
 
+  const isViewingHistory = activeTab === 'history';
+
   return (
     <aside className={classNames(LIST_CLASS_BASE, isOpen ? LIST_CLASS_OPEN : LIST_CLASS_CLOSED)}>
       {/* Same markup/classes as `TeacherProblemsList`'s header — the two rails' top rows must not drift apart. */}
@@ -138,46 +140,47 @@ export default function ProblemsList({
           <div className={LIST_FOOTER_LEGEND_CLASS}>
             <StatusBadge status={'tried'} size="s" label='Tried' />
             <StatusBadge status={'passed'} size="s" label='Passed' />
-            <span> | </span>
-            <button
-              type="button"
-              aria-label="View submission history"
-              aria-pressed={activeTab === 'history'}
-              onClick={handleToggleHistory}
-              className={classNames(
-                LIST_HISTORY_VIEW_TOGGLE_CLASS,
-                activeTab === 'history' ? LIST_HISTORY_VIEW_TOGGLE_ACTIVE_CLASS : LIST_HISTORY_VIEW_TOGGLE_IDLE_CLASS,
-              )}
-            >
-              View history
-            </button>
+            <StatusBadge status={'error'} size="s" label='Error' />
           </div>
-
-          {onToggleHand && (
-            <button
-              type="button"
-              aria-pressed={!!isHandRaised}
-              onClick={onToggleHand}
-              className={classNames(
-                LIST_RAISE_HAND_CLASS,
-                isHandRaised ? LIST_RAISE_HAND_ACTIVE_CLASS : LIST_RAISE_HAND_IDLE_CLASS,
-              )}
-            >
-              {isHandRaised ? (
-                <>
+          <div className={LIST_FOOTER_ACTIONS_CLASS}>
+            {onToggleHand && (
+                <button
+                    type="button"
+                    aria-pressed={!!isHandRaised}
+                    onClick={onToggleHand}
+                    className={classNames(
+                        LIST_RAISE_HAND_CLASS,
+                        isHandRaised ? LIST_RAISE_HAND_ACTIVE_CLASS : LIST_RAISE_HAND_IDLE_CLASS,
+                    )}
+                >
+                  {isHandRaised ? (
+                      <>
                   <span className={LIST_RAISE_HAND_DEFAULT_ICON_CLASS}>
                     <Icon name="handStop" />
                   </span>
-                  <span className={LIST_RAISE_HAND_HOVER_ICON_CLASS}>
+                        <span className={LIST_RAISE_HAND_HOVER_ICON_CLASS}>
                     <Icon name="handOff" />
                   </span>
-                </>
-              ) : (
-                <Icon name="handStop" />
-              )}
-              {isHandRaised ? 'Hand Raised' : 'Raise Hand'}
+                      </>
+                  ) : (
+                      <Icon name="handStop" />
+                  )}
+                  {isHandRaised ? 'Hand Raised' : 'Raise Hand'}
+                </button>
+            )}
+            <button
+                type="button"
+                aria-label="View submission history"
+                aria-pressed={isViewingHistory}
+                onClick={handleToggleHistory}
+                className={classNames(
+                    LIST_HISTORY_VIEW_TOGGLE_CLASS,
+                    isViewingHistory ? LIST_HISTORY_VIEW_TOGGLE_ACTIVE_CLASS : LIST_HISTORY_VIEW_TOGGLE_IDLE_CLASS,
+                )}
+            >
+              {isViewingHistory? 'View assignments' : 'View history'}
             </button>
-          )}
+          </div>
         </div>
       )}
       </div>

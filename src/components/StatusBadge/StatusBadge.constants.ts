@@ -3,6 +3,7 @@ import type {ProblemStatus} from "@components";
 export const STATUS_ICON = {
   passed: 'check',
   tried: 'alert',
+  error: 'x',
   untried: null
 } as const
 
@@ -15,6 +16,7 @@ export const STATUS_ICON = {
 export const STATUS_COLORS: Record<ProblemStatus, string> = {
   passed: 'bg-status-success/15 text-status-success',
   tried: 'bg-status-warning/15 text-status-warning',
+  error: 'bg-status-error/15 text-status-error',
   untried: 'bg-foreground/15 text-muted-foreground',
 }
 

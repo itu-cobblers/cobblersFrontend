@@ -60,7 +60,9 @@ export const LIST_ITEM_LIVE_CLASS = 'ml-auto text-[9px] font-semibold uppercase 
 export const LIST_FOOTER_CLASS = 'flex flex-col items-center gap-1.5 text-[10px]'
 
 /** `flex-wrap` is the fallback, not the plan — Tried, Passed and the History toggle are sized to fit one row; they only wrap on a genuinely narrow rail. */
-export const LIST_FOOTER_LEGEND_CLASS = 'flex flex-wrap items-center justify-center px-4 py-2 gap-2'
+export const LIST_FOOTER_LEGEND_CLASS = 'flex items-center justify-center px-4 py-2 gap-2'
+
+export const LIST_FOOTER_ACTIONS_CLASS = 'flex items-center justify-center py-2 gap-2'
 
 /** "View history" toggle, sharing the footer legend row with the Tried/Passed badges. */
 export const LIST_HISTORY_VIEW_TOGGLE_CLASS =
@@ -76,7 +78,7 @@ export const LIST_HISTORY_VIEW_TOGGLE_IDLE_CLASS = 'text-muted-foreground hover:
  * `group/hand` scopes the icon-swap below to hovering this button only.
  */
 export const LIST_RAISE_HAND_CLASS =
-  'group/hand flex w-full items-center justify-center gap-1.5 rounded px-2 py-1.5 text-[11px] font-medium normal-case tracking-normal transition-colors'
+  'group/hand flex  items-center justify-center gap-1.5 rounded px-2 py-1.5 text-[12px] font-medium normal-case tracking-normal transition-colors'
 
 /** Filled solid while the hand is up, white text/icon to stay readable on the dark fill. Hover lightens slightly for feedback. */
 export const LIST_RAISE_HAND_ACTIVE_CLASS =

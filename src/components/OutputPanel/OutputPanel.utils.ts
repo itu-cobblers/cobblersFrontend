@@ -9,3 +9,7 @@ export function getStatusLabel(status: ExecuteStatus | null): string {
   if (!status) return ''
   return OUTPUT_STATUS_LABEL[status]
 }
+
+export function hasFeedback(feedback: string[] | null | undefined): feedback is string[] {
+  return Array.isArray(feedback) && feedback.length > 0
+}

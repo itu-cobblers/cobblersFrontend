@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { createElement } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import ProblemsList from './ProblemsList'
-import type { ProblemListItem } from './ProblemsList.types'
+import type { ProblemListItem } from '@components'
 import { formatSubmittedAt } from './ProblemsList.utils'
 
 const sessionItems: ProblemListItem[] = [
@@ -33,6 +33,13 @@ describe('ProblemsList', () => {
     expect(screen.getByText('Hello, World!')).toBeInTheDocument()
     expect(screen.getByText('Predict this')).toBeInTheDocument()
     expect(screen.getByText('Build a Tree')).toBeInTheDocument()
+  })
+
+  it('renders the Tried/Passed/Error legend', () => {
+    render(createElement(ProblemsList, baseProps))
+    expect(screen.getByText('Tried')).toBeInTheDocument()
+    expect(screen.getByText('Passed')).toBeInTheDocument()
+    expect(screen.getByText('Error')).toBeInTheDocument()
   })
 
   // The History toggle lives in the footer, beside the Tried/Passed legend,

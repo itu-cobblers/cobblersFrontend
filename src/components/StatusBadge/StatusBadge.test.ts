@@ -19,4 +19,9 @@ describe('StatusBadge', () => {
     const { container } = render(createElement(StatusBadge, { status: 'untried' }))
     expect(container.querySelector('svg')).not.toBeInTheDocument()
   })
+
+  it('renders the error label alongside an icon', () => {
+    render(createElement(StatusBadge, { status: 'error', label: 'Error' }))
+    expect(screen.getByText('Error')).toBeInTheDocument()
+  })
 })

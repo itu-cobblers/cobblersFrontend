@@ -1,6 +1,7 @@
 import {
     SUBMISSION_ROW_ACTIVE_CLASS,
     SUBMISSION_ROW_IDLE_CLASS,
+    SUBMISSION_STATUS_LABEL,
     SUBMISSION_TITLE_CLASS,
     SUBMISSION_META_CLASS,
 } from './SubmissionRow.constants'
@@ -14,8 +15,6 @@ export default function SubmissionRow({
     isActive = false,
     onClick,
 }: SubmissionRowProps) {
-    const isPassed = submission.passed !== false
-
     return (
         <li
             onClick={onClick}
@@ -24,9 +23,9 @@ export default function SubmissionRow({
             <div className="flex items-start justify-between gap-2 w-full">
                 <div className="flex items-center gap-3">
                     <StatusBadge
-                        status={isPassed ? 'passed' : 'tried'}
+                        status={submission.status}
                         size="m"
-                        label={isPassed ? 'Passed' : 'Tried'}
+                        label={SUBMISSION_STATUS_LABEL[submission.status]}
                     />
                     <div>
                         <div className={SUBMISSION_TITLE_CLASS}>{title}</div>
