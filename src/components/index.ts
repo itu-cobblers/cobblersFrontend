@@ -97,3 +97,5 @@ export { PortalShell } from './PortalShell'
 export type { PortalShellProps } from './PortalShell'
 
 export { AppColophon } from './AppColophon'
+
+export { ScreenSizeBlocker } from './ScreenSizeBlocker'
