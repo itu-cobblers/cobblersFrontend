@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
 import {
   applyTheme,
   getSystemTheme,
   readThemePreference,
+  subscribeThemePreference,
   watchSystemTheme,
   writeThemePreference,
   type ResolvedTheme,
@@ -14,12 +15,14 @@ import {
  * preference, because consumers that aren't CSS — Monaco's theme name, for one
  * — need to know which one is actually showing, not which one was asked for.
  *
- * `theme` is derived rather than held in state: storing it would mean setting
- * state from an effect on every preference change, which cascades renders.
+ * Preference and system theme are read via `useSyncExternalStore` rather than
+ * local `useState`: every call site — `AppHeader`'s toggle, `CodeEditor`'s
+ * theme prop — must see the same value the moment it changes, not just the
+ * component that called `setPreference`.
  */
 export function useTheme() {
-  const [preference, setPreference] = useState<ThemePreference>(readThemePreference)
-  const [systemTheme, setSystemTheme] = useState<ResolvedTheme>(getSystemTheme)
+  const preference = useSyncExternalStore(subscribeThemePreference, readThemePreference)
+  const systemTheme = useSyncExternalStore(watchSystemTheme, getSystemTheme)
 
   const theme: ResolvedTheme = preference === 'system' ? systemTheme : preference
 
@@ -27,13 +30,8 @@ export function useTheme() {
     applyTheme(theme)
   }, [theme])
 
-  // Tracked always, applied only while the preference is `system` — an explicit
-  // choice shouldn't be overridden when the OS appearance changes.
-  useEffect(() => watchSystemTheme(setSystemTheme), [])
-
   function changePreference(next: ThemePreference) {
     writeThemePreference(next)
-    setPreference(next)
   }
 
   return { theme, preference, setPreference: changePreference }
