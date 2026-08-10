@@ -17,7 +17,7 @@ export const BUTTON_BASE_CLASS =
 export const BUTTON_BASE_TYPOGRAPHY = TYPOGRAPHY_LEVELS.bodyStrong.tailwindClass;
 
 export const BUTTON_VARIANT_CLASS: Record<ButtonVariant, string> = {
-  primary: 'bg-primary text-white enabled:hover:bg-primary',
+  primary: 'bg-primary text-primary-foreground enabled:hover:bg-primary',
   ghost: 'border border-border bg-transparent text-muted-foreground enabled:hover:border-muted-foreground enabled:hover:text-foreground',
   solid: 'bg-primary text-primary-foreground enabled:hover:bg-primary/90',
   zinc: 'bg-zinc-700 text-white hover:bg-zinc-600'

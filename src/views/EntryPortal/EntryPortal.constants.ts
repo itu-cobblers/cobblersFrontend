@@ -15,19 +15,19 @@ export { PORTAL_FIELD_CLASS as ENTRY_PORTAL_NAME_INPUT_CLASS } from '@components
 export const ENTRY_PORTAL_CTA_ROW_CLASS = 'mt-12 flex flex-col-reverse items-center justify-center gap-4 sm:flex-row'
 
 export const ENTRY_PORTAL_SOLO_BTN_CLASS =
-  'inline-flex items-center gap-3 rounded-md border border-border bg-black/[0.03] px-6 py-3 text-sm font-medium text-secondary-foreground transition hover:border-black/30 hover:bg-black/10 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40'
+  'inline-flex items-center gap-3 rounded-md border border-border bg-wash-hover px-6 py-3 text-sm font-medium text-secondary-foreground transition hover:border-wash-line hover:bg-wash-panel hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40'
 
 export const ENTRY_PORTAL_JOIN_BTN_CLASS =
-  'inline-flex items-center gap-3 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-black/[0.03] disabled:text-foreground/40 disabled:border disabled:border-border'
+  'inline-flex items-center gap-3 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-wash-hover disabled:text-foreground/40 disabled:border disabled:border-border'
 
 export const ENTRY_PORTAL_JOIN_BTN_CODE_CLASS =
-  'rounded bg-black/20 px-2 py-0.5 text-xs font-semibold tracking-wider'
+  'rounded bg-wash-strong px-2 py-0.5 text-xs font-semibold tracking-wider'
 
 export const ENTRY_PORTAL_NO_SESSION_ROW_CLASS =
-  'inline-flex items-center gap-3 rounded-md border border-border bg-black/[0.03] px-6 py-3 text-sm font-medium text-foreground/40'
+  'inline-flex items-center gap-3 rounded-md border border-border bg-wash-hover px-6 py-3 text-sm font-medium text-foreground/40'
 
 export const ENTRY_PORTAL_REFRESH_BTN_CLASS =
-  'inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition hover:bg-black/10 hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40'
+  'inline-flex h-6 w-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-foreground/50 transition hover:bg-wash-panel hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40'
 
 export const ENTRY_PORTAL_NO_SESSION_LABEL = 'No current active session to join'
 
