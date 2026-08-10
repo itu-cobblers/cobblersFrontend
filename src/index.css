@@ -57,6 +57,7 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
   --color-terminal: var(--terminal);
+  --color-terminal-raised: var(--terminal-raised);
   --color-terminal-line: var(--terminal-line);
   --color-terminal-ink: var(--terminal-ink);
   --color-terminal-muted: var(--terminal-muted);
@@ -154,6 +155,9 @@
   /* Dark "glass" zone — Monaco stays vs-dark, so the editor/output area keeps
      this palette regardless of light/dark mode (see CLAUDE.md). */
   --terminal: oklch(1 0 0);
+  /* Same as --terminal in light — OutputPanel/PredictPanel/FileUpload only need
+     to sit visibly lighter than the editor once the theme goes dark. */
+  --terminal-raised: oklch(1 0 0);
   --terminal-line: oklch(0 0 0);
   --terminal-ink: oklch(0.6 0.01 260);
   --terminal-muted: oklch(0.43 0.014 260);
@@ -212,8 +216,12 @@
   --scrim: oklch(0 0 0 / 60%);      /* still shadow, just deeper on a dark page */
 
   /* The code zone. `--terminal` is the editor background — the darkest
-     surface in the theme, per the note above. */
+     surface in the theme, per the note above. `--terminal-raised` is one
+     notch above that: OutputPanel/PredictPanel/FileUpload sit a shade
+     lighter than the editor itself so the code stays visually the darkest,
+     most-recessed surface. */
   --terminal: #121314;
+  --terminal-raised: #1c1e20;
   --terminal-line: oklch(1 0 0 / 8%);
   --terminal-ink: #e6edf3;
   --terminal-muted: #9198a1;
@@ -233,8 +241,11 @@
   --status-error-bg: #2b1b1a;
   --status-error-text: #ffb3ae;
 
-  /* Raise Hand button — same fixed colors as light; not part of the app's reachable dark palette (see note above .dark). */
-  --raise-hand-idle-bg: oklch(0.968 0.011 226.0); /* #EDF6FA */
+  /* Raise Hand button. Active keeps the same saturated blue fill in both
+     themes — it's a status color, not a surface. Idle has to invert though:
+     it's a near-white pastel and was previously left unstyled here, so it
+     rendered as a bright light box on the dark page. */
+  --raise-hand-idle-bg: #1c2b38;
   --raise-hand-active-bg: oklch(0.437 0.097 247.5); /* #1C5584 */
 
 }

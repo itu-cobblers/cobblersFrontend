@@ -26,7 +26,7 @@ export const PANEL_LESSON_TEXT_CLASS = 'mb-3 whitespace-pre-wrap text-[15px] lea
 export const PANEL_LESSON_CODE_CLASS =
   'mb-3 overflow-x-auto bg-wash-panel px-3.5 py-3 font-mono text-[12px] leading-relaxed whitespace-pre text-foreground/90'
 
-export const PANEL_TASK_LABEL_CLASS = 'mb-1.5 mt-4 text-[13px] font-semibold uppercase tracking-[0.8px] text-black'
+export const PANEL_TASK_LABEL_CLASS = 'mb-1.5 mt-4 text-[13px] font-semibold uppercase tracking-[0.8px] text-foreground'
 
 export const PANEL_TASK_CLASS = 'whitespace-pre-wrap text-[15px] leading-relaxed text-foreground'
 
