@@ -15,17 +15,22 @@ export const SUBMIT_BUTTON_ICON: Record<SubmitButtonStatus, IconName> = {
   waiting: 'spinner'
 }
 
-/** Icon stays white on every status — the pill's own background now carries the status color. */
-export const SUBMIT_BUTTON_ICON_CLASS = 'text-primary-foreground'
+export const SUBMIT_BUTTON_ICON_CLASS = 'text-brand-ink'
 
 export const SUBMIT_BUTTON_CLASS = `${BUTTON_BASE_CLASS} ${BUTTON_BASE_TYPOGRAPHY} ${BUTTON_HEIGHT_CLASS} min-w-[128px] relative`;
 
+/**
+ * Brand chrome, not CTA colour: this button occupies the same slot in the
+ * editor rail that `RunMenu` does on `code` assignments, so it has to stay
+ * black in both themes or the two kinds would disagree. Same hover as the run
+ * control, for the same reason.
+ */
 export const SUBMIT_BUTTON_BG_CLASS: Record<SubmitButtonStatus, string> = {
-  idle: 'bg-primary text-primary-foreground enabled:hover:bg-primary/90',
-  waiting: 'bg-primary text-primary-foreground'
+  idle: 'bg-brand-surface text-brand-ink enabled:hover:bg-brand-surface-hover',
+  waiting: 'bg-brand-surface text-brand-ink'
 }
 
-/** Waiting darkens the pill (still `bg-primary`, just dimmed) and blocks re-clicks. */
+/** Waiting darkens the pill (still `bg-brand-surface`, just dimmed) and blocks re-clicks. */
 export const SUBMIT_BUTTON_WAITING_CLASS = 'brightness-[0.6]'
 
 export const SUBMIT_BUTTON_ICON_WRAP_CLASS = 'flex h-5 w-5 items-center justify-center'

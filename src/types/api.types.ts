@@ -92,14 +92,17 @@ export interface SubmissionResponseDto {
     subId: string
     passed: boolean | null
     result: ExecuteResponseDto | null
+    feedback?: string[] | null
     submittedAt: string
 }
+
+export type SubmissionStatus = 'passed' | 'tried' | 'error'
 
 export interface SubmissionHistoryDto {
     subId: string
     assignmentId: number
     sessionId?: string | null
-    passed: boolean | null
+    status: SubmissionStatus
     submittedAt: string
 }
 
@@ -111,6 +114,7 @@ export interface SubmissionDetailDto {
     content: string
     result: ExecuteResponseDto | null
     passed: boolean | null
+    feedback?: string[] | null
     submittedAt: string
 }
 
@@ -118,7 +122,7 @@ export interface SessionSubmissionDto {
     subId: string
     studentId: string
     assignmentId: number
-    passed: boolean | null
+    status: SubmissionStatus
     submittedAt: string
 }
 

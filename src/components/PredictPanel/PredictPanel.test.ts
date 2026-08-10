@@ -37,4 +37,35 @@ describe('PredictPanel', () => {
     ).toBeInTheDocument()
     expect(screen.queryByPlaceholderText(/type what you think it prints/i)).not.toBeInTheDocument()
   })
+
+  it('lists feedback messages under a "What to fix" heading', () => {
+    render(createElement(PredictPanel, {
+      ...base,
+      status: 'tried',
+      feedback: ['print the exact sentence for whichever branch runs'],
+    }))
+    expect(screen.getByText('What to fix')).toBeInTheDocument()
+    expect(screen.getByText('print the exact sentence for whichever branch runs')).toBeInTheDocument()
+  })
+
+  it('omits the feedback section when absent, null, or empty', () => {
+    render(createElement(PredictPanel, { ...base, status: 'tried' }))
+    expect(screen.queryByText('What to fix')).not.toBeInTheDocument()
+
+    render(createElement(PredictPanel, { ...base, status: 'tried', feedback: null }))
+    expect(screen.queryAllByText('What to fix')).toHaveLength(0)
+
+    render(createElement(PredictPanel, { ...base, status: 'tried', feedback: [] }))
+    expect(screen.queryAllByText('What to fix')).toHaveLength(0)
+  })
+
+  it('hides feedback while the reference solution is showing', () => {
+    render(createElement(PredictPanel, {
+      ...base,
+      status: 'tried',
+      isSolutionVisible: true,
+      feedback: ['some hint'],
+    }))
+    expect(screen.queryByText('What to fix')).not.toBeInTheDocument()
+  })
 })

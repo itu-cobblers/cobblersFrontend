@@ -20,18 +20,29 @@ interface ProgressOptions {
     pendingAssignmentId?: number | null
 }
 
+/**
+ * `items` arrives newest-first (per CONTRACT.md), so the first time an
+ * assignmentId is seen here is its most recent attempt — `erroredLatest`
+ * tracks that without a second sort pass.
+ */
 function collectStatusSets(items: SubmissionHistoryItem[], getAssignment: (id: number) => Assignment | undefined) {
     const attempted = new Set<number>()
     const passed = new Set<number>()
+    const erroredLatest = new Set<number>()
+    const seenLatest = new Set<number>()
 
     items.forEach(item => {
         attempted.add(item.assignmentId)
         const assignment = getAssignment(item.assignmentId)
-        if (assignment?.kind === 'project' || item.passed === true) {
+        if (assignment?.kind === 'project' || item.status === 'passed') {
             passed.add(item.assignmentId)
         }
+        if (!seenLatest.has(item.assignmentId)) {
+            seenLatest.add(item.assignmentId)
+            if (item.status === 'error') erroredLatest.add(item.assignmentId)
+        }
     })
-    return { attempted, passed }
+    return { attempted, passed, erroredLatest }
 }
 
 export function useWorkspaceProgress({
@@ -66,23 +77,23 @@ export function useWorkspaceProgress({
     const latestHistoryAssignmentId = submissionHistory[0]?.assignmentId
 
     // Global — every room the student has ever submitted in. Feeds the History tab only.
-    const { attemptedIds, passedIds } = useMemo(
+    const { attemptedIds, passedIds, erroredIds } = useMemo(
         () => {
-            const { attempted, passed } = collectStatusSets(submissionHistory, getAssignment)
-            return { attemptedIds: attempted, passedIds: passed }
+            const { attempted, passed, erroredLatest } = collectStatusSets(submissionHistory, getAssignment)
+            return { attemptedIds: attempted, passedIds: passed, erroredIds: erroredLatest }
         },
         [submissionHistory, getAssignment]
     )
 
     // Scoped to the current room — feeds the Session tab, so a pass in another room/day
     // doesn't leak into today's status. Solo (no `sessionCode`) matches un-roomed submissions.
-    const { attemptedIds: sessionAttemptedIds, passedIds: sessionPassedIds } = useMemo(
+    const { attemptedIds: sessionAttemptedIds, passedIds: sessionPassedIds, erroredIds: sessionErroredIds } = useMemo(
         () => {
             const sessionOnly = submissionHistory.filter((item) =>
                 sessionCode ? item.sessionId === sessionCode : !item.sessionId
             )
-            const { attempted, passed } = collectStatusSets(sessionOnly, getAssignment)
-            return { attemptedIds: attempted, passedIds: passed }
+            const { attempted, passed, erroredLatest } = collectStatusSets(sessionOnly, getAssignment)
+            return { attemptedIds: attempted, passedIds: passed, erroredIds: erroredLatest }
         },
         [submissionHistory, getAssignment, sessionCode]
     )
@@ -151,9 +162,12 @@ export function useWorkspaceProgress({
         }
     }
 
-    const getStatus = (id: number, attempted: Set<number>, passed: Set<number>): ProblemStatus => {
+    const getStatus = (id: number, attempted: Set<number>, passed: Set<number>, errored: Set<number>): ProblemStatus => {
         if (passed.has(id) || assignmentProgress.completedAssignments.has(id)) {
             return 'passed'
+        }
+        if (errored.has(id)) {
+            return 'error'
         }
         if (attempted.has(id)) {
             return 'tried'
@@ -165,7 +179,7 @@ export function useWorkspaceProgress({
         id: a.id,
         title: a.title,
         kind: a.kind,
-        status: getStatus(a.id, sessionAttemptedIds, sessionPassedIds),
+        status: getStatus(a.id, sessionAttemptedIds, sessionPassedIds, sessionErroredIds),
     }))
 
     const historyProblems = useMemo(() => {
@@ -176,10 +190,10 @@ export function useWorkspaceProgress({
                 id: assignment.id,
                 title: assignment.title,
                 kind: assignment.kind,
-                status: getStatus(id, attemptedIds, passedIds)
+                status: getStatus(id, attemptedIds, passedIds, erroredIds)
             }
         }).filter(Boolean) as { id: number, title: string, kind: AssignmentKind, status: ProblemStatus }[]
-    }, [attemptedIds, getAssignment, passedIds, assignmentProgress.completedAssignments])
+    }, [attemptedIds, getAssignment, passedIds, erroredIds, assignmentProgress.completedAssignments])
 
     const focusedAssignmentId = teacherFocus?.kind === 'assignment' ? teacherFocus.id : null
     const teacherFocusedAssignment = focusedAssignmentId != null

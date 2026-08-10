@@ -2,6 +2,7 @@ import classNames from 'classnames'
 import { Icon } from '@components/Icon'
 import { ProjectBrief } from '@components/ProjectBrief'
 import { formatAttemptTime } from '@components/ProblemsList'
+import { renderBoldText } from '@lib/renderBoldText'
 import type { AssignmentPanelTab } from '@components/AssignmentPanel/AssignmentPanel.types'
 import type {TeacherAssignmentPanelProps, TeacherSubmissionItem} from './TeacherAssignmentPanel.types'
 import { useHintDisclosure } from '@components/AssignmentPanel/AssignmentPanel.hooks'
@@ -43,6 +44,7 @@ import {
   TITLE_ROW_CLASS,
   BREAKDOWN_ROW_CLASS,
   BREAKDOWN_ITEM_CLASS,
+  SUBMISSION_STATUS_LABEL,
 } from './TeacherAssignmentPanel.constants'
 import {SubmissionRow} from "@components/SubmissionRow";
 
@@ -130,14 +132,14 @@ export default function TeacherAssignmentPanel({
               </pre>
             ) : (
               <p key={index} className={PANEL_LESSON_TEXT_CLASS}>
-                {block.text}
+                {renderBoldText(block.text)}
               </p>
             ),
           )}
           {!projectIdentity && (
             <>
               <h3 className={PANEL_TASK_LABEL_CLASS}>Task Description</h3>
-              <p className={PANEL_TASK_CLASS}>{description}</p>
+              <p className={PANEL_TASK_CLASS}>{renderBoldText(description)}</p>
             </>
           )}
 
@@ -156,7 +158,7 @@ export default function TeacherAssignmentPanel({
               </button>
               {isHintExpanded && (
                 <div className={PANEL_HINT_BODY_CLASS}>
-                  <code className={PANEL_HINT_CODE_CLASS}>{hint}</code>
+                  <code className={PANEL_HINT_CODE_CLASS}>{renderBoldText(hint)}</code>
                 </div>
               )}
             </div>
@@ -208,7 +210,7 @@ export default function TeacherAssignmentPanel({
                       submission={submission}
                       isActive={isActive}
                       onClick={() => onSelectSubmission?.(submission.subId)}
-                      title={`${submission.studentName} — ${submission.passed ? 'Passed' : 'Failed'}`}
+                      title={`${submission.studentName} — ${SUBMISSION_STATUS_LABEL[submission.status]}`}
                       meta={`${submission.assignmentTitle} · ${formatAttemptTime(submission.submittedAt)}`}/>
                 )
               })}

@@ -106,3 +106,5 @@ export type { SlideViewerProps } from './SlideViewer'
 
 export { ViewModeToggle } from './ViewModeToggle'
 export type { ViewModeToggleProps, ViewMode } from './ViewModeToggle'
+
+export { ScreenSizeBlocker } from './ScreenSizeBlocker'

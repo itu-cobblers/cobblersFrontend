@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import type { AssignmentPanelTab } from '@components/AssignmentPanel/AssignmentPanel.types'
 import { getSubmissionNumber } from '@components/SubmissionBanner'
 import {
+    AppHeader,
+    AppColophon,
     SubmissionBanner,
     ProblemsList,
     TeacherFollowBanner,
@@ -14,11 +16,13 @@ import {
     AssignmentFooter
 } from '@components'
 import {
+    STUDENT_WORKSPACE_LAYOUT_CLASS,
     STUDENT_WORKSPACE_MAIN_CLASS,
     STUDENT_WORKSPACE_CLASS,
     STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS,
     STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS,
     STUDENT_WORKSPACE_EDITOR_BODY_CLASS,
+    WORKSPACE_SECTION_LABEL,
 } from './StudentWorkspace.constants'
 
 import { useWorkspaceProgress } from './hooks/useWorkspaceProgress'
@@ -32,8 +36,12 @@ import {fetchSubmissionDetailsById} from "@/api/submissionApi.ts";
 
 interface StudentWorkspaceProps {
     assignmentSet: AssignmentSet
+    sessionLabel: string
+    sessionActionLabel: string
+    onLeaveSession: () => void
     sessionCode?: string
-    teacherFocus: TeacherFocus
+    displayName: string
+    teacherFocusedAssignmentId: number | null
     timerEndsAt: string | null
     isHandRaised?: boolean
     onToggleHand?: () => void
@@ -138,6 +146,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                 assignmentId: activeAssignment.id,
                 passed: submitResult.passed,
                 result: submitResult.result,
+                feedback: submitResult.feedback,
                 content: activeAssignment.kind === 'predict'
                     ? drafts.state.predict[activeAssignment.id] ?? ''
                     : (activeAssignment.kind === 'project' || (activeAssignment.kind === 'code' && activeAssignment.starterFiles))
@@ -213,85 +222,101 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
     )
 
     return (
-        <div className={STUDENT_WORKSPACE_MAIN_CLASS}>
-
-            <ProblemsList
-                {...progress.problemsListProps}
-                isHistoryLoading={props.isHistoryLoading}
-                timerEndsAt={props.timerEndsAt}
-                isHandRaised={props.isHandRaised}
-                onToggleHand={props.onToggleHand}
+        <div className={STUDENT_WORKSPACE_LAYOUT_CLASS}>
+            <AppHeader
+                variant="bar"
+                section={WORKSPACE_SECTION_LABEL}
+                sessionLabel={props.sessionLabel}
+                displayName={props.displayName}
+                onLeaveSession={props.onLeaveSession}
+                leaveLabel={props.sessionActionLabel}
             />
 
-            <div className={STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS}>
-                {progress.followBannerProps && <TeacherFollowBanner {...progress.followBannerProps} />}
+            <div className={STUDENT_WORKSPACE_MAIN_CLASS}>
 
-                <div className={STUDENT_WORKSPACE_CLASS}>
-                    <AssignmentPanel
-                        {...progress.assignmentPanelProps}
-                        onTabChange={handlePanelTabChange}
-                        onViewSubmission={handleViewSubmission}
-                        viewingSubmissionId={viewingSubmission?.subId}
-                        relatedSlideLink={relatedSlide ? { onNavigate: () => props.onNavigateToSlide(relatedSlide.id) } : undefined}
-                    />
+                <ProblemsList
+                    {...progress.problemsListProps}
+                    isHistoryLoading={props.isHistoryLoading}
+                    timerEndsAt={props.timerEndsAt}
+                    isHandRaised={props.isHandRaised}
+                    onToggleHand={props.onToggleHand}
+                />
 
-                    <div className={STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS}>
-                        <CodeFileTabs
-                            files={mode.tabFiles}
-                            activeIndex={mode.activeTabIndex}
-                            onSelectFile={mode.handleSelectFile}
-                            actions={assignmentActions}
+                <div className={STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS}>
+                    {progress.followBannerProps && <TeacherFollowBanner {...progress.followBannerProps} />}
+
+                    <div className={STUDENT_WORKSPACE_CLASS}>
+                        <AssignmentPanel
+                            {...progress.assignmentPanelProps}
+                            onTabChange={handlePanelTabChange}
+                            onViewSubmission={handleViewSubmission}
+                            viewingSubmissionId={viewingSubmission?.subId}
+                            relatedSlideLink={relatedSlide ? { onNavigate: () => props.onNavigateToSlide(relatedSlide.id) } : undefined}
                         />
-                        <div className={STUDENT_WORKSPACE_EDITOR_BODY_CLASS}>
-                        {viewingSubmission && (
-                            <SubmissionBanner
-                                number={getSubmissionNumber(
-                                    props.submissionHistory,
-                                    activeAssignment.id,
-                                    viewingSubmission.subId,
-                                )}
-                                submittedAt={viewingSubmission.submittedAt}
-                                passed={viewingSubmission.passed}
+
+                        <div className={STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS}>
+                            <CodeFileTabs
+                                files={mode.tabFiles}
+                                activeIndex={mode.activeTabIndex}
+                                onSelectFile={mode.handleSelectFile}
+                                actions={assignmentActions}
                             />
-                        )}
-                        <CodeEditor
-                            key={mode.editorRemountKey}
-                            value={mode.editorValue}
-                            onChange={mode.handleEditorChange}
-                            isReadOnly={mode.isReadOnly}
-                            localClassNames={mode.localClassNames}
-                        />
-                        {activeAssignment.kind === 'code' && (
-                            <OutputPanel
-                                output={
-                                    viewingSubmission
-                                        ? (viewingSubmission.result?.stdout?.trim() || viewingSubmission.result?.stderr || '')
-                                        : submit.outputState.output
-                                }
-                                status={viewingSubmission ? (viewingSubmission.result?.status ?? null ) : submit.outputState.status}
-                                placeHolder={mode.isReadOnly ? 'Back to Editor to run your code…' : 'Press Run to see your output…'}
+                            <div className={STUDENT_WORKSPACE_EDITOR_BODY_CLASS}>
+                            {viewingSubmission && (
+                                <SubmissionBanner
+                                    number={getSubmissionNumber(
+                                        props.submissionHistory,
+                                        activeAssignment.id,
+                                        viewingSubmission.subId,
+                                    )}
+                                    submittedAt={viewingSubmission.submittedAt}
+                                    passed={viewingSubmission.passed}
+                                    result={viewingSubmission.result}
+                                />
+                            )}
+                            <CodeEditor
+                                key={mode.editorRemountKey}
+                                value={mode.editorValue}
+                                onChange={mode.handleEditorChange}
+                                isReadOnly={mode.isReadOnly}
+                                localClassNames={mode.localClassNames}
                             />
-                        )}
-                        {activeAssignment.kind === 'predict' && (
-                            <PredictPanel
-                                answer={viewingSubmission ? viewingSubmission.content : (drafts.state.predict[activeAssignment.id] ?? '')}
-                                status={viewingSubmission ? (viewingSubmission.passed ? 'correct' : 'tried' ) : submit.predictStatus}
-                                expectedOutput={activeAssignment.expectedOutput}
-                                isSolutionVisible={isSolutionVisible}
-                                onAnswerChange={(val) => drafts.updatePredict(activeAssignment.id, val)}
-                            />
-                        )}
-                        {activeAssignment.kind === 'project' && !viewingSubmission && !isSolutionVisible && (
-                            <ProjectPanel
-                                files={drafts.state.project[activeAssignment.id] ?? []}
-                                onFilesChange={(files) => drafts.updateProject(activeAssignment.id, files)}
-                                hasSubmitted={hasSubmitted}
-                            />
-                        )}
+                            {activeAssignment.kind === 'code' && (
+                                <OutputPanel
+                                    output={
+                                        viewingSubmission
+                                            ? (viewingSubmission.result?.stdout?.trim() || viewingSubmission.result?.stderr || '')
+                                            : submit.outputState.output
+                                    }
+                                    status={viewingSubmission ? (viewingSubmission.result?.status ?? null ) : submit.outputState.status}
+                                    placeHolder={mode.isReadOnly ? 'Back to Editor to run your code…' : 'Press Run to see your output…'}
+                                    feedback={viewingSubmission?.feedback}
+                                />
+                            )}
+                            {activeAssignment.kind === 'predict' && (
+                                <PredictPanel
+                                    answer={viewingSubmission ? viewingSubmission.content : (drafts.state.predict[activeAssignment.id] ?? '')}
+                                    status={viewingSubmission ? (viewingSubmission.passed ? 'correct' : 'tried' ) : submit.predictStatus}
+                                    expectedOutput={activeAssignment.expectedOutput}
+                                    isSolutionVisible={isSolutionVisible}
+                                    onAnswerChange={(val) => drafts.updatePredict(activeAssignment.id, val)}
+                                    feedback={viewingSubmission?.feedback}
+                                />
+                            )}
+                            {activeAssignment.kind === 'project' && !viewingSubmission && !isSolutionVisible && (
+                                <ProjectPanel
+                                    files={drafts.state.project[activeAssignment.id] ?? []}
+                                    onFilesChange={(files) => drafts.updateProject(activeAssignment.id, files)}
+                                    hasSubmitted={hasSubmitted}
+                                />
+                            )}
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <AppColophon />
         </div>
     )
 }

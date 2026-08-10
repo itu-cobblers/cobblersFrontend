@@ -3,18 +3,20 @@ import { createRoot } from 'react-dom/client'
 import { loader } from '@monaco-editor/react'
 import * as monaco from 'monaco-editor'
 import './index.css'
-import { StudentView } from '@views/StudentView'
-import { TeacherGate } from '@views/TeacherGate'
+import { applyTheme, readThemePreference, resolveTheme } from '@lib/theme'
+import { ScreenSizeGate } from '@views/ScreenSizeGate'
 
 loader.config({ monaco })
 
-const isTeacherPath = window.location.pathname.startsWith('/teacher')
+// Before React mounts, or the first paint is light and then snaps dark.
+applyTheme(resolveTheme(readThemePreference()))
+
 const rootElement = document.getElementById('root')
 
 if (rootElement) {
   createRoot(rootElement).render(
     <StrictMode>
-      {isTeacherPath ? <TeacherGate /> : <StudentView />}
+      <ScreenSizeGate />
     </StrictMode>,
   )
 }

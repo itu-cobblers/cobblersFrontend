@@ -13,4 +13,6 @@ export interface PredictPanelProps {
   expectedOutput: string
   isSolutionVisible: boolean
   onAnswerChange: (value: string) => void
+  /** Per-rule hints from a graded submission — omitted when correct or no rule had a message. */
+  feedback?: string[] | null
 }

@@ -7,10 +7,10 @@
  * otherwise dim this band along with the page behind it.
  */
 export const COLOPHON_CLASS =
-  'relative z-10 flex h-6 w-full shrink-0 items-center justify-center gap-2 bg-foreground px-3 text-[10px] text-background/60'
+  'relative z-10 flex h-6 w-full shrink-0 items-center justify-center gap-2 bg-brand-surface px-3 text-[10px] text-brand-ink/60'
 
 export const COLOPHON_LINK_CLASS =
-  'truncate underline-offset-2 transition-colors hover:text-background hover:underline'
+  'truncate underline-offset-2 transition-colors hover:text-brand-ink hover:underline'
 
 /** Decorative separator — hidden from screen readers so it isn't read as "middle dot". */
 export const COLOPHON_SEPARATOR = '·'

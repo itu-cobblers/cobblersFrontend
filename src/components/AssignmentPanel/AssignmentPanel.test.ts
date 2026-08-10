@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { createElement } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import AssignmentPanel from './AssignmentPanel'
-import type { AssignmentPanelProps } from './AssignmentPanel.types'
+import type { AssignmentPanelProps } from '@components'
 
 const baseProps: AssignmentPanelProps = {
   activeTab: 'description',
@@ -59,7 +59,7 @@ describe('AssignmentPanel', () => {
       createElement(AssignmentPanel, {
         ...baseProps,
         activeTab: 'submissions',
-        submissions: [{ subId: 's1', assignmentId: 0, sessionId: null, passed: true, submittedAt: '2026-07-24T14:30:00Z' }],
+        submissions: [{ subId: 's1', assignmentId: 0, sessionId: null, status: 'passed', submittedAt: '2026-07-24T14:30:00Z' }],
       }),
     )
     expect(screen.getByText('Passed')).toBeInTheDocument()

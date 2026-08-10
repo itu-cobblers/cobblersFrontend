@@ -17,14 +17,23 @@ describe('AppHeader', () => {
     expect(image).toHaveAttribute('aria-hidden', 'true')
   })
 
-  it('exposes an empty nav landmark for the buttons still to come', () => {
+  it('renders only the theme toggle in the nav landmark by default', () => {
     render(createElement(AppHeader))
-    expect(screen.getByRole('navigation', { name: 'Main' })).toBeEmptyDOMElement()
+    const strip = screen.getByRole('navigation', { name: 'Main' })
+    expect(strip.querySelectorAll('button')).toHaveLength(1)
+    expect(screen.getByRole('button', { name: 'Switch to dark mode' })).toBeInTheDocument()
   })
 
   it('renders no leave action unless a handler is given', () => {
     render(createElement(AppHeader))
-    expect(screen.getByRole('navigation', { name: 'Main' })).toBeEmptyDOMElement()
+    expect(screen.queryByRole('button', { name: 'Exit' })).not.toBeInTheDocument()
+  })
+
+  it('toggles the theme preference when the theme button is clicked', () => {
+    render(createElement(AppHeader))
+    const toggle = screen.getByRole('button', { name: 'Switch to dark mode' })
+    fireEvent.click(toggle)
+    expect(screen.getByRole('button', { name: 'Switch to light mode' })).toBeInTheDocument()
   })
 
   it('shows the room code and signed-in name in the action strip', () => {
