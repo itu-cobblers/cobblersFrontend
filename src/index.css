@@ -192,7 +192,7 @@
   --secondary-foreground: #e6edf3;
   --muted: #232527;
   --muted-foreground: #9198a1;
-  --accent: #d2a8ff;                /* function purple */
+  --accent: #ac8aca;                /* function purple */
   --accent-foreground: #121314;
   --destructive: #ff7b72;           /* structural red */
   --destructive-foreground: #121314;
@@ -200,7 +200,7 @@
   --border: oklch(1 0 0 / 12%);
   --divider: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 14%);
-  --ring: #d2a8ff;
+  --ring: #ac8aca;
 
   /* Wash scale — white here, black in `:root`. Nudged slightly heavier than
      their light counterparts: a white film over a dark surface reads weaker
