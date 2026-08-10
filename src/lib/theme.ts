@@ -30,6 +30,20 @@ export function readThemePreference(): ThemePreference {
 export function writeThemePreference(preference: ThemePreference): void {
   if (preference === 'system') localStorage.removeItem(STORAGE_KEY)
   else localStorage.setItem(STORAGE_KEY, preference)
+  preferenceListeners.forEach((listener) => listener())
+}
+
+/**
+ * Every `useTheme()` call reads the same localStorage-backed preference, but
+ * each call site is a separate React instance — without this, only the
+ * component that called `setPreference` would re-render, and every other
+ * consumer (Monaco's theme name, for one) would stay stale until a remount.
+ */
+const preferenceListeners = new Set<() => void>()
+
+export function subscribeThemePreference(onChange: () => void): () => void {
+  preferenceListeners.add(onChange)
+  return () => preferenceListeners.delete(onChange)
 }
 
 export function resolveTheme(preference: ThemePreference): ResolvedTheme {
