@@ -71,6 +71,8 @@
   --color-status-warning: var(--status-warning);
   --color-status-warning-bg: var(--status-warning-bg);
   --color-status-warning-text: var(--status-warning-text);
+  --color-raise-hand-idle-bg: var(--raise-hand-idle-bg);
+  --color-raise-hand-active-bg: var(--raise-hand-active-bg);
 }
 
 :root {
@@ -82,7 +84,7 @@
   --radius: 0.5rem;
   /* BootIT Palette (參照 src/constants/palette.ts) */
   --background: oklch(1 0 0);
-  --foreground: oklch(0 0 0); /* #424242 主要文字 */ /* turned this black YA*/
+  --foreground: oklch(0 0 0); /* #424242 */ /* turned this black YA*/
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.32 0 0);
   --primary: oklch(0 0 0); /* #427BAB CTA */
@@ -90,26 +92,30 @@
   --secondary: oklch(0.81 0.02 250); /* #B8C1CA Secondary */
   --secondary-foreground: oklch(0.32 0 0);
   --muted: oklch(0.96 0.003 250);
-  --muted-foreground: oklch(0 0 0); /* #71717A 次要文字 */ /* turned this black YA*/
-  --accent: oklch(0 0 0); /* #5C2482 主題高亮點綴色 */
+  --muted-foreground: oklch(0 0 0); /* #71717A */ /* turned this black YA*/
+  --accent: oklch(0 0 0); /* #5C2482 */
   --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.6 0.22 27); /* #DC2626 Compile Error & Failed */
   --destructive-foreground: oklch(1 0 0);
 
-  /* Compile Error & Failed 狀態色 */
+  /* Compile Error & Failed */
   --status-error: oklch(0.6 0.22 27); /* #DC2626 */
   --status-error-bg: oklch(0.97 0.015 17); /* #FEF2F2 */
   --status-error-text: oklch(0.42 0.18 25); /* #991B1B */
 
-  /* Success & Passed 狀態色 */
+  /* Success & Passed */
   --status-success: oklch(0.65 0.2 145); /* #16A34A */
   --status-success-bg: oklch(0.98 0.015 145); /* #F0FDF4 */
   --status-success-text: oklch(0.42 0.15 145); /* #166534 */
 
-  /* Warning 狀態色 */
+  /* Warning */
   --status-warning: oklch(0.77 0.17 74); /* #F0AD4E */
   --status-warning-bg: oklch(0.97 0.03 90); /* #FFF9E6 */
   --status-warning-text: oklch(0.5 0.15 60); /* #B26A00 */
+
+  /* Raise Hand button */
+  --raise-hand-idle-bg: oklch(0.968 0.011 226.0); /* #EDF6FA */
+  --raise-hand-active-bg: oklch(0.437 0.097 247.5); /* #1C5584 */
   --border: oklch(0 0 0); /* turned this black YA*/
   /* Structural separations between the three workspace regions — assignment
      panel, editor, terminal. Deliberately NOT --border: that one is black and
@@ -214,10 +220,7 @@
   --term-ok: #7ee787;
   --term-err: #ff7b72;
 
-  --status-error: #ff7b72;          /* structural red */
-  --status-error-bg: #2b1b1a;
-  --status-error-text: #ffb3ae;
-
+  /* Status */
   --status-success: #7ee787;        /* JSX/tag green */
   --status-success-bg: #16251a;
   --status-success-text: #a9f2ae;
@@ -225,6 +228,15 @@
   --status-warning: #ffa657;        /* parameter orange */
   --status-warning-bg: #2b2117;
   --status-warning-text: #ffc894;
+
+  --status-error: #ff7b72;          /* structural red */
+  --status-error-bg: #2b1b1a;
+  --status-error-text: #ffb3ae;
+
+  /* Raise Hand button — same fixed colors as light; not part of the app's reachable dark palette (see note above .dark). */
+  --raise-hand-idle-bg: oklch(0.968 0.011 226.0); /* #EDF6FA */
+  --raise-hand-active-bg: oklch(0.437 0.097 247.5); /* #1C5584 */
+
 }
 
 

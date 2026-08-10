@@ -1,3 +1,4 @@
+import { type MouseEvent } from 'react'
 import classNames from 'classnames'
 import { Icon } from '@components/Icon'
 import { StatusBadge } from '@components/StatusBadge'
@@ -17,6 +18,9 @@ import {
   ROSTER_ONLINE_DOT_CLASS,
   ROSTER_OFFLINE_DOT_CLASS,
   ROSTER_ITEM_NAME_CLASS,
+  ROSTER_ITEM_HAND_CLASS,
+  ROSTER_ITEM_HAND_DEFAULT_ICON_CLASS,
+  ROSTER_ITEM_HAND_HOVER_ICON_CLASS,
 } from './AttendanceList.constants'
 
 export default function AttendanceList({
@@ -24,7 +28,13 @@ export default function AttendanceList({
   activeStudentId,
   onSelectStudent,
   selectedAssignmentTitle,
+  onLowerHand,
 }: AttendanceListProps) {
+  function handleLowerHand(event: MouseEvent, studentId: string) {
+    event.stopPropagation()
+    onLowerHand?.(studentId)
+  }
+
   return (
     <aside className={ROSTER_CLASS}>
       <div className={ROSTER_HEADER_CLASS}>
@@ -62,6 +72,23 @@ export default function AttendanceList({
                     />
                     <span className={ROSTER_ITEM_NAME_CLASS}>{student.displayName}</span>
                   </div>
+
+                  {student.isHandRaised && (
+                    <span
+                      role="button"
+                      aria-label="Lower hand"
+                      title="Lower hand"
+                      className={ROSTER_ITEM_HAND_CLASS}
+                      onClick={(event) => handleLowerHand(event, student.studentId)}
+                    >
+                      <span className={ROSTER_ITEM_HAND_DEFAULT_ICON_CLASS}>
+                        <Icon name="handStop" />
+                      </span>
+                      <span className={ROSTER_ITEM_HAND_HOVER_ICON_CLASS}>
+                        <Icon name="handOff" />
+                      </span>
+                    </span>
+                  )}
 
                   {student.assignmentStatus && <StatusBadge status={student.assignmentStatus} />}
                 </button>

@@ -9,6 +9,9 @@ import {
   PREDICT_TEXTAREA_CLASS,
   PREDICT_REVEAL_CLASS,
   PREDICT_HEADER_LEFT_CLASS,
+  PREDICT_FEEDBACK_CLASS,
+  PREDICT_FEEDBACK_HEADER_CLASS,
+  PREDICT_FEEDBACK_LIST_CLASS,
 } from './PredictPanel.constants'
 
 /**
@@ -23,10 +26,13 @@ export default function PredictPanel({
   expectedOutput,
   isSolutionVisible,
   onAnswerChange,
+  feedback,
 }: PredictPanelProps) {
   function handleChange(event: ChangeEvent<HTMLTextAreaElement>) {
     onAnswerChange(event.target.value)
   }
+
+  const hasFeedback = Array.isArray(feedback) && feedback.length > 0
 
   return (
     <div className={PREDICT_PANEL_CLASS}>
@@ -52,6 +58,19 @@ export default function PredictPanel({
               spellCheck={false}
           />
           </>
+        )}
+        {hasFeedback && !isSolutionVisible && (
+          <div className={PREDICT_FEEDBACK_CLASS}>
+            <span className={PREDICT_FEEDBACK_HEADER_CLASS}>
+              <Icon name="info" />
+              What to fix
+            </span>
+            <ul className={PREDICT_FEEDBACK_LIST_CLASS}>
+              {feedback.map((message, index) => (
+                <li key={index}>{message}</li>
+              ))}
+            </ul>
+          </div>
         )}
       </div>
     </div>

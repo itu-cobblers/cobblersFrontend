@@ -32,14 +32,28 @@ export async function joinSession(args: JoinArgsDto, callbacks: StudentCallbacks
   if (callbacks.onSessionEnded) {
     conn.on('SessionEnded', () => callbacks.onSessionEnded?.())
   }
+  if (callbacks.onHandsUpdated) {
+    conn.on('HandsUpdated', (studentIds: string[]) => callbacks.onHandsUpdated?.(studentIds))
+  }
   const state = await conn.invoke<SessionStateDto>('JoinSession', args)
   if (state?.activeTimer) callbacks.onTimerStarted?.(state.activeTimer)
   if (state?.focusedAssignmentId != null) callbacks.onAssignmentFocused?.(state.focusedAssignmentId)
+  if (state?.raisedHandStudentIds) callbacks.onHandsUpdated?.(state.raisedHandStudentIds)
 }
 
 export async function focusAssignment(code: string, assignmentId: number): Promise<void> {
   const conn = await getConnection()
   await conn.invoke('FocusAssignment', code, assignmentId)
+}
+
+export async function raiseHand(code: string, studentId: string): Promise<void> {
+  const conn = await getConnection()
+  await conn.invoke('RaiseHand', code, studentId)
+}
+
+export async function lowerHand(code: string, studentId: string): Promise<void> {
+  const conn = await getConnection()
+  await conn.invoke('LowerHand', code, studentId)
 }
 
 /**
@@ -65,6 +79,9 @@ export async function observeSession(code: string, callbacks: TeacherCallbacks =
   }
   if (callbacks.onSubmissionRecorded) {
     conn.on('SubmissionRecorded', (submission: SessionSubmissionDto) => callbacks.onSubmissionRecorded?.(submission))
+  }
+  if (callbacks.onHandsUpdated) {
+    conn.on('HandsUpdated', (studentIds: string[]) => callbacks.onHandsUpdated?.(studentIds))
   }
 
   const roster = await conn.invoke<StudentDto[]>('ObserveSession', code)

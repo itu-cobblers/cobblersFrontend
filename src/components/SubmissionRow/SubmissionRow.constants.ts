@@ -1,3 +1,5 @@
+import type { SubmissionStatus } from '@types'
+
 /**
  * Active/hover washes use the shared wash scale, matching
  * `LIST_ITEM_ACTIVE_CLASS` on the assignment rail. They were once literal
@@ -9,6 +11,12 @@ export const SUBMISSION_ROW_ACTIVE_CLASS =
 
 export const SUBMISSION_ROW_IDLE_CLASS = '' +
     'flex items-center justify-between gap-3 px-4 py-3 text-left text-sm hover:bg-wash-hover cursor-pointer bg-transparent'
+
+export const SUBMISSION_STATUS_LABEL: Record<SubmissionStatus, string> = {
+    passed: 'Passed',
+    tried: 'Tried',
+    error: 'Error',
+}
 
 export const SUBMISSION_TITLE_CLASS = 'text-sm font-medium text-foreground'
 

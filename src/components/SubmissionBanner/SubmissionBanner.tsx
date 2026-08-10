@@ -1,6 +1,7 @@
 import { StatusBadge } from '@components/StatusBadge'
 import { formatAttemptTime } from '@components/ProblemsList'
-import type { SubmissionBannerProps } from './SubmissionBanner.types'
+import type { SubmissionBannerProps } from '@/components'
+import { deriveSubmissionStatus } from './SubmissionBanner.utils'
 import {
   SUBMISSION_BANNER_CLASS,
   SUBMISSION_BANNER_TITLE_CLASS,
@@ -8,15 +9,12 @@ import {
 } from './SubmissionBanner.constants'
 
 /** Identifies the past submission currently filling the editor. */
-export default function SubmissionBanner({ number, submittedAt, passed }: SubmissionBannerProps) {
-  // `!== false` rather than truthiness, matching SubmissionRow: a submission
-  // whose result is unknown (`null`) reads the same in the banner as it does
-  // in the list, so the badge never changes colour when you click a row.
-  const isPassed = passed !== false
+export default function SubmissionBanner({ number, submittedAt, passed, result }: SubmissionBannerProps) {
+  const status = deriveSubmissionStatus(passed, result)
 
   return (
     <div className={SUBMISSION_BANNER_CLASS}>
-      <StatusBadge status={isPassed ? 'passed' : 'tried'} size="s" />
+      <StatusBadge status={status} size="s" />
       <span className={SUBMISSION_BANNER_TITLE_CLASS}>Submission #{number}</span>
       <span className={SUBMISSION_BANNER_META_CLASS}>submitted on {formatAttemptTime(submittedAt)}</span>
     </div>

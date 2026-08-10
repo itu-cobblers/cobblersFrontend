@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { StudentDto, SessionSubmissionDto } from '@types'
-import {focusAssignment, observeSession} from "@/api/sessionHub.ts";
+import {focusAssignment, lowerHand, observeSession} from "@/api/sessionHub.ts";
 
 interface UseTeacherLiveSessionProps {
     sessionCode: string | null
@@ -12,6 +12,7 @@ interface UseTeacherLiveSessionProps {
 export function useTeacherLiveSession({ sessionCode, onSubmissionRecorded, onLiveStudents }: UseTeacherLiveSessionProps) {
     const [liveStudentIds, setLiveStudentIds] = useState<Set<string>>(new Set())
     const [focusedAssignmentId, setFocusedAssignmentId] = useState<number | null>(null)
+    const [raisedHandOrder, setRaisedHandOrder] = useState<string[]>([])
 
     const handleRosterUpdate = useCallback((roster: StudentDto[]) => {
         setLiveStudentIds(new Set(roster.map(s => s.studentId)))
@@ -36,6 +37,7 @@ export function useTeacherLiveSession({ sessionCode, onSubmissionRecorded, onLiv
             onRoster: (roster) => !cancelled && handleRosterUpdate(roster),
             onStudentJoined: (student) => !cancelled && handleStudentJoined(student),
             onSubmissionRecorded: (sub) => !cancelled && onSubmissionRecorded(sub),
+            onHandsUpdated: (studentIds) => !cancelled && setRaisedHandOrder(studentIds),
         }).catch((err) => console.warn('[room] observe failed:', err))
 
         return () => {
@@ -49,9 +51,16 @@ export function useTeacherLiveSession({ sessionCode, onSubmissionRecorded, onLiv
         focusAssignment(sessionCode, id).catch((err) => console.warn('[room] focusAssignment failed:', err))
     }, [sessionCode])
 
+    const handleLowerHand = useCallback((studentId: string) => {
+        if (!sessionCode) return
+        lowerHand(sessionCode, studentId).catch((err) => console.warn('[room] lowerHand failed:', err))
+    }, [sessionCode])
+
     return {
         liveStudentIds,
         focusedAssignmentId,
-        handleFocusAssignment
+        raisedHandOrder,
+        handleFocusAssignment,
+        handleLowerHand
     }
 }

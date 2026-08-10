@@ -20,3 +20,12 @@ export const OUTPUT_CONTENT_CLASS =
   'flex-1 overflow-y-auto whitespace-pre-wrap break-all px-3.5 py-2.5 text-[13px] leading-relaxed text-terminal-ink'
 
 export const OUTPUT_PLACEHOLDER_CLASS = 'italic text-terminal-muted'
+
+export const OUTPUT_FEEDBACK_CLASS =
+  'shrink-0 border-t border-divider bg-status-warning-bg px-3.5 py-2.5'
+
+export const OUTPUT_FEEDBACK_HEADER_CLASS =
+  'flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.8px] text-status-warning-text'
+
+export const OUTPUT_FEEDBACK_LIST_CLASS =
+  'mt-1.5 list-disc space-y-1 pl-5 text-[13px] leading-relaxed text-status-warning-text'

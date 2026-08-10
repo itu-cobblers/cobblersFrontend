@@ -34,6 +34,10 @@ export interface ProblemsListProps {
   onToggleOpen: () => void
   /** ISO string while the teacher's session timer runs; null/omitted shows nothing. A session-wide countdown, not tied to any one assignment. */
   timerEndsAt?: string | null
+  /** Whether this student currently has their hand raised in the room. */
+  isHandRaised?: boolean
+  /** Raises/lowers this student's hand. Omitted outside a room — solo practice has no teacher to notify, so the button doesn't render. */
+  onToggleHand?: () => void
 }
 
 export interface ProblemsListRowProps {

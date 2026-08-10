@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { createElement } from 'react'
 import { render, screen, fireEvent } from '@testing-library/react'
 import ProblemsList from './ProblemsList'
-import type { ProblemListItem } from './ProblemsList.types'
+import type { ProblemListItem } from '@components'
 import { formatSubmittedAt } from './ProblemsList.utils'
 
 const sessionItems: ProblemListItem[] = [
@@ -33,6 +33,13 @@ describe('ProblemsList', () => {
     expect(screen.getByText('Hello, World!')).toBeInTheDocument()
     expect(screen.getByText('Predict this')).toBeInTheDocument()
     expect(screen.getByText('Build a Tree')).toBeInTheDocument()
+  })
+
+  it('renders the Tried/Passed/Error legend', () => {
+    render(createElement(ProblemsList, baseProps))
+    expect(screen.getByText('Tried')).toBeInTheDocument()
+    expect(screen.getByText('Passed')).toBeInTheDocument()
+    expect(screen.getByText('Error')).toBeInTheDocument()
   })
 
   // The History toggle lives in the footer, beside the Tried/Passed legend,
@@ -100,6 +107,45 @@ describe('ProblemsList', () => {
     const timerEndsAt = new Date(Date.now() - 60_000).toISOString()
     render(createElement(ProblemsList, { ...baseProps, timerEndsAt }))
     expect(screen.queryByText(/Move to next at/)).not.toBeInTheDocument()
+  })
+
+  // Raise Hand — omitted entirely outside a room (solo practice has no
+  // teacher to notify), shown and wired to the hub the moment a handler exists.
+  it('does not render the Raise Hand button when onToggleHand is omitted', () => {
+    render(createElement(ProblemsList, baseProps))
+    expect(screen.queryByText('Raise Hand')).not.toBeInTheDocument()
+  })
+
+  it('renders an idle Raise Hand button showing only the hand-stop icon', () => {
+    const { container } = render(createElement(ProblemsList, { ...baseProps, onToggleHand: vi.fn() }))
+    const button = screen.getByRole('button', { name: 'Raise Hand' })
+    expect(button).toHaveAttribute('aria-pressed', 'false')
+    // Idle renders exactly the raise icon — no hand-off markup waiting for a hover yet.
+    expect(container.querySelector('.icon-tabler-hand-stop')).not.toBeNull()
+    expect(container.querySelector('.icon-tabler-hand-off')).toBeNull()
+  })
+
+  it('fires onToggleHand when the Raise Hand button is clicked', () => {
+    const onToggleHand = vi.fn()
+    render(createElement(ProblemsList, { ...baseProps, onToggleHand }))
+    fireEvent.click(screen.getByRole('button', { name: 'Raise Hand' }))
+    expect(onToggleHand).toHaveBeenCalledOnce()
+  })
+
+  it('shows "Hand Raised" and both icons (for the hover swap) once the hand is up', () => {
+    const { container } = render(createElement(ProblemsList, { ...baseProps, onToggleHand: vi.fn(), isHandRaised: true }))
+    const button = screen.getByRole('button', { name: 'Hand Raised' })
+    expect(button).toHaveAttribute('aria-pressed', 'true')
+    // Both icons are present so CSS can swap on hover; only hand-stop shows at rest.
+    expect(container.querySelector('.icon-tabler-hand-stop')).not.toBeNull()
+    expect(container.querySelector('.icon-tabler-hand-off')).not.toBeNull()
+  })
+
+  it('fires onToggleHand (to self-lower) when clicked while the hand is already raised', () => {
+    const onToggleHand = vi.fn()
+    render(createElement(ProblemsList, { ...baseProps, onToggleHand, isHandRaised: true }))
+    fireEvent.click(screen.getByRole('button', { name: 'Hand Raised' }))
+    expect(onToggleHand).toHaveBeenCalledOnce()
   })
 })
 

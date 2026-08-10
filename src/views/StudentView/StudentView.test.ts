@@ -69,6 +69,7 @@ interface JoinSessionCallbacks {
   onAssignmentFocused?: (id: number) => void
   onTimerStarted?: (timer: { endsAt: string }) => void
   onSessionEnded?: () => void
+  onHandsUpdated?: (studentIds: string[]) => void
 }
 let capturedJoinCallbacks: JoinSessionCallbacks | null = null
 vi.mock('@/api/sessionHub.ts', () => ({
@@ -77,13 +78,19 @@ vi.mock('@/api/sessionHub.ts', () => ({
     return Promise.resolve(undefined)
   }),
   leaveSession: vi.fn().mockResolvedValue(undefined),
+  raiseHand: vi.fn().mockResolvedValue(undefined),
+  lowerHand: vi.fn().mockResolvedValue(undefined),
 }))
 
 const { default: StudentView } = await import('./StudentView')
+const { raiseHand, lowerHand } = await import('@/api/sessionHub.ts')
 
 describe('StudentView', () => {
   beforeEach(() => {
     localStorage.clear()
+    capturedJoinCallbacks = null
+    vi.mocked(raiseHand).mockClear()
+    vi.mocked(lowerHand).mockClear()
   })
 
   it('shows the entry screen first, not the IDE', () => {
@@ -164,5 +171,42 @@ describe('StudentView', () => {
 
     expect(screen.getByRole('heading', { name: 'BootCode' })).toBeInTheDocument()
     expect(localStorage.getItem('bootit.studentSession')).toBeNull()
+  })
+
+  // Raise Hand, student side.
+  it('does not render a Raise Hand button in solo practice — there is no teacher to notify', async () => {
+    localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'solo' }))
+    render(createElement(StudentView))
+    await screen.findByText('Terminal')
+
+    expect(screen.queryByText('Raise Hand')).not.toBeInTheDocument()
+  })
+
+  it('raises the hand via the hub when Raise Hand is clicked in a room', async () => {
+    localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'join', code: 'ABCD1234' }))
+    render(createElement(StudentView))
+    await screen.findByText('Terminal')
+    const studentId = localStorage.getItem('bootit.studentId')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Raise Hand' }))
+
+    expect(raiseHand).toHaveBeenCalledWith('ABCD1234', studentId)
+  })
+
+  it('shows "Hand Raised" once the hub echoes the broadcast back, and lowers it on the next click', async () => {
+    localStorage.setItem('bootit.studentSession', JSON.stringify({ mode: 'join', code: 'ABCD1234' }))
+    render(createElement(StudentView))
+    await screen.findByText('Terminal')
+    const studentId = localStorage.getItem('bootit.studentId')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Raise Hand' }))
+    // Simulate the room broadcast confirming the raise (own tab included).
+    capturedJoinCallbacks?.onHandsUpdated?.([studentId as string])
+
+    expect(await screen.findByRole('button', { name: 'Hand Raised' })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hand Raised' }))
+
+    expect(lowerHand).toHaveBeenCalledWith('ABCD1234', studentId)
   })
 })

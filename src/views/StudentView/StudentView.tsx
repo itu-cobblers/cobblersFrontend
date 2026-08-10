@@ -40,6 +40,8 @@ export default function StudentView() {
                 displayName={session.displayName}
                 teacherFocusedAssignmentId={session.teacherFocusedAssignmentId}
                 timerEndsAt={session.timerEndsAt}
+                isHandRaised={session.isHandRaised}
+                onToggleHand={session.onToggleHand}
 
                 submissionHistory={progress.history}
                 isHistoryLoading={progress.isLoading}

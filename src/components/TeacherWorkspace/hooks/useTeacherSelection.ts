@@ -13,14 +13,24 @@ interface UseTeacherSelectionProps {
     attendanceList: AttendanceStudentDto[]
     allSubmissions: SessionSubmissionDto[]
     liveStudentIds: Set<string>
+    /** studentIds with a raised hand, oldest-raised first. */
+    raisedHandOrder: string[]
     /** Seeds the selected assignment (e.g. restoring a persisted selection after a refresh). */
     initialAssignmentId?: number | null
 }
 
+/**
+ * "Passed" wins if any attempt ever passed. Otherwise the *most recent*
+ * attempt decides tried vs error — an old compile error the student has
+ * since resubmitted past shouldn't keep flashing red.
+ */
 function getStudentAssignmentStatus(studentSubs: SessionSubmissionDto[]): ProblemStatus {
     if (studentSubs.length === 0) return 'untried';
-    if (studentSubs.some(s => s.passed === true)) return 'passed';
-    return 'tried';
+    if (studentSubs.some(s => s.status === 'passed')) return 'passed';
+    const latest = [...studentSubs].sort(
+        (a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()
+    )[0];
+    return latest.status === 'error' ? 'error' : 'tried';
 }
 
 export function useTeacherSelection({
@@ -28,6 +38,7 @@ export function useTeacherSelection({
                                         attendanceList,
                                         allSubmissions,
                                         liveStudentIds,
+                                        raisedHandOrder,
                                         initialAssignmentId = null
                                     }: UseTeacherSelectionProps) {
     const [selectedAssignmentIdRaw, setSelectedAssignmentIdRaw] = useState<number | null>(initialAssignmentId)
@@ -75,14 +86,16 @@ export function useTeacherSelection({
             )
             const status = getStudentAssignmentStatus(studentSubs)
             if (status === 'passed') passed++
-            else if (status === 'tried') tried++
+            // `error` still counts as an attempt for this breakdown — it's a
+            // 3-bucket count (passed/tried/untried), not a 4th bucket.
+            else if (status === 'tried' || status === 'error') tried++
         })
 
         return { passed, tried, untried: attendanceList.length - passed - tried }
     }, [attendanceList, allSubmissions, selectedAssignmentId]);
 
     const attendanceStudents: AttendanceStudent[] = useMemo(() => {
-        return attendanceList.map(student => {
+        const mapped = attendanceList.map(student => {
             let assignmentStatus: ProblemStatus | undefined = undefined;
 
             if (selectedAssignmentId !== null) {
@@ -96,10 +109,22 @@ export function useTeacherSelection({
                 studentId: student.studentId,
                 displayName: student.displayName,
                 isActive: liveStudentIds.has(student.studentId),
+                isHandRaised: raisedHandOrder.includes(student.studentId),
                 assignmentStatus
             }
         })
-    }, [attendanceList, allSubmissions, selectedAssignmentId, liveStudentIds]);
+
+        // Raised hands bubble to the top, oldest-raised first; everyone else
+        // keeps their existing relative order (stable sort).
+        return [...mapped].sort((a, b) => {
+            const aIndex = raisedHandOrder.indexOf(a.studentId)
+            const bIndex = raisedHandOrder.indexOf(b.studentId)
+            if (aIndex === -1 && bIndex === -1) return 0
+            if (aIndex === -1) return 1
+            if (bIndex === -1) return -1
+            return aIndex - bIndex
+        })
+    }, [attendanceList, allSubmissions, selectedAssignmentId, liveStudentIds, raisedHandOrder]);
 
     const filteredSubmissions: TeacherSubmissionItem[] = useMemo(() => {
         if (!selectedAssignmentId) return [];
@@ -117,7 +142,7 @@ export function useTeacherSelection({
                     studentName,
                     assignmentId: sub.assignmentId,
                     assignmentTitle,
-                    passed: sub.passed,
+                    status: sub.status,
                     submittedAt: sub.submittedAt,
                 }
             });

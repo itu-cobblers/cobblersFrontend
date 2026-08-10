@@ -42,6 +42,8 @@ interface StudentWorkspaceProps {
     displayName: string
     teacherFocusedAssignmentId: number | null
     timerEndsAt: string | null
+    isHandRaised?: boolean
+    onToggleHand?: () => void
     submissionHistory: SubmissionHistoryItem[]
     isHistoryLoading: boolean
     onSubmissionMade: () => void
@@ -124,6 +126,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                 assignmentId: activeAssignment.id,
                 passed: submitResult.passed,
                 result: submitResult.result,
+                feedback: submitResult.feedback,
                 content: activeAssignment.kind === 'predict'
                     ? drafts.state.predict[activeAssignment.id] ?? ''
                     : (activeAssignment.kind === 'project' || (activeAssignment.kind === 'code' && activeAssignment.starterFiles))
@@ -215,6 +218,8 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                     {...progress.problemsListProps}
                     isHistoryLoading={props.isHistoryLoading}
                     timerEndsAt={props.timerEndsAt}
+                    isHandRaised={props.isHandRaised}
+                    onToggleHand={props.onToggleHand}
                 />
 
                 <div className={STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS}>
@@ -245,6 +250,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     )}
                                     submittedAt={viewingSubmission.submittedAt}
                                     passed={viewingSubmission.passed}
+                                    result={viewingSubmission.result}
                                 />
                             )}
                             <CodeEditor
@@ -263,6 +269,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     }
                                     status={viewingSubmission ? (viewingSubmission.result?.status ?? null ) : submit.outputState.status}
                                     placeHolder={mode.isReadOnly ? 'Back to Editor to run your code…' : 'Press Run to see your output…'}
+                                    feedback={viewingSubmission?.feedback}
                                 />
                             )}
                             {activeAssignment.kind === 'predict' && (
@@ -272,6 +279,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     expectedOutput={activeAssignment.expectedOutput}
                                     isSolutionVisible={isSolutionVisible}
                                     onAnswerChange={(val) => drafts.updatePredict(activeAssignment.id, val)}
+                                    feedback={viewingSubmission?.feedback}
                                 />
                             )}
                             {activeAssignment.kind === 'project' && !viewingSubmission && !isSolutionVisible && (

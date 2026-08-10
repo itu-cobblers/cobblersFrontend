@@ -5,7 +5,7 @@ import { getStudentId, getDisplayName } from '@lib/identity'
 import { upsertStudent } from '@/api/studentApi.ts'
 import { fetchSoloAssignmentSet, fetchAssignmentSet } from '@/api/assignmentSetApi.ts'
 import { fetchSubmissionHistory } from '@/api/submissionApi.ts'
-import { joinSession, leaveSession } from '@/api/sessionHub.ts'
+import { joinSession, leaveSession, raiseHand, lowerHand } from '@/api/sessionHub.ts'
 import {
   getPersistedStudentSession,
   setPersistedStudentSession,
@@ -27,6 +27,7 @@ export function useStudentApp() {
   const [code, setCode] = useState('')
   const [teacherFocusedAssignmentId, setTeacherFocusedAssignmentId] = useState<number | null>(null)
   const [timerEndsAt, setTimerEndsAt] = useState<string | null>(null)
+  const [raisedHandStudentIds, setRaisedHandStudentIds] = useState<string[]>([])
 
   const [toast, setToast] = useState<ToastState | null>(null)
   const [submissionHistory, setSubmissionHistory] = useState<SubmissionHistoryItem[]>([])
@@ -38,6 +39,7 @@ export function useStudentApp() {
     setCode('')
     setTeacherFocusedAssignmentId(null)
     setTimerEndsAt(null)
+    setRaisedHandStudentIds([])
     leaveSession().catch((err: unknown) => console.warn('[room] leaveSession failed:', err))
   }
 
@@ -48,12 +50,23 @@ export function useStudentApp() {
         {
           onAssignmentFocused: setTeacherFocusedAssignmentId,
           onTimerStarted: (timer) => setTimerEndsAt(timer.endsAt),
+          onHandsUpdated: setRaisedHandStudentIds,
           onSessionEnded: () => {
             handleLeaveSession()
             setToast({ message: 'This session has ended — ask your teacher for the new code.', tone: 'error' })
           },
         }
     ).catch(() => console.warn('[join] hub join failed'))
+  }
+
+  function handleToggleHand() {
+    if (mode !== 'join' || !code) return
+    const studentId = getStudentId()
+    if (raisedHandStudentIds.includes(studentId)) {
+      lowerHand(code, studentId).catch((err: unknown) => console.warn('[room] lowerHand failed:', err))
+    } else {
+      raiseHand(code, studentId).catch((err: unknown) => console.warn('[room] raiseHand failed:', err))
+    }
   }
 
   useEffect(() => {
@@ -145,6 +158,8 @@ export function useStudentApp() {
       displayName: getDisplayName(),
       teacherFocusedAssignmentId: mode === 'join' ? teacherFocusedAssignmentId : null,
       timerEndsAt: mode === 'join' ? timerEndsAt : null,
+      isHandRaised: mode === 'join' && raisedHandStudentIds.includes(getStudentId()),
+      onToggleHand: mode === 'join' ? handleToggleHand : undefined,
     },
     progress: {
       isLoading: isHistoryLoading,

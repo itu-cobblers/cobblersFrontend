@@ -39,6 +39,7 @@ export interface AttendanceStudentDto {
 export interface SessionStateDto {
     activeTimer?: TimerDto
     focusedAssignmentId?: number
+    raisedHandStudentIds?: string[]
 }
 
 export interface JoinArgsDto {
@@ -51,12 +52,14 @@ export interface StudentCallbacks {
     onTimerStarted?: (timer: TimerDto) => void
     onAssignmentFocused?: (assignmentId: number) => void
     onSessionEnded?: () => void
+    onHandsUpdated?: (studentIds: string[]) => void
 }
 
 export interface TeacherCallbacks {
     onStudentJoined?: (student: StudentDto) => void
     onRoster?: (roster: StudentDto[]) => void
     onSubmissionRecorded?: (submission: SessionSubmissionDto) => void
+    onHandsUpdated?: (studentIds: string[]) => void
 }
 
 // ==========================================
@@ -89,14 +92,17 @@ export interface SubmissionResponseDto {
     subId: string
     passed: boolean | null
     result: ExecuteResponseDto | null
+    feedback?: string[] | null
     submittedAt: string
 }
+
+export type SubmissionStatus = 'passed' | 'tried' | 'error'
 
 export interface SubmissionHistoryDto {
     subId: string
     assignmentId: number
     sessionId?: string | null
-    passed: boolean | null
+    status: SubmissionStatus
     submittedAt: string
 }
 
@@ -108,6 +114,7 @@ export interface SubmissionDetailDto {
     content: string
     result: ExecuteResponseDto | null
     passed: boolean | null
+    feedback?: string[] | null
     submittedAt: string
 }
 
@@ -115,7 +122,7 @@ export interface SessionSubmissionDto {
     subId: string
     studentId: string
     assignmentId: number
-    passed: boolean | null
+    status: SubmissionStatus
     submittedAt: string
 }
 
