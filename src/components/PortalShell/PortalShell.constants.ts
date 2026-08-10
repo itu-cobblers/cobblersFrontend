@@ -19,7 +19,7 @@ export const PORTAL_BACKDROP_CLASS = 'absolute inset-x-0 top-0'
  * above the atrium photo (so the photo blurs) but below the header bar
  * (`z-20`) and the card (`z-10`), both of which stay crisp.
  */
-export const PORTAL_SCRIM_CLASS = 'absolute inset-0 z-[1] bg-black/50 backdrop-blur-[2px]'
+export const PORTAL_SCRIM_CLASS = 'absolute inset-0 z-[1] bg-wash-badge0 backdrop-blur-[2px]'
 
 /** Centres the card in the viewport, the way the Modal overlay centres a dialog. */
 export const PORTAL_CENTER_CLASS = 'relative z-10 flex flex-1 items-center justify-center p-5'
@@ -40,6 +40,6 @@ export const PORTAL_HEADING_CLASS = 'text-2xl font-light tracking-tight text-for
  * beneath it — the gate and the creator had each grown their own field styling.
  */
 export const PORTAL_FIELD_CLASS =
-  'w-full rounded-md border border-border bg-black/[0.03] px-6 py-3 text-left text-sm text-foreground outline-none transition placeholder:text-foreground/40 focus:border-black/30 focus:bg-black/[0.06]'
+  'w-full rounded-md border border-border bg-wash-hover px-6 py-3 text-left text-sm text-foreground outline-none transition placeholder:text-foreground/40 focus:border-wash-line focus:bg-wash-active'
 
 export const PORTAL_FIELD_ROW_CLASS = 'mx-auto mt-10 flex w-full max-w-md flex-col gap-2 text-left'

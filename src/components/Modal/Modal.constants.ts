@@ -1,7 +1,7 @@
 import type { ModalSize } from './Modal.types'
 
 export const MODAL_OVERLAY_CLASS =
-  'fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-5 backdrop-blur-[2px]'
+  'fixed inset-0 z-[100] flex items-center justify-center bg-wash-badge0 p-5 backdrop-blur-[2px]'
 
 const MODAL_DIALOG_BASE_CLASS =
   'w-full rounded-[10px] border border-border bg-background p-[22px] pb-[18px]'

@@ -187,6 +187,30 @@ const ICONS: Record<IconName, ReactElement> = {
         <path d="M17 7.5a1.5 1.5 0 0 1 3 0v8.5a6 6 0 0 1 -6 6h-2h.208a6 6 0 0 1 -5.012 -2.7a69.74 69.74 0 0 1 -.196 -.3c-.312 -.479 -1.407 -2.388 -3.286 -5.728a1.5 1.5 0 0 1 .536 -2.022a1.867 1.867 0 0 1 2.28 .28l1.47 1.47"/>
     </svg>
   ),
+  sun: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+         className="icon icon-tabler icons-tabler-outline icon-tabler-sun-high" aria-hidden="true">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M14.828 14.828a4 4 0 1 0 -5.656 -5.656a4 4 0 0 0 5.656 5.656"/>
+        <path d="M6.343 17.657l-1.414 1.414"/>
+        <path d="M6.343 6.343l-1.414 -1.414"/>
+        <path d="M17.657 6.343l1.414 -1.414"/>
+        <path d="M17.657 17.657l1.414 1.414"/>
+        <path d="M4 12h-2"/>
+        <path d="M12 4v-2"/>
+        <path d="M20 12h2"/>
+        <path d="M12 20v2"/>
+    </svg>
+  ),
+  moon: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+         className="icon icon-tabler icons-tabler-outline icon-tabler-moon" aria-hidden="true">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+        <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454l0 .008"/>
+    </svg>
+  ),
   handOff: (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
          stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"

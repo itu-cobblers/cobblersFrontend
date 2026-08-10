@@ -16,7 +16,16 @@ export const CODE_EDITOR_SURFACE_CLASS = 'h-full w-full transition-opacity durat
  */
 export const CODE_EDITOR_DIMMED_CLASS = 'opacity-45 grayscale'
 
-export const EDITOR_THEME = 'vs'
+/**
+ * Monaco ships its own themes; ours are CSS. `vs`/`vs-dark` are the two
+ * built-ins that correspond to the app's light and dark modes, picked at
+ * render time from `useTheme` — a `.dark` class on <html> cannot reach
+ * inside Monaco.
+ */
+export const EDITOR_THEME: Record<'light' | 'dark', string> = {
+  light: 'vs',
+  dark: 'vs-dark',
+}
 
 /** Monaco options tuned to feel like VSCode's Java experience. tabSize 4 is the Java the students write. */
 export const EDITOR_OPTIONS: editor.IStandaloneEditorConstructionOptions = {
