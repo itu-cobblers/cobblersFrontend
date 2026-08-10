@@ -1,7 +1,8 @@
 import classNames from 'classnames'
 import { Icon } from '@components/Icon'
+import { useTheme } from '@hooks/useTheme'
 import atriumImage from '@/assets/itu-atrium.jpg'
-import type { AppHeaderProps } from './AppHeader.types'
+import type { AppHeaderProps } from '@/components'
 import {
   APP_HEADER_CLASS,
   APP_HEADER_BAND_CLASS,
@@ -48,6 +49,13 @@ export default function AppHeader({
   leaveLabel,
 }: AppHeaderProps) {
   const boxClass = classNames(APP_HEADER_BRAND_BOX_CLASS, APP_HEADER_BRAND_BOX_SIZE_CLASS[variant])
+  const { theme, setPreference } = useTheme()
+  const isDark = theme === 'dark'
+  const themeToggleLabel = isDark ? 'Switch to light mode' : 'Switch to dark mode'
+
+  function handleToggleTheme() {
+    setPreference(isDark ? 'light' : 'dark')
+  }
 
   return (
     <header className={classNames(APP_HEADER_CLASS, APP_HEADER_BAND_CLASS[variant])}>
@@ -76,6 +84,15 @@ export default function AppHeader({
 
         <nav className={APP_HEADER_NAV_CLASS} aria-label="Main">
           {actions}
+          <button
+            type="button"
+            onClick={handleToggleTheme}
+            aria-label={themeToggleLabel}
+            title={themeToggleLabel}
+            className={classNames(APP_HEADER_CHIP_CLASS, APP_HEADER_ACTION_CLASS)}
+          >
+            <Icon name={isDark ? 'sun' : 'moon'} />
+          </button>
           {sessionLabel &&
             (onSessionLabelClick ? (
               <button

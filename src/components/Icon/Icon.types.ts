@@ -25,6 +25,8 @@ export type IconName =
   | 'users'
   | 'handStop'
   | 'handOff'
+  | 'sun'
+  | 'moon'
 
 export interface IconProps {
   name: IconName
