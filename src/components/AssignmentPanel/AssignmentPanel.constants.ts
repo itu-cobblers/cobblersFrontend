@@ -58,8 +58,15 @@ export const PANEL_HINT_CODE_CLASS = 'font-mono text-[11px] text-foreground'
  * the active tab is pulled `-mb-px` over it and covers that pixel with its own
  * opaque background. Nothing here may gain `overflow-hidden` — it clips the
  * overlap and closes the seam.
+ *
+ * `bg-background` is load-bearing, matching `FILE_TABS_ROW_CLASS`. The row sits
+ * inside `PANEL_CLASS`, which is `bg-card`, so with no background of its own it
+ * inherits the panel's fill and the rail reads as part of the description
+ * surface rather than the page the folder sits on. Invisible in light — there
+ * `--background` and `--card` are both pure white — so this only shows in dark.
  */
-export const PANEL_TABS_CLASS = 'flex h-10 shrink-0 items-stretch gap-1 border-b border-divider px-3'
+export const PANEL_TABS_CLASS =
+  'flex h-10 shrink-0 items-stretch gap-1 border-b border-divider bg-background px-3'
 
 /**
  * No `h-full`. The seam depends on the tab being *stretched* by the row: a

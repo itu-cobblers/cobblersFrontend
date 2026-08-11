@@ -17,14 +17,50 @@ export const CODE_EDITOR_SURFACE_CLASS = 'h-full w-full transition-opacity durat
 export const CODE_EDITOR_DIMMED_CLASS = 'opacity-45 grayscale'
 
 /**
- * Monaco ships its own themes; ours are CSS. `vs`/`vs-dark` are the two
- * built-ins that correspond to the app's light and dark modes, picked at
- * render time from `useTheme` — a `.dark` class on <html> cannot reach
- * inside Monaco.
+ * Monaco ships its own themes; ours are CSS. A `.dark` class on `<html>` cannot
+ * reach inside the editor, so `CodeEditor` reads `useTheme()` and passes a name.
+ *
+ * Light uses the built-in `vs`, whose white background already matches
+ * `--terminal`. Dark cannot: Monaco's only dark built-ins are `vs-dark`
+ * (VS Code **Dark+**, two defaults ago, background `#1E1E1E`) and `hc-black`
+ * (pure black, high contrast). Neither is Dark 2026, so `vs-dark` painted the
+ * pane `#1E1E1E` inside a `#121314` container — a visible seam.
+ *
+ * `EDITOR_DARK_THEME` fixes that by extending `vs-dark` with our background.
  */
+export const EDITOR_DARK_THEME = 'bootcode-dark'
+
 export const EDITOR_THEME: Record<'light' | 'dark', string> = {
   light: 'vs',
-  dark: 'vs-dark',
+  dark: EDITOR_DARK_THEME,
+}
+
+/**
+ * Registered once at startup in `main.tsx`, **not** in `beforeMount`.
+ * `beforeMount` fires per editor instance, so a live editor whose `theme` prop
+ * changes without a remount would be handed a name Monaco has never seen — and
+ * `setTheme` answers an unknown name by silently falling back to `vs`, i.e. the
+ * *light* theme. Registration is global and one-time; it belongs where the rest
+ * of the one-time Monaco setup already lives.
+ *
+ * Surfaces only — `inherit: true` keeps every one of `vs-dark`'s token colours.
+ *
+ * Deliberately *not* adopting Dark 2026's syntax palette along with its
+ * background. That palette moves structural keywords (`class`, `void`) to a
+ * red `#ff7b72` and function calls to a purple that collides with flow
+ * keywords. Students here spend three days learning that red means broken;
+ * colouring `class` in error-red fights that, and the keyword/function
+ * separation is scaffolding beginners lean on more than we do.
+ */
+export const EDITOR_DARK_THEME_DATA: editor.IStandaloneThemeData = {
+  base: 'vs-dark',
+  inherit: true,
+  rules: [],
+  colors: {
+    'editor.background': '#121314',
+    'editorGutter.background': '#121314',
+    'minimap.background': '#121314',
+  },
 }
 
 /** Monaco options tuned to feel like VSCode's Java experience. tabSize 4 is the Java the students write. */

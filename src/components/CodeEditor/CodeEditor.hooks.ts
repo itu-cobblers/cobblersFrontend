@@ -7,6 +7,9 @@ import { attachLocalTypeHighlighting } from '@lib/javaLocalTypes'
  * Stateless Monaco setup: register Java completions before mount, attach the
  * heuristic validator and local-type highlighter on mount. Editor
  * configuration, not business logic.
+ *
+ * The dark theme is deliberately *not* registered here — see
+ * `EDITOR_DARK_THEME_DATA`.
  */
 export function useCodeEditorSetup(localClassNames: string[] = []): { handleBeforeMount: BeforeMount; handleMount: OnMount } {
   const handleBeforeMount: BeforeMount = (monaco) => {
