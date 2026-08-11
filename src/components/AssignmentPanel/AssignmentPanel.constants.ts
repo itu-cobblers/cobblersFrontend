@@ -30,6 +30,17 @@ export const PANEL_TASK_LABEL_CLASS = 'mb-1.5 mt-4 text-[13px] font-semibold upp
 
 export const PANEL_TASK_CLASS = 'whitespace-pre-wrap text-[15px] leading-relaxed text-foreground'
 
+/**
+ * A clear call-to-action rather than a quiet inline link — an outlined pill
+ * with an accent tint so it reads as clickable at a glance, sitting between
+ * the lesson content and "Your task".
+ */
+export const PANEL_SLIDE_LINK_CLASS =
+  'mt-1 inline-flex w-fit items-center gap-2 rounded-md border border-primary/30 bg-primary/[0.06] px-3 py-1.5 text-[13px] font-semibold text-primary transition hover:border-primary/50 hover:bg-primary/10'
+
+/** Separates the lesson/CTA block from "Your task" so the two read as distinct chunks. */
+export const PANEL_TASK_DIVIDER_CLASS = 'my-4 border-t border-divider'
+
 export const PANEL_BODY_CLASS = 'mt-3 whitespace-pre-wrap text-[15px] leading-relaxed text-muted-foreground'
 
 // Project briefs (embedded PDF + setup-guide popup) render via the shared

@@ -10,6 +10,8 @@ export interface AppHeaderProps {
   variant?: AppHeaderVariant
   /** Trailing section name, shown after a slash — e.g. "ITU BootIT / BootCode". */
   section?: string
+  /** Left-of-center controls, e.g. the Slides/Practice switcher — sits right after the brand lockup, ahead of the right-hand action strip. */
+  tabs?: ReactNode
   /** Extra controls at the head of the action strip — e.g. the teacher's timer. */
   actions?: ReactNode
   /** Current session status — "Room: XXXX" or "Solo practice". */

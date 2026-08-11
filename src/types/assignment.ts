@@ -13,6 +13,8 @@ interface AssignmentBase {
   /** Teaching content (concept + example code) shown above the task. */
   lesson?: LessonBlock[]
   hint?: string
+  /** Jump target into the Slides view — "Go to slide to learn more". */
+  relatedSlideId?: number
   kind: AssignmentKind
   solution?: string | SourceFile[] | null
 }

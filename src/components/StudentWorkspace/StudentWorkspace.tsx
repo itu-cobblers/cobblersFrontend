@@ -1,9 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { AssignmentPanelTab } from '@components/AssignmentPanel/AssignmentPanel.types'
 import { getSubmissionNumber } from '@components/SubmissionBanner'
 import {
-    AppHeader,
-    AppColophon,
     SubmissionBanner,
     ProblemsList,
     TeacherFollowBanner,
@@ -16,13 +14,11 @@ import {
     AssignmentFooter
 } from '@components'
 import {
-    STUDENT_WORKSPACE_LAYOUT_CLASS,
     STUDENT_WORKSPACE_MAIN_CLASS,
     STUDENT_WORKSPACE_CLASS,
     STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS,
     STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS,
     STUDENT_WORKSPACE_EDITOR_BODY_CLASS,
-    WORKSPACE_SECTION_LABEL,
 } from './StudentWorkspace.constants'
 
 import { useWorkspaceProgress } from './hooks/useWorkspaceProgress'
@@ -30,23 +26,25 @@ import { useLocalDrafts } from './hooks/useLocalDrafts'
 import { useAssignmentData } from './hooks/useAssignmentData.ts'
 import { useWorkspaceMode } from './hooks/useWorkspaceMode'
 import { useWorkspaceSubmit } from './hooks/useWorkspaceSubmit'
-import type { AssignmentSet, SubmissionHistoryItem, SubmissionDetails } from '@types'
+import { useCourseContent } from '@hooks/useCourseContent'
+import type { AssignmentSet, SubmissionHistoryItem, SubmissionDetails, TeacherFocus } from '@types'
 import {fetchSubmissionDetailsById} from "@/api/submissionApi.ts";
 
 interface StudentWorkspaceProps {
     assignmentSet: AssignmentSet
-    sessionLabel: string
-    sessionActionLabel: string
-    onLeaveSession: () => void
     sessionCode?: string
-    displayName: string
-    teacherFocusedAssignmentId: number | null
+    teacherFocus: TeacherFocus
     timerEndsAt: string | null
     isHandRaised?: boolean
     onToggleHand?: () => void
     submissionHistory: SubmissionHistoryItem[]
     isHistoryLoading: boolean
     onSubmissionMade: () => void
+    /** Set by a slide's "Try this now" link — consumed once, then cleared. */
+    pendingAssignmentId?: number | null
+    onConsumedPendingAssignment?: () => void
+    /** Switches to Slides and opens this page — wired from the parent view. */
+    onNavigateToSlide: (slideId: number) => void
 }
 
 export default function StudentWorkspace(props: StudentWorkspaceProps) {
@@ -58,16 +56,29 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
         props.submissionHistory
     )
 
+    const courseContent = useCourseContent(props.assignmentSet.assignmentSetId)
+
     const progress = useWorkspaceProgress({
         assignmentSet: props.assignmentSet,
         submissionHistory: props.submissionHistory,
-        teacherFocusedAssignmentId: props.teacherFocusedAssignmentId,
+        teacherFocus: props.teacherFocus,
         getAssignment: assignmentData.getAssignment,
-        sessionCode: props.sessionCode
+        sessionCode: props.sessionCode,
+        onNavigateToSlide: props.onNavigateToSlide,
+        pendingAssignmentId: props.pendingAssignmentId
     })
 
     const activeAssignment = progress.activeAssignment
     const drafts = useLocalDrafts(props.assignmentSet.assignments)
+
+    const relatedPage = courseContent.findPageForAssignment(activeAssignment.id)
+
+    useEffect(() => {
+        if (props.pendingAssignmentId == null) return
+        progress.problemsListProps.onSelect(props.pendingAssignmentId)
+        props.onConsumedPendingAssignment?.()
+        // eslint-disable-next-line react-hooks/exhaustive-deps -- fires once per pending-slide-link click; progress/props are fresh every render
+    }, [props.pendingAssignmentId])
 
     const mode = useWorkspaceMode({
         activeAssignment,
@@ -188,7 +199,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
             onSubmit={handleGlobalSubmit}
             isSubmitDisabled={submit.isRunning || submit.isSubmitting || submit.isSubmittingPredict}
 
-            canRevealAnswer={hasSubmitted}
+            canRevealAnswer={progress.canRevealAnswer}
             isSolutionVisible={isSolutionVisible}
             isLoadingSolution={isLoadingSolution}
             onToggleSolution={handleToggleSolution}
@@ -202,45 +213,35 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
     )
 
     return (
-        <div className={STUDENT_WORKSPACE_LAYOUT_CLASS}>
-            <AppHeader
-                variant="bar"
-                section={WORKSPACE_SECTION_LABEL}
-                sessionLabel={props.sessionLabel}
-                displayName={props.displayName}
-                onLeaveSession={props.onLeaveSession}
-                leaveLabel={props.sessionActionLabel}
+        <div className={STUDENT_WORKSPACE_MAIN_CLASS}>
+            <ProblemsList
+                {...progress.problemsListProps}
+                isHistoryLoading={props.isHistoryLoading}
+                timerEndsAt={props.timerEndsAt}
+                isHandRaised={props.isHandRaised}
+                onToggleHand={props.onToggleHand}
             />
 
-            <div className={STUDENT_WORKSPACE_MAIN_CLASS}>
+            <div className={STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS}>
+                {progress.followBannerProps && <TeacherFollowBanner {...progress.followBannerProps} />}
 
-                <ProblemsList
-                    {...progress.problemsListProps}
-                    isHistoryLoading={props.isHistoryLoading}
-                    timerEndsAt={props.timerEndsAt}
-                    isHandRaised={props.isHandRaised}
-                    onToggleHand={props.onToggleHand}
-                />
+                <div className={STUDENT_WORKSPACE_CLASS}>
+                    <AssignmentPanel
+                        {...progress.assignmentPanelProps}
+                        onTabChange={handlePanelTabChange}
+                        onViewSubmission={handleViewSubmission}
+                        viewingSubmissionId={viewingSubmission?.subId}
+                        relatedSlideLink={relatedPage != null ? { onNavigate: () => props.onNavigateToSlide(relatedPage) } : undefined}
+                    />
 
-                <div className={STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS}>
-                    {progress.followBannerProps && <TeacherFollowBanner {...progress.followBannerProps} />}
-
-                    <div className={STUDENT_WORKSPACE_CLASS}>
-                        <AssignmentPanel
-                            {...progress.assignmentPanelProps}
-                            onTabChange={handlePanelTabChange}
-                            onViewSubmission={handleViewSubmission}
-                            viewingSubmissionId={viewingSubmission?.subId}
+                    <div className={STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS}>
+                        <CodeFileTabs
+                            files={mode.tabFiles}
+                            activeIndex={mode.activeTabIndex}
+                            onSelectFile={mode.handleSelectFile}
+                            actions={assignmentActions}
                         />
-
-                        <div className={STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS}>
-                            <CodeFileTabs
-                                files={mode.tabFiles}
-                                activeIndex={mode.activeTabIndex}
-                                onSelectFile={mode.handleSelectFile}
-                                actions={assignmentActions}
-                            />
-                            <div className={STUDENT_WORKSPACE_EDITOR_BODY_CLASS}>
+                        <div className={STUDENT_WORKSPACE_EDITOR_BODY_CLASS}>
                             {viewingSubmission && (
                                 <SubmissionBanner
                                     number={getSubmissionNumber(
@@ -289,13 +290,10 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     hasSubmitted={hasSubmitted}
                                 />
                             )}
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <AppColophon />
         </div>
     )
 }

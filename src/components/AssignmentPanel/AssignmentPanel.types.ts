@@ -25,6 +25,10 @@ export interface AssignmentPanelProps {
    */
   projectIdentity?: ProjectIdentity
   hint?: string
+  /** Gates the hint disclosure — unlocked after the student's first wrong submission on this assignment. */
+  canShowHint?: boolean
   onViewSubmission?: (item: SubmissionHistoryItem) => void;
   viewingSubmissionId?: string;
+  /** Present only when this assignment has a related Slides page — "Go to slide to learn more". */
+  relatedSlideLink?: { onNavigate: () => void }
 }

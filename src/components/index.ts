@@ -98,4 +98,10 @@ export type { PortalShellProps } from './PortalShell'
 
 export { AppColophon } from './AppColophon'
 
+export { SlideViewer } from './SlideViewer'
+export type { SlideViewerProps } from './SlideViewer'
+
+export { ViewModeToggle } from './ViewModeToggle'
+export type { ViewModeToggleProps, ViewMode } from './ViewModeToggle'
+
 export { ScreenSizeBlocker } from './ScreenSizeBlocker'

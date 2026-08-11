@@ -1,5 +1,3 @@
-export const STUDENT_WORKSPACE_LAYOUT_CLASS = 'relative flex h-screen flex-col overflow-hidden bg-background text-foreground'
-
 /**
  * `p-3` keeps the folder tabs off the app header and the window edges; `gap-3`
  * is what separates the rail from the rest. The three sections are cards now,
@@ -21,6 +19,3 @@ export const STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS =
  */
 export const STUDENT_WORKSPACE_EDITOR_BODY_CLASS =
   'flex min-h-0 flex-1 flex-col overflow-hidden rounded-b-md border-x border-b border-divider'
-
-/** Shown after the brand lockup in the header bar: "ITU BootIT / BootCode". */
-export const WORKSPACE_SECTION_LABEL = 'BootCode'

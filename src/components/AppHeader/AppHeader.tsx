@@ -18,6 +18,7 @@ import {
   APP_HEADER_SECTION_CLASS,
   APP_HEADER_SEPARATOR_CLASS,
   APP_HEADER_SECTION_NAME_CLASS,
+  APP_HEADER_TABS_CLASS,
   APP_HEADER_NAV_CLASS,
   APP_HEADER_CHIP_CLASS,
   APP_HEADER_SESSION_NAME_CLASS,
@@ -25,6 +26,7 @@ import {
   APP_HEADER_ACTION_CLASS,
   APP_HEADER_BRAND_PREFIX,
   APP_HEADER_BRAND_NAME,
+  LEARNIT_URL,
 } from './AppHeader.constants'
 
 /**
@@ -35,12 +37,13 @@ import {
  * stays clear. `bar` is the 40px chrome strip used above the workspace — the
  * bar fills the band, so all that shows through is the top slice of the photo.
  *
- * Purely decorative: no links, no routing. The nav slot on the right is
- * deliberately empty until the buttons are specified.
+ * The nav slot on the right is otherwise deliberately empty until the buttons
+ * are specified — the LearnIT link is the one fixed external link.
  */
 export default function AppHeader({
   variant = 'hero',
   section,
+  tabs,
   actions,
   sessionLabel,
   onSessionLabelClick,
@@ -82,8 +85,19 @@ export default function AppHeader({
           )}
         </div>
 
+        {tabs && <div className={APP_HEADER_TABS_CLASS}>{tabs}</div>}
+
         <nav className={APP_HEADER_NAV_CLASS} aria-label="Main">
           {actions}
+          <a
+            href={LEARNIT_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={classNames(APP_HEADER_CHIP_CLASS, APP_HEADER_ACTION_CLASS)}
+          >
+            <Icon name="externalLink"/>
+            <span>LearnIT</span>
+          </a>
           <button
             type="button"
             onClick={handleToggleTheme}
