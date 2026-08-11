@@ -10,9 +10,9 @@
  * per page that should link to an assignment; pages with no entry are
  * theory-only and link nowhere.
  */
-import bootItDay1Pdf from '@/assets/slides/Boot IT - Day 1 .pdf?url'
-import bootItDay2Pdf from '@/assets/slides/Boot IT - Day 2 .pdf?url'
-import bootItDay3Pdf from '@/assets/slides/Boot IT - Day 3 .pdf?url'
+import bootItDay1Pdf from '@/assets/slides/Boot IT - Day 1.pdf?url'
+import bootItDay2Pdf from '@/assets/slides/Boot IT - Day 2.pdf?url'
+import bootItDay3Pdf from '@/assets/slides/Boot IT - Day 3.pdf?url'
 
 export interface ContentPageLink {
   /** 1-indexed page number in the PDF. */
@@ -40,21 +40,57 @@ const CONTENT_BY_ASSIGNMENT_SET: Record<string, ContentSetConfig> = {
   // },
   'day1-2026': {
     pdfSrc: bootItDay1Pdf,
-    pageLinks: [{
-      page: 3, assignmentId: 1
-    }],
+    pageLinks: [
+      {page: 18, assignmentId: 1 },
+      {page: 20, assignmentId: 2 },
+      {page: 23, assignmentId: 3 },
+      {page: 25, assignmentId: 4 },
+      {page: 28, assignmentId: 5 },
+      {page: 30, assignmentId: 6 },
+      {page: 33, assignmentId: 7 },
+      {page: 35, assignmentId: 8 },
+      {page: 38, assignmentId: 9 },
+      {page: 40, assignmentId: 10 },
+    ],
   },
   'day2-2026': {
-     pdfSrc: bootItDay2Pdf,
-     pageLinks: [{
-       page: 12, assignmentId: 11
-     }],
+    pdfSrc: bootItDay2Pdf,
+    pageLinks: [
+      {page: 13, assignmentId: 11 },
+      {page: 15, assignmentId: 12 },
+      {page: 17, assignmentId: 13 },
+      {page: 19, assignmentId: 14 },
+      {page: 22, assignmentId: 15 },
+      {page: 25, assignmentId: 16 },
+      {page: 28, assignmentId: 17 },
+      {page: 32, assignmentId: 18 },
+      {page: 34, assignmentId: 19 },
+      {page: 35, assignmentId: 20 },
+      {page: 36, assignmentId: 21 },
+      {page: 37, assignmentId: 22 },
+      {page: 38, assignmentId: 23 },
+      {page: 39, assignmentId: 24 },
+      {page: 40, assignmentId: 25 },
+      {page: 42, assignmentId: 26 },
+      {page: 43, assignmentId: 27 },
+      {page: 44, assignmentId: 28 },
+      {page: 45, assignmentId: 29 },
+      {page: 46, assignmentId: 30 },
+      {page: 47, assignmentId: 31 },
+      {page: 48, assignmentId: 32 },
+      {page: 54, assignmentId: 33 },
+      {page: 55, assignmentId: 34 },
+      {page: 58, assignmentId: 35 },
+    ],
    },
   'day3-2026': {
     pdfSrc: bootItDay3Pdf,
-    pageLinks: [{
-      page: 12, assignmentId: 33
-    }],
+    pageLinks: [
+      {page: 22, assignmentId: 36 },
+      {page: 23, assignmentId: 37 },
+      {page: 24, assignmentId: 38 },
+      {page: 25, assignmentId: 39 },
+    ],
   }
 }
 
