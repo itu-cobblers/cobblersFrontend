@@ -19,7 +19,7 @@ export const PORTAL_BACKDROP_CLASS = 'absolute inset-x-0 top-0'
  * above the atrium photo (so the photo blurs) but below the header bar
  * (`z-20`) and the card (`z-10`), both of which stay crisp.
  */
-export const PORTAL_SCRIM_CLASS = 'absolute inset-0 z-[1] bg-wash-badge0 backdrop-blur-[2px]'
+export const PORTAL_SCRIM_CLASS = 'absolute inset-0 z-[1] bg-scrim backdrop-blur-[2px]'
 
 /** Centres the card in the viewport, the way the Modal overlay centres a dialog. */
 export const PORTAL_CENTER_CLASS = 'relative z-10 flex flex-1 items-center justify-center p-5'

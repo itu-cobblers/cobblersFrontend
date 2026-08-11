@@ -288,10 +288,15 @@ whenever a surface has to look identical in both themes.
 ### Things the tokens do NOT control
 
 - **Monaco.** `EDITOR_THEME` in `CodeEditor.constants.ts` maps the app's two themes onto
-  Monaco's own built-ins (`vs` / `vs-dark`). These are theme *names*, not CSS — a `.dark`
-  class on `<html>` cannot reach inside the editor, so `CodeEditor` reads `useTheme()` and
-  passes the right one. The same applies to `.java-local-type`, which has a light and a
-  dark rule in `index.css`.
+  Monaco theme *names*, not CSS — a `.dark` class on `<html>` cannot reach inside the
+  editor, so `CodeEditor` reads `useTheme()` and passes the right one. Light is the
+  built-in `vs`; dark is **ours**, `bootcode-dark` — `vs-dark`'s tokens with our darker
+  background, since Monaco ships no Dark 2026. It is registered **once in `main.tsx`**
+  beside `loader.config({ monaco })`, not in `beforeMount`: registration is global and
+  one-time, and `setTheme` answers an unknown name by silently falling back to `vs`, the
+  *light* theme. The same applies to `.java-local-type`, which has a light and a dark rule
+  in `index.css` — its dark value is `vs-dark`'s type colour, so it tracks whatever base
+  `bootcode-dark` inherits from.
 - **The terminal/output slab.** `--terminal*` now differs per theme: white in light,
   `#121314` in dark — VS Code Dark 2026 makes the editor the *darkest* surface, with the
   chrome above it, which is the opposite of most dark UIs and is what puts the code first.
