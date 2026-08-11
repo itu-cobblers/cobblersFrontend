@@ -6,6 +6,30 @@ export function useThumbnailPanel() {
   return { isOpen, toggle: () => setIsOpen((open) => !open) }
 }
 
+/** ArrowLeft/ArrowRight step through slide pages, mirroring the pager buttons. */
+export function usePageArrowKeys({
+  onPrev,
+  onNext,
+  canGoPrev,
+  canGoNext,
+}: {
+  onPrev: () => void
+  onNext: () => void
+  canGoPrev: boolean
+  canGoNext: boolean
+}) {
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target
+      if (target instanceof HTMLElement && ['INPUT', 'TEXTAREA'].includes(target.tagName)) return
+      if (event.key === 'ArrowLeft' && canGoPrev) onPrev()
+      if (event.key === 'ArrowRight' && canGoNext) onNext()
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [onPrev, onNext, canGoPrev, canGoNext])
+}
+
 /**
  * Tracks the page container's rendered size and the PDF's native page aspect
  * ratio (read off the first page that loads), and derives the `width` to hand

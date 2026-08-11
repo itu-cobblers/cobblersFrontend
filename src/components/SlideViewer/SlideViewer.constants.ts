@@ -13,9 +13,7 @@ export const VIEWER_PAGE_WRAPPER_CLASS = 'relative'
 
 export const VIEWER_LOADING_CLASS = 'flex flex-1 items-center justify-center text-sm text-muted-foreground'
 
-// ── corner live/focus control ───────────────────────────────────────────────
-
-export const VIEWER_FOCUS_CORNER_CLASS = 'absolute right-4 top-4 z-10'
+// ── live/focus control — sits in the footer, right of "Try this now" ───────
 
 export const VIEWER_FOCUS_BUTTON_CLASS =
   'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold shadow-sm transition-colors'
@@ -52,7 +50,7 @@ export const VIEWER_FOOTER_EXPAND_ICON_CLASS = 'transition-transform'
 export const VIEWER_FOOTER_PAGER_CLASS = 'flex items-center gap-2 justify-self-center'
 
 export const VIEWER_FOOTER_BUTTON_CLASS =
-  'flex h-8 w-8 items-center justify-center rounded-md text-[15px] font-semibold text-foreground transition-colors hover:bg-black/[0.05] disabled:opacity-30 disabled:hover:bg-transparent'
+  'flex h-8 w-8 items-center justify-center rounded-md text-xl font-semibold text-foreground transition-colors hover:bg-black/[0.05] disabled:opacity-30 disabled:hover:bg-transparent'
 
 export const VIEWER_FOOTER_COUNTER_CLASS = 'font-mono text-[13px] text-muted-foreground'
 

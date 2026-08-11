@@ -1,7 +1,8 @@
 import classNames from 'classnames'
 import { Document, Page, Thumbnail, pdfjs } from 'react-pdf'
+import 'react-pdf/dist/Page/AnnotationLayer.css'
 import { Icon } from '@components/Icon'
-import { useFitPageWidth, useThumbnailPanel } from './SlideViewer.hooks'
+import { useFitPageWidth, usePageArrowKeys, useThumbnailPanel } from './SlideViewer.hooks'
 import type { SlideViewerProps } from './SlideViewer.types'
 import {
   VIEWER_CLASS,
@@ -9,7 +10,6 @@ import {
   VIEWER_SCROLL_CLASS,
   VIEWER_PAGE_WRAPPER_CLASS,
   VIEWER_LOADING_CLASS,
-  VIEWER_FOCUS_CORNER_CLASS,
   VIEWER_FOCUS_BUTTON_CLASS,
   VIEWER_FOCUS_BUTTON_ACTIVE_CLASS,
   VIEWER_FOCUS_BUTTON_IDLE_CLASS,
@@ -60,6 +60,8 @@ export default function SlideViewer({
   const handlePrevPage = () => onNavigate(pageNumber - 1)
   const handleNextPage = () => onNavigate(pageNumber + 1)
 
+  usePageArrowKeys({ onPrev: handlePrevPage, onNext: handleNextPage, canGoPrev: pageNumber > 1, canGoNext: pageCount > 0 && pageNumber < pageCount })
+
   return (
     <div className={VIEWER_CLASS}>
       <Document
@@ -70,35 +72,11 @@ export default function SlideViewer({
       >
         <div ref={containerRef} className={VIEWER_SCROLL_CLASS}>
           <div className={VIEWER_PAGE_WRAPPER_CLASS}>
-            {(onToggleFocus || isPageLive) && (
-              <div className={VIEWER_FOCUS_CORNER_CLASS}>
-                {onToggleFocus ? (
-                  <button
-                    type="button"
-                    onClick={onToggleFocus}
-                    title="Broadcast this page to every student in the room"
-                    className={classNames(
-                      VIEWER_FOCUS_BUTTON_CLASS,
-                      isPageLive ? VIEWER_FOCUS_BUTTON_ACTIVE_CLASS : VIEWER_FOCUS_BUTTON_IDLE_CLASS,
-                    )}
-                  >
-                    <Icon name={isPageLive ? 'check' : 'arrowUp'} />
-                    {isPageLive ? 'Live for students' : 'Focus this page'}
-                  </button>
-                ) : (
-                  <span className={VIEWER_LIVE_BADGE_CLASS}>
-                    <Icon name="check" />
-                    live
-                  </span>
-                )}
-              </div>
-            )}
             <Page
               pageNumber={pageNumber}
               width={fitWidth}
               onLoadSuccess={handlePageLoadSuccess}
               renderTextLayer={false}
-              renderAnnotationLayer={false}
             />
           </div>
         </div>
@@ -129,7 +107,7 @@ export default function SlideViewer({
             aria-label={thumbnails.isOpen ? 'Hide page thumbnails' : 'Show page thumbnails'}
             className={VIEWER_FOOTER_EXPAND_BUTTON_CLASS}
           >
-            <span className={classNames(VIEWER_FOOTER_EXPAND_ICON_CLASS, thumbnails.isOpen && 'rotate-180')}>
+            <span className={classNames(VIEWER_FOOTER_EXPAND_ICON_CLASS, !thumbnails.isOpen && 'rotate-180')}>
               <Icon name="chevronDown" />
             </span>
           </button>
@@ -156,6 +134,27 @@ export default function SlideViewer({
             <button type="button" onClick={handleTryThisNow} className={VIEWER_FOOTER_GOTO_BUTTON_CLASS}>
               Try this now →
             </button>
+          )}
+          {(onToggleFocus || isPageLive) && (
+            onToggleFocus ? (
+              <button
+                type="button"
+                onClick={onToggleFocus}
+                title="Broadcast this page to every student in the room"
+                className={classNames(
+                  VIEWER_FOCUS_BUTTON_CLASS,
+                  isPageLive ? VIEWER_FOCUS_BUTTON_ACTIVE_CLASS : VIEWER_FOCUS_BUTTON_IDLE_CLASS,
+                )}
+              >
+                <Icon name={isPageLive ? 'check' : 'arrowUp'} />
+                {isPageLive ? 'Live for students' : 'Focus this page'}
+              </button>
+            ) : (
+              <span className={VIEWER_LIVE_BADGE_CLASS}>
+                <Icon name="check" />
+                live
+              </span>
+            )
           )}
           {followBanner && (
             <div className={VIEWER_FOOTER_FOLLOW_CLASS} role="status">
