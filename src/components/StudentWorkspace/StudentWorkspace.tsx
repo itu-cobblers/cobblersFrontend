@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react'
 import type { AssignmentPanelTab } from '@components/AssignmentPanel/AssignmentPanel.types'
 import { getSubmissionNumber } from '@components/SubmissionBanner'
 import {
-    AppHeader,
-    AppColophon,
     SubmissionBanner,
     ProblemsList,
     TeacherFollowBanner,
@@ -16,13 +14,11 @@ import {
     AssignmentFooter
 } from '@components'
 import {
-    STUDENT_WORKSPACE_LAYOUT_CLASS,
     STUDENT_WORKSPACE_MAIN_CLASS,
     STUDENT_WORKSPACE_CLASS,
     STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS,
     STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS,
     STUDENT_WORKSPACE_EDITOR_BODY_CLASS,
-    WORKSPACE_SECTION_LABEL,
 } from './StudentWorkspace.constants'
 
 import { useWorkspaceProgress } from './hooks/useWorkspaceProgress'
@@ -36,12 +32,8 @@ import {fetchSubmissionDetailsById} from "@/api/submissionApi.ts";
 
 interface StudentWorkspaceProps {
     assignmentSet: AssignmentSet
-    sessionLabel: string
-    sessionActionLabel: string
-    onLeaveSession: () => void
     sessionCode?: string
-    displayName: string
-    teacherFocusedAssignmentId: number | null
+    teacherFocus: TeacherFocus
     timerEndsAt: string | null
     isHandRaised?: boolean
     onToggleHand?: () => void
@@ -64,13 +56,12 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
         props.submissionHistory
     )
 
-    const courseContent = useCourseContent(props.assignmentSet.assignmentSetId, props.assignmentSet.assignments[0]?.id)
+    const courseContent = useCourseContent(props.assignmentSet.assignmentSetId)
 
     const progress = useWorkspaceProgress({
         assignmentSet: props.assignmentSet,
         submissionHistory: props.submissionHistory,
         teacherFocus: props.teacherFocus,
-        slides: courseContent.slides,
         getAssignment: assignmentData.getAssignment,
         sessionCode: props.sessionCode,
         onNavigateToSlide: props.onNavigateToSlide,
@@ -80,7 +71,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
     const activeAssignment = progress.activeAssignment
     const drafts = useLocalDrafts(props.assignmentSet.assignments)
 
-    const relatedSlide = courseContent.findSlideForAssignment(activeAssignment.id)
+    const relatedPage = courseContent.findPageForAssignment(activeAssignment.id)
 
     useEffect(() => {
         if (props.pendingAssignmentId == null) return
@@ -222,46 +213,35 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
     )
 
     return (
-        <div className={STUDENT_WORKSPACE_LAYOUT_CLASS}>
-            <AppHeader
-                variant="bar"
-                section={WORKSPACE_SECTION_LABEL}
-                sessionLabel={props.sessionLabel}
-                displayName={props.displayName}
-                onLeaveSession={props.onLeaveSession}
-                leaveLabel={props.sessionActionLabel}
+        <div className={STUDENT_WORKSPACE_MAIN_CLASS}>
+            <ProblemsList
+                {...progress.problemsListProps}
+                isHistoryLoading={props.isHistoryLoading}
+                timerEndsAt={props.timerEndsAt}
+                isHandRaised={props.isHandRaised}
+                onToggleHand={props.onToggleHand}
             />
 
-            <div className={STUDENT_WORKSPACE_MAIN_CLASS}>
+            <div className={STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS}>
+                {progress.followBannerProps && <TeacherFollowBanner {...progress.followBannerProps} />}
 
-                <ProblemsList
-                    {...progress.problemsListProps}
-                    isHistoryLoading={props.isHistoryLoading}
-                    timerEndsAt={props.timerEndsAt}
-                    isHandRaised={props.isHandRaised}
-                    onToggleHand={props.onToggleHand}
-                />
+                <div className={STUDENT_WORKSPACE_CLASS}>
+                    <AssignmentPanel
+                        {...progress.assignmentPanelProps}
+                        onTabChange={handlePanelTabChange}
+                        onViewSubmission={handleViewSubmission}
+                        viewingSubmissionId={viewingSubmission?.subId}
+                        relatedSlideLink={relatedPage != null ? { onNavigate: () => props.onNavigateToSlide(relatedPage) } : undefined}
+                    />
 
-                <div className={STUDENT_WORKSPACE_CONTENT_COLUMN_CLASS}>
-                    {progress.followBannerProps && <TeacherFollowBanner {...progress.followBannerProps} />}
-
-                    <div className={STUDENT_WORKSPACE_CLASS}>
-                        <AssignmentPanel
-                            {...progress.assignmentPanelProps}
-                            onTabChange={handlePanelTabChange}
-                            onViewSubmission={handleViewSubmission}
-                            viewingSubmissionId={viewingSubmission?.subId}
-                            relatedSlideLink={relatedSlide ? { onNavigate: () => props.onNavigateToSlide(relatedSlide.id) } : undefined}
+                    <div className={STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS}>
+                        <CodeFileTabs
+                            files={mode.tabFiles}
+                            activeIndex={mode.activeTabIndex}
+                            onSelectFile={mode.handleSelectFile}
+                            actions={assignmentActions}
                         />
-
-                        <div className={STUDENT_WORKSPACE_EDITOR_COLUMN_CLASS}>
-                            <CodeFileTabs
-                                files={mode.tabFiles}
-                                activeIndex={mode.activeTabIndex}
-                                onSelectFile={mode.handleSelectFile}
-                                actions={assignmentActions}
-                            />
-                            <div className={STUDENT_WORKSPACE_EDITOR_BODY_CLASS}>
+                        <div className={STUDENT_WORKSPACE_EDITOR_BODY_CLASS}>
                             {viewingSubmission && (
                                 <SubmissionBanner
                                     number={getSubmissionNumber(
@@ -310,13 +290,10 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
                                     hasSubmitted={hasSubmitted}
                                 />
                             )}
-                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-            <AppColophon />
         </div>
     )
 }

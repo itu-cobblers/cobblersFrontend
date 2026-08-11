@@ -44,13 +44,12 @@ export function useStudentApp() {
   // refresh mid-session restores whichever tab/page was last open.
   const [viewMode, setViewMode] = useState<ViewMode>(() => getPersistedWorkspaceUI()?.viewMode ?? 'slides')
   const [lastSlideId, setLastSlideId] = useState<number | null>(() => getPersistedWorkspaceUI()?.lastSlideId ?? null)
-  const [slidesRailOpen, setSlidesRailOpen] = useState<boolean>(() => getPersistedWorkspaceUI()?.slidesRailOpen ?? true)
   const [pendingAssignmentId, setPendingAssignmentId] = useState<number | null>(null)
   const [pendingSlideId, setPendingSlideId] = useState<number | null>(null)
 
   useEffect(() => {
-    setPersistedWorkspaceUI({ viewMode, lastSlideId, slidesRailOpen })
-  }, [viewMode, lastSlideId, slidesRailOpen])
+    setPersistedWorkspaceUI({ viewMode, lastSlideId })
+  }, [viewMode, lastSlideId])
 
   function navigateToAssignment(assignmentId: number) {
     setPendingAssignmentId(assignmentId)
@@ -202,8 +201,6 @@ export function useStudentApp() {
       navigateToSlide,
       lastSlideId,
       onActiveSlideChange: setLastSlideId,
-      slidesRailOpen,
-      onToggleSlidesRailOpen: () => setSlidesRailOpen((prev) => !prev),
     },
     progress: {
       isLoading: isHistoryLoading,

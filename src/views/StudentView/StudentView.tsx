@@ -49,8 +49,6 @@ export default function StudentView() {
                     onNavigateToAssignment={view.navigateToAssignment}
                     initialSlideId={view.lastSlideId}
                     onActiveSlideChange={view.onActiveSlideChange}
-                    isRailOpen={view.slidesRailOpen}
-                    onToggleRailOpen={view.onToggleSlidesRailOpen}
                     teacherFocus={session.teacherFocus}
                 />
             ) : (

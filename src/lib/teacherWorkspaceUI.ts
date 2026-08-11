@@ -20,8 +20,6 @@ export interface PersistedTeacherWorkspaceUI {
   viewMode?: 'slides' | 'practice'
   /** Last-viewed Slides page, independent of `selectedAssignmentId`. */
   lastSlideId?: number | null
-  /** Slides tab's own rail, independent of `isRailOpen` (Practice's rail). */
-  slidesRailOpen?: boolean
 }
 
 export function getPersistedTeacherWorkspaceUI(): PersistedTeacherWorkspaceUI | null {
@@ -38,7 +36,6 @@ export function getPersistedTeacherWorkspaceUI(): PersistedTeacherWorkspaceUI | 
     }
     if (p.viewMode === 'slides' || p.viewMode === 'practice') result.viewMode = p.viewMode
     if (p.lastSlideId === null || typeof p.lastSlideId === 'number') result.lastSlideId = p.lastSlideId
-    if (typeof p.slidesRailOpen === 'boolean') result.slidesRailOpen = p.slidesRailOpen
     return result
   } catch {
     return null

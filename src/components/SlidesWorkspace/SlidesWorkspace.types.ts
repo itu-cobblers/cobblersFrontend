@@ -13,9 +13,6 @@ export interface SlidesWorkspaceProps {
   /** Fires whenever the active slide changes, so the caller can persist it. */
   onActiveSlideChange?: (slideId: number) => void
 
-  isRailOpen: boolean
-  onToggleRailOpen: () => void
-
   /** Teacher-only — omit both for the student instance. */
   focusedSlideId?: number | null
   onToggleFocusSlide?: (slideId: number) => void

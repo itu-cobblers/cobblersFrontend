@@ -35,12 +35,11 @@ export default function TeacherDashboard() {
   // Slides; a refresh mid-session restores whichever tab/page was last open.
   const [viewMode, setViewMode] = useState<ViewMode>(() => getPersistedTeacherWorkspaceUI()?.viewMode ?? 'slides')
   const [lastSlideId, setLastSlideId] = useState<number | null>(() => getPersistedTeacherWorkspaceUI()?.lastSlideId ?? null)
-  const [slidesRailOpen, setSlidesRailOpen] = useState<boolean>(() => getPersistedTeacherWorkspaceUI()?.slidesRailOpen ?? true)
   const [pendingSlideId, setPendingSlideId] = useState<number | null>(null)
 
   useEffect(() => {
-    setPersistedTeacherWorkspaceUI({ viewMode, lastSlideId, slidesRailOpen })
-  }, [viewMode, lastSlideId, slidesRailOpen])
+    setPersistedTeacherWorkspaceUI({ viewMode, lastSlideId })
+  }, [viewMode, lastSlideId])
 
   function navigateToSlide(slideId: number) {
     setPendingSlideId(slideId)
@@ -92,8 +91,6 @@ export default function TeacherDashboard() {
                 onConsumedPendingSlide={() => setPendingSlideId(null)}
                 initialSlideId={lastSlideId}
                 onActiveSlideChange={setLastSlideId}
-                isRailOpen={slidesRailOpen}
-                onToggleRailOpen={() => setSlidesRailOpen((prev) => !prev)}
                 focusedSlideId={liveSession.teacherFocus?.kind === 'slide' ? liveSession.teacherFocus.id : null}
                 onToggleFocusSlide={liveSession.handleToggleFocusSlide}
             />

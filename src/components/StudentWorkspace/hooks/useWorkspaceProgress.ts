@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
-import type { Assignment, AssignmentSet, SubmissionHistoryItem, AssignmentKind, SlidePage, TeacherFocus } from '@types'
+import type { Assignment, AssignmentSet, SubmissionHistoryItem, AssignmentKind, TeacherFocus } from '@types'
 import type { ProblemsListTab, AssignmentPanelTab, ProblemStatus } from '@components'
 import { useAssignments } from '@hooks/useAssignments'
 import { getProjectIdentity } from '@lib/projectIdentity'
@@ -9,8 +9,6 @@ interface ProgressOptions {
     assignmentSet: AssignmentSet
     submissionHistory: SubmissionHistoryItem[]
     teacherFocus: TeacherFocus
-    /** For labelling a slide-focus follow banner — "Slide · <title>". */
-    slides: SlidePage[]
     getAssignment: (id: number) => Assignment | undefined
     /** Current room's code, if any — scopes the "Session" tab's statuses to this room only. */
     sessionCode?: string
@@ -49,7 +47,6 @@ export function useWorkspaceProgress({
     assignmentSet,
     submissionHistory,
     teacherFocus,
-    slides,
     getAssignment,
     sessionCode,
     onNavigateToSlide,
@@ -209,7 +206,7 @@ export function useWorkspaceProgress({
         }
         : teacherFocus?.kind === 'slide'
             ? {
-                label: `Slide · ${slides.find((s) => s.id === teacherFocus.id)?.title ?? teacherFocus.id}`,
+                label: `Slide · Page ${teacherFocus.id}`,
                 onFollow: () => onNavigateToSlide(teacherFocus.id),
             }
             : undefined

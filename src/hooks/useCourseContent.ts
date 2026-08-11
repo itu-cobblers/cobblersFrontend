@@ -1,44 +1,25 @@
-import { useEffect, useState } from 'react'
-import type { SlidePage } from '@types'
-import { fetchCourseContent } from '@/api/courseContentApi.ts'
+import { getContentConfig } from '@lib/contentConfig'
 
 export interface UseCourseContent {
-  slides: SlidePage[]
-  isLoading: boolean
-  /** The slide (if any) that links back to this assignment — powers "Go to slide to learn more". */
-  findSlideForAssignment: (assignmentId: number) => SlidePage | undefined
+  pdfSrc: string
+  /** The page (if any) that introduces this assignment — powers "Go to slide to learn more". */
+  findPageForAssignment: (assignmentId: number) => number | undefined
+  /** The assignment (if any) a page links to — powers "Try this now". */
+  findAssignmentForPage: (page: number) => number | undefined
 }
 
 /**
- * Fetches the Slides content for a session's assignment set. Shared by
- * `StudentWorkspace` (to resolve an assignment's "learn more" link) and
- * `SlidesWorkspace` (to render the deck itself), so both read the same data
- * without fetching it twice.
+ * Resolves the Content tab's PDF and its page↔assignment links for a session's
+ * assignment set. Shared by `StudentWorkspace`/`TeacherWorkspace` (to resolve
+ * an assignment's "learn more" link) and `SlidesWorkspace` (to render the deck
+ * itself and resolve a page's "Try this now" link).
  */
-export function useCourseContent(assignmentSetId: string | undefined, firstAssignmentId: number | undefined): UseCourseContent {
-  const [slides, setSlides] = useState<SlidePage[]>([])
-  // Derived, not a synchronous setState-in-effect: `isLoading` is just "have we
-  // loaded slides for the set we were asked for yet" — the effect below only
-  // ever calls setState from its async `.then`, which isn't a cascading render.
-  const [loadedForId, setLoadedForId] = useState<string | undefined>(undefined)
-  const isLoading = assignmentSetId !== loadedForId
-
-  useEffect(() => {
-    if (!assignmentSetId) return
-    let cancelled = false
-    fetchCourseContent(assignmentSetId, firstAssignmentId).then((result) => {
-      if (cancelled) return
-      setSlides(result)
-      setLoadedForId(assignmentSetId)
-    })
-    return () => {
-      cancelled = true
-    }
-  }, [assignmentSetId, firstAssignmentId])
+export function useCourseContent(assignmentSetId: string | undefined): UseCourseContent {
+  const { pdfSrc, pageLinks } = getContentConfig(assignmentSetId)
 
   return {
-    slides,
-    isLoading,
-    findSlideForAssignment: (assignmentId) => slides.find((slide) => slide.relatedAssignmentId === assignmentId),
+    pdfSrc,
+    findPageForAssignment: (assignmentId) => pageLinks.find((link) => link.assignmentId === assignmentId)?.page,
+    findAssignmentForPage: (page) => pageLinks.find((link) => link.page === page)?.assignmentId,
   }
 }

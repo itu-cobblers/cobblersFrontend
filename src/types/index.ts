@@ -8,7 +8,6 @@ export type {
   ProjectAssignment,
 } from './assignment'
 export type { AssignmentSet } from './assignmentSet'
-export type { SlideBlock, SlidePage } from './slide'
 export type { TeacherFocus } from './teacherFocus'
 export type * from './api.types'
 

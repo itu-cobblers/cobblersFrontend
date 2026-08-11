@@ -31,7 +31,7 @@ export default function TeacherWorkspace({ assignmentData, session, hydration, l
     const { attendanceList, allSubmissions } = hydration
     const { liveStudentIds, teacherFocus, raisedHandOrder, handleToggleFocusAssignment, handleLowerHand } = liveSession
 
-    const courseContent = useCourseContent(assignmentData.selectedAssignmentSetId, assignmentData.assignments[0]?.id)
+    const courseContent = useCourseContent(assignmentData.selectedAssignmentSetId)
 
     const {
         selectedAssignmentId,
@@ -99,7 +99,7 @@ export default function TeacherWorkspace({ assignmentData, session, hydration, l
 
     const focusedAssignmentId = teacherFocus?.kind === 'assignment' ? teacherFocus.id : null
     const isSelectedAssignmentFocused = selectedAssignmentId != null && focusedAssignmentId === selectedAssignmentId
-    const relatedSlide = selectedAssignmentId != null ? courseContent.findSlideForAssignment(selectedAssignmentId) : undefined
+    const relatedPage = selectedAssignmentId != null ? courseContent.findPageForAssignment(selectedAssignmentId) : undefined
 
     function handleFocusClick() {
         if (selectedAssignmentId != null) handleToggleFocusAssignment(selectedAssignmentId)
@@ -147,7 +147,7 @@ export default function TeacherWorkspace({ assignmentData, session, hydration, l
                     hint={activeAssignment?.hint}
                     onFocusClick={handleFocusClick}
                     isFocused={isSelectedAssignmentFocused}
-                    relatedSlideLink={relatedSlide ? { onNavigate: () => onNavigateToSlide(relatedSlide.id) } : undefined}
+                    relatedSlideLink={relatedPage != null ? { onNavigate: () => onNavigateToSlide(relatedPage) } : undefined}
                     assignmentBreakdown={assignmentBreakdown}
                     selectedStudentName={attendanceStudents.find(s => s.studentId === selectedStudentId)?.displayName}
                     onClearStudentFilter={handleClearStudentFilter}
