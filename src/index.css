@@ -180,8 +180,6 @@
   --foreground: #e6edf3;
   --card: #1f2021;                  /* panels sit one step above the page */
   --card-foreground: #e6edf3;
-  --popover: #1f2021;
-  --popover-foreground: #e6edf3;
 
   /* The CTA inverts rather than recolours: in light it's the darkest thing on
      the page, so in dark it's the lightest. */
