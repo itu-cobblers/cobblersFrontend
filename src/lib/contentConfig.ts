@@ -13,6 +13,7 @@
 import bootItDay1Pdf from '@/assets/slides/Boot IT - Day 1.pdf?url'
 import bootItDay2Pdf from '@/assets/slides/Boot IT - Day 2.pdf?url'
 import bootItDay3Pdf from '@/assets/slides/Boot IT - Day 3.pdf?url'
+import bootItDayAll from '@/assets/slides/Boot IT - all.pdf?url'
 
 export interface ContentPageLink {
   /** 1-indexed page number in the PDF. */
@@ -26,9 +27,48 @@ export interface ContentSetConfig {
 }
 
 const DEFAULT_CONTENT: ContentSetConfig = {
-  pdfSrc: bootItDay1Pdf,
-  // e.g. { page: 12, assignmentId: 101 } — fill in once real assignment ids are known.
-  pageLinks: [],
+  pdfSrc: bootItDayAll,
+  pageLinks: [
+    {page: 18, assignmentId: 1 },
+    {page: 20, assignmentId: 2 },
+    {page: 23, assignmentId: 3 },
+    {page: 25, assignmentId: 4 },
+    {page: 28, assignmentId: 5 },
+    {page: 30, assignmentId: 6 },
+    {page: 33, assignmentId: 7 },
+    {page: 35, assignmentId: 8 },
+    {page: 38, assignmentId: 9 },
+    {page: 40, assignmentId: 10 },
+    {page: 53, assignmentId: 11 },
+    {page: 55, assignmentId: 12 },
+    {page: 57, assignmentId: 13 },
+    {page: 59, assignmentId: 14 },
+    {page: 62, assignmentId: 15 },
+    {page: 65, assignmentId: 16 },
+    {page: 68, assignmentId: 17 },
+    {page: 72, assignmentId: 18 },
+    {page: 74, assignmentId: 19 },
+    {page: 75, assignmentId: 20 },
+    {page: 76, assignmentId: 21 },
+    {page: 77, assignmentId: 22 },
+    {page: 78, assignmentId: 23 },
+    {page: 79, assignmentId: 24 },
+    {page: 80, assignmentId: 25 },
+    {page: 82, assignmentId: 26 },
+    {page: 83, assignmentId: 27 },
+    {page: 84, assignmentId: 28 },
+    {page: 85, assignmentId: 29 },
+    {page: 86, assignmentId: 30 },
+    {page: 87, assignmentId: 31 },
+    {page: 88, assignmentId: 32 },
+    {page: 94, assignmentId: 33 },
+    {page: 95, assignmentId: 34 },
+    {page: 98, assignmentId: 35 },
+    {page: 122, assignmentId: 36 },
+    {page: 123, assignmentId: 37 },
+    {page: 124, assignmentId: 38 },
+    {page: 125, assignmentId: 39 },
+  ],
 }
 
 const CONTENT_BY_ASSIGNMENT_SET: Record<string, ContentSetConfig> = {
