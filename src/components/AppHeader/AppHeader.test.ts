@@ -55,7 +55,7 @@ describe('AppHeader', () => {
       leaveLabel: 'Exit',
     }))
     const strip = screen.getByRole('navigation', { name: 'Main' })
-    expect(strip.textContent).toBe('Room: A8RTSigned in as AitingExit')
+    expect(strip.textContent).toBe('LearnITRoom: A8RTSigned in as AitingExit')
   })
 
   it('fires onLeaveSession from the action in the top-right', () => {
