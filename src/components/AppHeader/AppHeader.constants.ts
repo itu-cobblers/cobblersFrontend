@@ -102,3 +102,5 @@ export const APP_HEADER_SESSION_NAME_STRONG_CLASS = 'truncate font-semibold'
 export const APP_HEADER_BRAND_PREFIX = 'ITU'
 
 export const APP_HEADER_BRAND_NAME = 'BootIT'
+
+export const LEARNIT_URL = 'https://learnit.itu.dk/course/view.php?id=3026730'
