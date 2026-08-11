@@ -73,6 +73,7 @@
   --color-status-warning-bg: var(--status-warning-bg);
   --color-status-warning-text: var(--status-warning-text);
   --color-raise-hand-idle-bg: var(--raise-hand-idle-bg);
+  --color-raise-hand-idle-hover: var(--raise-hand-idle-hover);
   --color-raise-hand-active-bg: var(--raise-hand-active-bg);
 }
 
@@ -116,6 +117,9 @@
 
   /* Raise Hand button */
   --raise-hand-idle-bg: oklch(0.968 0.011 226.0); /* #EDF6FA */
+  /* Hover darkens the pale idle fill. Tokenised rather than inlined because the
+     direction has to flip with the theme — see the `.dark` counterpart. */
+  --raise-hand-idle-hover: color-mix(in oklch, var(--raise-hand-idle-bg), black 6%);
   --raise-hand-active-bg: oklch(0.437 0.097 247.5); /* #1C5584 */
   --border: oklch(0 0 0); /* turned this black YA*/
   /* Structural separations between the three workspace regions — assignment
@@ -244,6 +248,9 @@
      it's a near-white pastel and was previously left unstyled here, so it
      rendered as a bright light box on the dark page. */
   --raise-hand-idle-bg: #1c2b38;
+  /* Mixes toward white, not black: the idle fill inverted to navy, so darkening
+     it by 6% moved ~3/255 — no perceptible hover at all. */
+  --raise-hand-idle-hover: color-mix(in oklch, var(--raise-hand-idle-bg), white 8%);
   --raise-hand-active-bg: oklch(0.437 0.097 247.5); /* #1C5584 */
 
 }

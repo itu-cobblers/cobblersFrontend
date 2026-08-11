@@ -85,7 +85,7 @@ export const LIST_RAISE_HAND_ACTIVE_CLASS =
   'bg-raise-hand-active-bg text-white hover:bg-[color-mix(in_oklch,var(--raise-hand-active-bg),white_12%)]'
 
 export const LIST_RAISE_HAND_IDLE_CLASS =
-  'bg-raise-hand-idle-bg text-muted-foreground hover:bg-[color-mix(in_oklch,var(--raise-hand-idle-bg),black_6%)] hover:text-foreground'
+  'bg-raise-hand-idle-bg text-muted-foreground hover:bg-raise-hand-idle-hover hover:text-foreground'
 
 /** While raised: hand-stop by default, swapping to hand-off only on hover — signals "click to put it down" without changing the icon at rest. */
 export const LIST_RAISE_HAND_DEFAULT_ICON_CLASS = 'group-hover/hand:hidden'
