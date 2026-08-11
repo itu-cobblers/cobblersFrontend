@@ -199,7 +199,7 @@ export default function StudentWorkspace(props: StudentWorkspaceProps) {
             onSubmit={handleGlobalSubmit}
             isSubmitDisabled={submit.isRunning || submit.isSubmitting || submit.isSubmittingPredict}
 
-            canRevealAnswer={hasSubmitted}
+            canRevealAnswer={progress.canRevealAnswer}
             isSolutionVisible={isSolutionVisible}
             isLoadingSolution={isLoadingSolution}
             onToggleSolution={handleToggleSolution}

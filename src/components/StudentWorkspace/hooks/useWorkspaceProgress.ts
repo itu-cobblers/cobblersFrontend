@@ -18,6 +18,12 @@ interface ProgressOptions {
     pendingAssignmentId?: number | null
 }
 
+// Wrong-submission thresholds that gate the hint and the reference answer —
+// both count non-passed attempts on the active assignment, just at different
+// depths, so a struggling student sees help escalate rather than all at once.
+const HINT_UNLOCK_ATTEMPTS = 1
+const ANSWER_UNLOCK_ATTEMPTS = 3
+
 /**
  * `items` arrives newest-first (per CONTRACT.md), so the first time an
  * assignmentId is seen here is its most recent attempt — `erroredLatest`
@@ -192,6 +198,12 @@ export function useWorkspaceProgress({
         }).filter(Boolean) as { id: number, title: string, kind: AssignmentKind, status: ProblemStatus }[]
     }, [attemptedIds, getAssignment, passedIds, erroredIds, assignmentProgress.completedAssignments])
 
+    const activeAssignmentSubmissions = submissionHistory
+        .filter((item) => item.assignmentId === activeAssignment?.id)
+        .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime())
+
+    const wrongAttempts = activeAssignmentSubmissions.filter((item) => item.status !== 'passed').length
+
     const focusedAssignmentId = teacherFocus?.kind === 'assignment' ? teacherFocus.id : null
     const teacherFocusedAssignment = focusedAssignmentId != null
         ? assignmentSet.assignments.find((a) => a.id === focusedAssignmentId)
@@ -215,6 +227,7 @@ export function useWorkspaceProgress({
         activeAssignment: activeAssignment!,
         assignmentProgress,
         effectiveSessionCode: selectionSource === 'history' ? undefined : 'use_parent_session_code',
+        canRevealAnswer: wrongAttempts >= ANSWER_UNLOCK_ATTEMPTS,
 
         problemsListProps: {
             activeTab: railTab,
@@ -231,15 +244,14 @@ export function useWorkspaceProgress({
         assignmentPanelProps: {
             activeTab: panelTab,
             onTabChange: setPanelTab,
-            submissions: submissionHistory
-                .filter((item) => item.assignmentId === activeAssignment?.id)
-                .sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime()),
+            submissions: activeAssignmentSubmissions,
             title: activeAssignment?.title,
             lesson: activeAssignment?.lesson,
             description: activeAssignment?.description,
             body: activeAssignment?.kind === 'project' ? activeAssignment.brief : undefined,
             projectIdentity: activeAssignment?.kind === 'project' ? getProjectIdentity(activeAssignment.title) : undefined,
             hint: activeAssignment?.hint,
+            canShowHint: wrongAttempts >= HINT_UNLOCK_ATTEMPTS,
         },
 
         followBannerProps

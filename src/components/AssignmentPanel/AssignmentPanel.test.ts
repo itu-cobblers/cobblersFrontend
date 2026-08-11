@@ -15,6 +15,7 @@ const baseProps: AssignmentPanelProps = {
   ],
   description: 'Print exactly: Hello ITU!',
   hint: 'System.out.println("Hello ITU!");',
+  canShowHint: true,
 }
 
 describe('AssignmentPanel', () => {
@@ -34,6 +35,11 @@ describe('AssignmentPanel', () => {
     expect(screen.getByText('System.out.println("Hello ITU!");')).toBeInTheDocument()
     rerender(createElement(AssignmentPanel, { ...baseProps, hint: 'System.out.println("Bye!");' }))
     expect(screen.queryByText('System.out.println("Bye!");')).not.toBeInTheDocument()
+  })
+
+  it('hides the hint entirely until canShowHint is true', () => {
+    render(createElement(AssignmentPanel, { ...baseProps, canShowHint: false }))
+    expect(screen.queryByText('Hint')).not.toBeInTheDocument()
   })
 
 

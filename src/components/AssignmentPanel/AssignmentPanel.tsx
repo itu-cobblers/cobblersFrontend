@@ -12,6 +12,7 @@ import {
   PANEL_TASK_LABEL_CLASS,
   PANEL_TASK_CLASS,
   PANEL_SLIDE_LINK_CLASS,
+  PANEL_TASK_DIVIDER_CLASS,
   PANEL_BODY_CLASS,
   PANEL_HINT_CLASS,
   PANEL_HINT_TOGGLE_CLASS,
@@ -57,6 +58,7 @@ export default function AssignmentPanel({
   body,
   projectIdentity,
   hint,
+  canShowHint = false,
   onViewSubmission,
   viewingSubmissionId,
   relatedSlideLink,
@@ -98,6 +100,17 @@ export default function AssignmentPanel({
               </p>
             ),
           )}
+
+          {relatedSlideLink && (
+            <>
+              <button type="button" onClick={relatedSlideLink.onNavigate} className={PANEL_SLIDE_LINK_CLASS}>
+                <Icon name="book" />
+                Go to slide to learn more →
+              </button>
+              <hr className={PANEL_TASK_DIVIDER_CLASS} />
+            </>
+          )}
+
           { (
             <>
               <h3 className={PANEL_TASK_LABEL_CLASS}>Your task</h3>
@@ -109,7 +122,7 @@ export default function AssignmentPanel({
 
           {!projectIdentity && body && <p className={PANEL_BODY_CLASS}>{body}</p>}
 
-          {hint && (
+          {hint && canShowHint && (
             <div className={PANEL_HINT_CLASS}>
               <button type="button" onClick={handleHintToggle} className={PANEL_HINT_TOGGLE_CLASS}>
                 Hint
@@ -125,12 +138,6 @@ export default function AssignmentPanel({
                 </div>
               )}
             </div>
-          )}
-
-          {relatedSlideLink && (
-              <button type="button" onClick={relatedSlideLink.onNavigate} className={PANEL_SLIDE_LINK_CLASS}>
-                Go to slide to learn more →
-              </button>
           )}
         </div>
       ) : (
